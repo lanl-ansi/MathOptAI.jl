@@ -5,10 +5,8 @@
 
 using Test
 
-for file in readdir(joinpath(@__DIR__, "models"))
-    if startswith(file, "test_") && endswith(file, ".jl")
-        @testset "$file" begin
-            include(joinpath(@__DIR__, "models", file))
-        end
-    end
+is_test(x) = startswith(x, "test_") && endswith(x, ".jl")
+
+@testset "$file" for file in filter(is_test, readdir(@__DIR__))
+    include(joinpath(@__DIR__, file))
 end

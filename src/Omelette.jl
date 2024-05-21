@@ -8,44 +8,36 @@ module Omelette
 import JuMP
 
 """
-    abstract type AbstractModel end
+    abstract type AbstractPredictor end
 
 ## Methods
 
 All subtypes must implement:
 
- * `add_model_internal`
+ * `_add_predictor_inner`
  * `Base.size`
 """
-abstract type AbstractModel end
+abstract type AbstractPredictor end
+
+Base.size(x::AbstractPredictor, i::Int) = size(x)[i]
 
 """
-    add_model(
-        opt_model::JuMP.Model,
-        ml_model::AbstractModel,
+    add_predictor!(
+        model::JuMP.Model,
+        predictor::AbstractPredictor,
         x::Vector{JuMP.VariableRef},
         y::Vector{JuMP.VariableRef},
-    )
+    )::Nothing
 
-Add the constraint `ml_model(x) == y` to the optimization model `opt_model`.
-
-## Input
-
-## Output
-
- * `::Nothing`
-
-## Examples
-
-TODO
+Add the constraint `predictor(x) .== y` to the optimization model `model`.
 """
-function add_model(
-    opt_model::JuMP.Model,
-    ml_model::AbstractModel,
+function add_predictor!(
+    model::JuMP.Model,
+    predictor::AbstractPredictor,
     x::Vector{JuMP.VariableRef},
     y::Vector{JuMP.VariableRef},
 )
-    output_n, input_n = size(ml_model)
+    output_n, input_n = size(predictor)
     if length(x) != input_n
         msg = "Input vector x is length $(length(x)), expected $input_n"
         throw(DimensionMismatch(msg))
@@ -53,28 +45,28 @@ function add_model(
         msg = "Output vector y is length $(length(y)), expected $output_n"
         throw(DimensionMismatch(msg))
     end
-    _add_model_inner(opt_model, ml_model, x, y)
+    _add_predictor_inner(model, predictor, x, y)
+    return nothing
+end
+
+"""
+    add_predictor(
+        model::JuMP.Model,
+        predictor::AbstractPredictor,
+        x::Vector{JuMP.VariableRef},
+    )::Vector{JuMP.VariableRef}
+
+Return an expression for `predictor(x)` in terms of variables in the
+optimization model `model`.
+"""
+function add_predictor(
+    model::JuMP.Model,
+    predictor::AbstractPredictor,
+    x::Vector{JuMP.VariableRef},
+)
+    y = JuMP.@variable(model, [1:size(predictor, 1)])
+    add_predictor!(model, predictor, x, y)
     return y
-end
-
-Base.size(x::AbstractModel, i::Int) = size(x)[i]
-
-function add_model(
-    opt_model::JuMP.Model,
-    ml_model::AbstractModel,
-    x::Vector{JuMP.VariableRef},
-    y::JuMP.VariableRef,
-)
-    return add_model(opt_model, ml_model, x, [y])
-end
-
-function add_model(
-    opt_model::JuMP.Model,
-    ml_model::AbstractModel,
-    x::Vector{JuMP.VariableRef},
-)
-    y = JuMP.@variable(opt_model, [1:size(ml_model, 1)])
-    return add_model(opt_model, ml_model, x, y)
 end
 
 for file in readdir(joinpath(@__DIR__, "models"); join = true)

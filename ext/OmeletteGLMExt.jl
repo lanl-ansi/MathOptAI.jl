@@ -12,4 +12,12 @@ function Omelette.LinearRegression(model::GLM.LinearModel)
     return Omelette.LinearRegression(GLM.coef(model))
 end
 
+function Omelette.LogisticRegression(
+    model::GLM.GeneralizedLinearModel{
+        GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
+    },
+)
+    return Omelette.LogisticRegression(GLM.coef(model))
+end
+
 end #module

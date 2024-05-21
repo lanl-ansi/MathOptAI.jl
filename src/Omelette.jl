@@ -54,7 +54,27 @@ function add_model(
         throw(DimensionMismatch(msg))
     end
     _add_model_inner(opt_model, ml_model, x, y)
-    return
+    return y
+end
+
+Base.size(x::AbstractModel, i::Int) = size(x)[i]
+
+function add_model(
+    opt_model::JuMP.Model,
+    ml_model::AbstractModel,
+    x::Vector{JuMP.VariableRef},
+    y::JuMP.VariableRef,
+)
+    return add_model(opt_model, ml_model, x, [y])
+end
+
+function add_model(
+    opt_model::JuMP.Model,
+    ml_model::AbstractModel,
+    x::Vector{JuMP.VariableRef},
+)
+    y = JuMP.@variable(opt_model, [1:size(ml_model, 1)])
+    return add_model(opt_model, ml_model, x, y)
 end
 
 for file in readdir(joinpath(@__DIR__, "models"); join = true)

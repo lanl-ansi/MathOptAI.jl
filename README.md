@@ -24,10 +24,10 @@ This project is inspired by two existing projects:
 
 ## Supported models
 
-Use `add_model` to add a model.
+Use `add_predictor` to add a model.
 ```julia
-Omelette.add_model(model, model_ml, x, y)
-y = Omelette.add_model(model, model_ml, x)
+Omelette.add_predictor(model, model_ml, x, y)
+y = Omelette.add_predictor(model, model_ml, x)
 ```
 
 ### LinearRegression
@@ -38,11 +38,11 @@ X = rand(num_observations, num_features)
 θ = rand(num_features)
 Y = X * θ + randn(num_observations)
 model_glm = GLM.lm(X, Y)
-model_ml = Omelette.LinearRegression(model_glm)
+predictor = Omelette.LinearRegression(model_glm)
 model = Model(HiGHS.Optimizer)
 set_silent(model)
 @variable(model, 0 <= x[1:num_features] <= 1)
 @constraint(model, sum(x) == 1.5)
-y = Omelette.add_model(model, model_ml, x)
+y = Omelette.add_predictor(model, predictor, x)
 @objective(model, Max, y[1])
 ```

@@ -6,6 +6,13 @@ version = "0.1.0"
 [deps]
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 
+[weakdeps]
+GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+
+[extensions]
+OmeletteGLMExt = "GLM"
+
 [compat]
+GLM = "1.9"
 JuMP = "1"
-julia = "1.6"
+julia = "1.9"

@@ -5,17 +5,18 @@
 
 module LinearRegressionTests
 
-using Test
 using JuMP
+using Test
+
+import GLM
+import HiGHS
 import Omelette
 
+is_test(x) = startswith(string(x), "test_")
+
 function runtests()
-    for name in names(@__MODULE__; all = true)
-        if startswith("$name", "test_")
-            @testset "$name" begin
-                getfield(@__MODULE__, name)()
-            end
-        end
+    @testset "$name" for name in filter(is_test, names(@__MODULE__; all = true))
+        getfield(@__MODULE__, name)()
     end
     return
 end
@@ -44,6 +45,27 @@ function test_LinearRegression_dimension_mismatch()
     g = Omelette.LinearRegression([2.0 3.0; 4.0 5.0; 6.0 7.0])
     @test size(g) == (3, 2)
     @test_throws DimensionMismatch Omelette.add_model(model, g, x, y)
+    return
+end
+
+function test_LinearRegression_GLM()
+    num_features = 2
+    num_observations = 10
+    X = rand(num_observations, num_features)
+    θ = rand(num_features)
+    Y = X * θ + randn(num_observations)
+    model_glm = GLM.lm(X, Y)
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    model_ml = Omelette.LinearRegression(model_glm)
+    @variable(model, 0 <= x[1:num_features] <= 1)
+    @constraint(model, sum(x) == 1.5)
+    y = Omelette.add_model(model, model_ml, x)
+    @objective(model, Max, y[1])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    y_star_glm = GLM.predict(model_glm, value.(x)')
+    @test isapprox(objective_value(model), y_star_glm; atol = 1e-6)
     return
 end
 

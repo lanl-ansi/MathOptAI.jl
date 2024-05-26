@@ -64,7 +64,7 @@ function add_predictor(
     predictor::AbstractPredictor,
     x::Vector{JuMP.VariableRef},
 )
-    y = JuMP.@variable(model, [1:size(predictor, 1)])
+    y = JuMP.@variable(model, [1:size(predictor, 1)], base_name = "omelette_y")
     add_predictor!(model, predictor, x, y)
     return y
 end

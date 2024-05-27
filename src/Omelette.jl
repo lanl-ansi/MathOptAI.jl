@@ -5,7 +5,9 @@
 
 module Omelette
 
+import Distributions
 import JuMP
+import MathOptInterface as MOI
 
 """
     abstract type AbstractPredictor end

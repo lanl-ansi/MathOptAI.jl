@@ -4,7 +4,9 @@ authors = ["odow <o.dowson@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
 [weakdeps]
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
@@ -13,6 +15,8 @@ GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 OmeletteGLMExt = "GLM"
 
 [compat]
+Distributions = "0.25"
 GLM = "1.9"
 JuMP = "1"
+MathOptInterface = "1"
 julia = "1.9"

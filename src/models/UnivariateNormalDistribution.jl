@@ -4,9 +4,10 @@
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
 """
-    UnivariateNormalDistribution(; mean::Function, covariance::Function)
+    UnivariateNormalDistribution(; mean::Function, std_dev::Function)
 
-A Gaussian process, represented by the functions `mean(x)` and `covariance(x)`.
+A univariate Normal distribution, represented by the functions `mean(x::Vector)`
+and `std_dev(x::Vector)`.
 
 ## Example
 

@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
-module ChanceConstraintTests
+module UnivariateNormalDistributionTests
 
 using JuMP
 using Test
@@ -56,4 +56,4 @@ end
 
 end
 
-ChanceConstraintTests.runtests()
+UnivariateNormalDistributionTests.runtests()

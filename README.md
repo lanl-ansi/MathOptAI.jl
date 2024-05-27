@@ -50,3 +50,17 @@ X, Y = rand(10, 2), rand(Bool, 10)
 model_glm = GLM.glm(X, Y, GLM.Bernoulli())
 predictor = Omelette.LogisticRegression(model_glm)
 ```
+
+## Other constraints
+
+### UnivariateNormalDistribution
+```julia
+using JuMP, Omelette
+model = Model();
+@variable(model, 0 <= x <= 5);
+f = Omelette.UnivariateNormalDistribution(;
+    mean = x -> only(x),
+    covariance = x -> 1.0,
+);
+Omelette.add_constraint(model, f, [x], MOI.Interval(0.5, Inf), 0.95);
+```

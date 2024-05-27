@@ -25,10 +25,7 @@ struct UnivariateNormalDistribution{F,G}
     mean::F
     std_dev::G
 
-    function UnivariateNormalDistribution(;
-        mean::Function,
-        std_dev::Function,
-    )
+    function UnivariateNormalDistribution(; mean::Function, std_dev::Function)
         return new{typeof(mean),typeof(std_dev)}(mean, std_dev)
     end
 end

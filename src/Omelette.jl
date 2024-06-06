@@ -76,6 +76,16 @@ function _get_variable_bounds(x::Vector{JuMP.VariableRef})
     return lb, ub
 end
 
+function _set_bounds_if_finite(x, l, u)
+    if isfinite(l)
+        JuMP.set_lower_bound(x, l)
+    end
+    if isfinite(u)
+        JuMP.set_upper_bound(x, u)
+    end
+    return
+end
+
 for file in readdir(joinpath(@__DIR__, "models"); join = true)
     if endswith(file, ".jl")
         include(file)

@@ -56,6 +56,20 @@ function test_ReLU_SOS1()
     return
 end
 
+function test_ReLU_SOS1_no_bounds()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y = Omelette.add_predictor(model, Omelette.ReLUSOS1(), x)
+    @test_throws(
+        ErrorException(
+            "Unable to use SOS1ToMILPBridge because element 1 in the function has a non-finite domain: MOI.VariableIndex(1)",
+        ),
+        optimize!(model),
+    )
+    return
+end
+
 function test_ReLU_Quadratic()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

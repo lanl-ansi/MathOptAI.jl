@@ -10,6 +10,7 @@ using Test
 
 import ADTypes
 import HiGHS
+import Ipopt
 import Lux
 import Omelette
 import Optimisers
@@ -58,7 +59,7 @@ function train_cpu(
     return state
 end
 
-function test_end_to_end()
+function test_end_to_end_highs()
     rng = Random.MersenneTwister()
     Random.seed!(rng, 12345)
     x, y = generate_data(rng)
@@ -75,6 +76,38 @@ function test_end_to_end()
     set_silent(model)
     @variable(model, x)
     y = Omelette.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-2)
+    return
+end
+
+function test_end_to_end_ipopt()
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 12345)
+    x, y = generate_data(rng)
+    model = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
+    state = train_cpu(
+        model,
+        x,
+        y;
+        rng = rng,
+        optimizer = Optimisers.Adam(0.03f0),
+        epochs = 250,
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = Omelette.add_predictor(
+        model,
+        state,
+        [x];
+        relu = Omelette.ReLUQuadratic(),
+    )
+    # Ipopt needs a starting point to avoid the local minima.
+    set_start_value(only(y), 4.0)
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)

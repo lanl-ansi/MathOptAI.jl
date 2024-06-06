@@ -26,6 +26,20 @@ function _add_predictor(
     return
 end
 
+"""
+    Omelette.add_predictor(
+        model::JuMP.Model,
+        predictor::Lux.Experimental.TrainState,
+        x::Vector{JuMP.VariableRef};
+        relu::Omelette.AbstractPredictor = Omelette.ReLUBigM(1e4),
+    )
+
+Add a trained neural network from Lux.jl to `model`.
+
+## Keyword arguments
+
+ * `relu`: the predictor to use for ReLU layers
+"""
 function Omelette.add_predictor(
     model::JuMP.Model,
     predictor::Lux.Experimental.TrainState,

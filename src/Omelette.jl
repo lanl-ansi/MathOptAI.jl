@@ -12,44 +12,15 @@ import MathOptInterface as MOI
 """
     abstract type AbstractPredictor end
 
+An abstract type representig different types of prediction models.
+
 ## Methods
 
 All subtypes must implement:
 
- * `_add_predictor_inner`
- * `Base.size`
+ * `add_predictor`
 """
 abstract type AbstractPredictor end
-
-Base.size(x::AbstractPredictor, i::Int) = size(x)[i]
-
-"""
-    add_predictor!(
-        model::JuMP.Model,
-        predictor::AbstractPredictor,
-        x::Vector{JuMP.VariableRef},
-        y::Vector{JuMP.VariableRef},
-    )::Nothing
-
-Add the constraint `predictor(x) .== y` to the optimization model `model`.
-"""
-function add_predictor!(
-    model::JuMP.Model,
-    predictor::AbstractPredictor,
-    x::Vector{JuMP.VariableRef},
-    y::Vector{JuMP.VariableRef},
-)
-    output_n, input_n = size(predictor)
-    if length(x) != input_n
-        msg = "Input vector x is length $(length(x)), expected $input_n"
-        throw(DimensionMismatch(msg))
-    elseif length(y) != output_n
-        msg = "Output vector y is length $(length(y)), expected $output_n"
-        throw(DimensionMismatch(msg))
-    end
-    _add_predictor_inner(model, predictor, x, y)
-    return nothing
-end
 
 """
     add_predictor(
@@ -58,18 +29,32 @@ end
         x::Vector{JuMP.VariableRef},
     )::Vector{JuMP.VariableRef}
 
-Return an expression for `predictor(x)` in terms of variables in the
-optimization model `model`.
+Return a `Vector{JuMP.VariableRef}` representing `y` such that
+`y = predictor(x)`.
+
+## Example
+
+```jldoctest
+julia> using JuMP, Omelette
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> f = Omelette.LinearRegression([2.0, 3.0])
+Omelette.LinearRegression([2.0 3.0])
+
+julia> y = Omelette.add_predictor(model, f, x)
+1-element Vector{VariableRef}:
+ omelette_y[1]
+
+julia> print(model)
+ Feasibility
+ Subject to
+  2 x[1] + 3 x[2] - omelette_y[1] = 0
+```
 """
-function add_predictor(
-    model::JuMP.Model,
-    predictor::AbstractPredictor,
-    x::Vector{JuMP.VariableRef},
-)
-    y = JuMP.@variable(model, [1:size(predictor, 1)], base_name = "omelette_y")
-    add_predictor!(model, predictor, x, y)
-    return y
-end
+function add_predictor end
 
 for file in readdir(joinpath(@__DIR__, "models"); join = true)
     if endswith(file, ".jl")

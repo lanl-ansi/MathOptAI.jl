@@ -28,10 +28,6 @@ Use `add_predictor`:
 ```julia
 y = Omelette.add_predictor(model, predictor, x)
 ```
-or:
-```julia
-Omelette.add_predictor!(model, predictor, x, y)
-```
 
 ### LinearRegression
 
@@ -54,6 +50,7 @@ predictor = Omelette.LogisticRegression(model_glm)
 ## Other constraints
 
 ### UnivariateNormalDistribution
+
 ```julia
 using JuMP, Omelette
 model = Model();

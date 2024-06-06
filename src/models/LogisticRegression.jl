@@ -44,12 +44,13 @@ end
 
 Base.size(f::LogisticRegression) = size(f.parameters)
 
-function _add_predictor_inner(
+function add_predictor(
     model::JuMP.Model,
     predictor::LogisticRegression,
     x::Vector{JuMP.VariableRef},
-    y::Vector{JuMP.VariableRef},
 )
+    m = size(predictor.parameters, 1)
+    y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
     JuMP.@constraint(model, 1 ./ (1 .+ exp.(-predictor.parameters * x)) .== y)
-    return
+    return y
 end

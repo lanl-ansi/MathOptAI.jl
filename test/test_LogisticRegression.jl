@@ -24,28 +24,13 @@ end
 function test_LogisticRegression()
     model = Model()
     @variable(model, x[1:2])
-    @variable(model, y[1:1])
     f = Omelette.LogisticRegression([2.0, 3.0])
-    Omelette.add_predictor!(model, f, x, y)
+    y = Omelette.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
     g = 1.0 / (1.0 + exp(-2.0 * x[1] - 3.0 * x[2])) - y[1]
     @test isequal_canonical(obj.func, g)
-    return
-end
-
-function test_LogisticRegression_dimension_mismatch()
-    model = Model()
-    @variable(model, x[1:3])
-    @variable(model, y[1:2])
-    f = Omelette.LogisticRegression([2.0, 3.0])
-    @test size(f) == (1, 2)
-    @test_throws DimensionMismatch Omelette.add_predictor!(model, f, x, y[1:1])
-    @test_throws DimensionMismatch Omelette.add_predictor!(model, f, x[1:2], y)
-    g = Omelette.LogisticRegression([2.0 3.0; 4.0 5.0; 6.0 7.0])
-    @test size(g) == (3, 2)
-    @test_throws DimensionMismatch Omelette.add_predictor!(model, g, x, y)
     return
 end
 

@@ -57,6 +57,21 @@ function add_predictor(
 )
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
+    lb, ub = _get_variable_bounds(x)
+    for i in 1:size(predictor.A, 1)
+        y_lb, y_ub = predictor.b[i], predictor.b[i]
+        for j in 1:size(predictor.A, 2)
+            a_ij = predictor.A[i, j]
+            y_ub += a_ij * ifelse(a_ij >= 0, ub[j], lb[j])
+            y_lb += a_ij * ifelse(a_ij >= 0, lb[j], ub[j])
+        end
+        if isfinite(y_lb)
+            JuMP.set_lower_bound(y[i], y_lb)
+        end
+        if isfinite(y_ub)
+            JuMP.set_upper_bound(y[i], y_ub)
+        end
+    end
     JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
     return y
 end

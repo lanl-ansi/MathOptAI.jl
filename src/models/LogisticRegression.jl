@@ -32,6 +32,8 @@ julia> print(model)
 Feasibility
 Subject to
  (1.0 / (1.0 + exp(-2 x[1] - 3 x[2]))) - omelette_y[1] = 0
+ omelette_y[1] ≥ 0
+ omelette_y[1] ≤ 1
 ```
 """
 struct LogisticRegression <: AbstractPredictor
@@ -49,6 +51,8 @@ function add_predictor(
 )
     m = size(predictor.parameters, 1)
     y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
+    JuMP.set_lower_bound.(y, 0.0)
+    JuMP.set_upper_bound.(y, 1.0)
     JuMP.@constraint(model, 1 ./ (1 .+ exp.(-predictor.parameters * x)) .== y)
     return y
 end

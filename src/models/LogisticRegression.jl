@@ -42,8 +42,6 @@ function LogisticRegression(parameters::Vector{Float64})
     return LogisticRegression(reshape(parameters, 1, length(parameters)))
 end
 
-Base.size(f::LogisticRegression) = size(f.parameters)
-
 function add_predictor(
     model::JuMP.Model,
     predictor::LogisticRegression,

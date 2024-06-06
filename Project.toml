@@ -10,13 +10,16 @@ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
 [weakdeps]
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 
 [extensions]
 OmeletteGLMExt = "GLM"
+OmeletteLuxExt = "Lux"
 
 [compat]
 Distributions = "0.25"
 GLM = "1.9"
+Lux = "0.5"
 JuMP = "1"
 MathOptInterface = "1"
 julia = "1.9"

@@ -35,7 +35,7 @@ function test_ReLU_BigM()
     fix.(x, [-1, 2])
     optimize!(model)
     @assert is_solved_and_feasible(model)
-    @test value.(y) ≈ [0.0, 2.]
+    @test value.(y) ≈ [0.0, 2.0]
     return
 end
 
@@ -64,7 +64,7 @@ function test_ReLU_Quadratic()
     fix.(x, [-1, 2])
     optimize!(model)
     @assert is_solved_and_feasible(model)
-    @test value.(y) ≈ [0.0, 2.]
+    @test value.(y) ≈ [0.0, 2.0]
     return
 end
 

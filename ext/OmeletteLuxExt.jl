@@ -13,7 +13,7 @@ function _add_predictor(predictor::Omelette.Pipeline, layer::Lux.Dense, p)
     if layer.activation === identity
         # Do nothing
     elseif layer.activation === Lux.NNlib.relu
-        push!(predictor.layers, Omelette.ReLU(layer.out_dims, 1e6))
+        push!(predictor.layers, Omelette.ReLUBigM(layer.out_dims, 1e6))
     else
         error("Unsupported activation function: $x")
     end

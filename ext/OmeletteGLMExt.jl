@@ -5,19 +5,28 @@
 
 module OmeletteGLMExt
 
+import JuMP
 import Omelette
 import GLM
 
-function Omelette.LinearRegression(model::GLM.LinearModel)
-    return Omelette.LinearRegression(GLM.coef(model))
+function Omelette.add_predictor(
+    model::JuMP.Model,
+    predictor::GLM.LinearModel,
+    x::Vector{JuMP.VariableRef},
+)
+    inner_predictor = Omelette.LinearRegression(GLM.coef(predictor))
+    return Omelette.add_predictor(model, inner_predictor, x)
 end
 
-function Omelette.LogisticRegression(
-    model::GLM.GeneralizedLinearModel{
+function Omelette.add_predictor(
+    model::JuMP.Model,
+    predictor::GLM.GeneralizedLinearModel{
         GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
     },
+    x::Vector{JuMP.VariableRef},
 )
-    return Omelette.LogisticRegression(GLM.coef(model))
+    inner_predictor = Omelette.LogisticRegression(GLM.coef(predictor))
+    return Omelette.add_predictor(model, inner_predictor, x)
 end
 
 end #module

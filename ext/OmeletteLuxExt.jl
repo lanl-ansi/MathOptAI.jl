@@ -5,27 +5,38 @@
 
 module OmeletteLuxExt
 
-import Omelette
+import JuMP
 import Lux
+import Omelette
 
-function _add_predictor(predictor::Omelette.Pipeline, layer::Lux.Dense, p)
+function _add_predictor(
+    predictor::Omelette.Pipeline,
+    layer::Lux.Dense,
+    p;
+    relu::Omelette.AbstractPredictor,
+)
     push!(predictor.layers, Omelette.LinearRegression(p.weight, vec(p.bias)))
     if layer.activation === identity
         # Do nothing
     elseif layer.activation === Lux.NNlib.relu
-        push!(predictor.layers, Omelette.ReLUBigM(1e4))
+        push!(predictor.layers, relu)
     else
         error("Unsupported activation function: $x")
     end
     return
 end
 
-function Omelette.Pipeline(x::Lux.Experimental.TrainState)
-    predictor = Omelette.Pipeline(Omelette.AbstractPredictor[])
-    for (layer, parameter) in zip(x.model.layers, x.parameters)
-        _add_predictor(predictor, layer, parameter)
+function Omelette.add_predictor(
+    model::JuMP.Model,
+    predictor::Lux.Experimental.TrainState,
+    x::Vector{JuMP.VariableRef};
+    relu::Omelette.AbstractPredictor = Omelette.ReLUBigM(1e4),
+)
+    inner_predictor = Omelette.Pipeline(Omelette.AbstractPredictor[])
+    for (layer, parameter) in zip(predictor.model.layers, predictor.parameters)
+        _add_predictor(inner_predictor, layer, parameter; relu)
     end
-    return predictor
+    return Omelette.add_predictor(model, inner_predictor, x)
 end
 
 end #module

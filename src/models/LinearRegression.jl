@@ -42,14 +42,13 @@ function LinearRegression(parameters::Vector{Float64})
     return LinearRegression(reshape(parameters, 1, length(parameters)))
 end
 
-Base.size(f::LinearRegression) = size(f.parameters)
-
-function _add_predictor_inner(
+function add_predictor(
     model::JuMP.Model,
     predictor::LinearRegression,
     x::Vector{JuMP.VariableRef},
-    y::Vector{JuMP.VariableRef},
 )
+    m = size(predictor.parameters, 1)
+    y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
     JuMP.@constraint(model, predictor.parameters * x .== y)
-    return
+    return y
 end

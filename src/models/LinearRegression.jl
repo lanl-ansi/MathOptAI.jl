@@ -65,12 +65,7 @@ function add_predictor(
             y_ub += a_ij * ifelse(a_ij >= 0, ub[j], lb[j])
             y_lb += a_ij * ifelse(a_ij >= 0, lb[j], ub[j])
         end
-        if isfinite(y_lb)
-            JuMP.set_lower_bound(y[i], y_lb)
-        end
-        if isfinite(y_ub)
-            JuMP.set_upper_bound(y[i], y_ub)
-        end
+        _set_bounds_if_finite(y[i], y_lb, y_ub)
     end
     JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
     return y

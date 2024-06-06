@@ -24,28 +24,49 @@ This project is inspired by two existing projects:
 
 ## Supported models
 
-Use `add_predictor`:
+Use `Omelette.add_predictor(model, predictor, x)` to add the relationship
+`y = predictor(x)` to `model`:
+
 ```julia
 y = Omelette.add_predictor(model, predictor, x)
 ```
 
-### LinearRegression
+The following predictors are supported. See their docstrings for details:
+
+ * `Omelette.LinearRegression`
+ * `Omelette.LogisticRegression`
+ * `Omelette.Pipeline`
+ * `Omelette.ReLUBigM`
+ * `Omelette.ReLUSOS1`
+ * `Omelette.ReLUQuadratic`
+
+## Extensions
+
+The following third-party package extensions are supported.
+
+### [GLM.jl](https://github.com/JuliaStats/GLM.jl)
+
+#### LinearRegression
 
 ```julia
 using Omelette, GLM
 X, Y = rand(10, 2), rand(10)
 model_glm = GLM.lm(X, Y)
-predictor = Omelette.LinearRegression(model_glm)
+y = Omelette.add_predictor(model, model_glm, x)
 ```
 
-### LogisticRegression
+#### LogisticRegression
 
 ```julia
 using Omelette, GLM
 X, Y = rand(10, 2), rand(Bool, 10)
 model_glm = GLM.glm(X, Y, GLM.Bernoulli())
-predictor = Omelette.LogisticRegression(model_glm)
+y = Omelette.add_predictor(model, model_glm, x)
 ```
+
+### [Lux.jl](https://github.com/LuxDL/Lux.jl)
+
+See `test/test_Lux.jl` for an example.
 
 ## Other constraints
 

@@ -71,11 +71,10 @@ function test_end_to_end()
         optimizer = Optimisers.Adam(0.03f0),
         epochs = 250,
     )
-    f = Omelette.Pipeline(state)
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(model, f, [x])
+    y = Omelette.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)

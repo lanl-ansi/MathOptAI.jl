@@ -55,7 +55,7 @@ function add_predictor(
     predictor::LinearRegression,
     x::Vector{JuMP.VariableRef},
 )
-    m = size(predictor.parameters, 1)
+    m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
     JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
     return y

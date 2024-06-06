@@ -25,13 +25,12 @@ function test_ReLU_BigM()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    f = Omelette.ReLUBigM(2, 100.0)
-    @test size(f) == (2, 2)
+    f = Omelette.ReLUBigM(100.0)
     y = Omelette.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, AffExpr, MOI.LessThan{Float64}) == 4
-    @test num_constraints(model, AffExpr, MOI.GreaterThan{Float64}) == 4
+    @test num_constraints(model, AffExpr, MOI.GreaterThan{Float64}) == 2
     @objective(model, Min, sum(y))
     fix.(x, [-1, 2])
     optimize!(model)
@@ -43,8 +42,7 @@ end
 function test_ReLU_SOS1()
     model = Model()
     @variable(model, x[1:2])
-    f = Omelette.ReLUSOS1(2)
-    @test size(f) == (2, 2)
+    f = Omelette.ReLUSOS1()
     y = Omelette.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
@@ -57,8 +55,7 @@ function test_ReLU_Quadratic()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    f = Omelette.ReLUQuadratic(2)
-    @test size(f) == (2, 2)
+    f = Omelette.ReLUQuadratic()
     y = Omelette.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6

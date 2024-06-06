@@ -4,13 +4,16 @@
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
 """
-    LinearRegression(parameters::Matrix)
+    LinearRegression(
+        A::Matrix{Float64},
+        b::Vector{Float64} = zeros(size(A, 1)),
+    )
 
 Represents the linear relationship:
 ```math
-f(x) = A x
+f(x) = A x + b
 ```
-where \$A\$ is the \$m \\times n\$ matrix `parameters`.
+where \$A\$ is the \$m \\times n\$ matrix `A`.
 
 ## Example
 
@@ -22,7 +25,7 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = Omelette.LinearRegression([2.0, 3.0])
-Omelette.LinearRegression([2.0 3.0])
+Omelette.LinearRegression([2.0 3.0], [0.0])
 
 julia> y = Omelette.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
@@ -35,11 +38,16 @@ julia> print(model)
 ```
 """
 struct LinearRegression <: AbstractPredictor
-    parameters::Matrix{Float64}
+    A::Matrix{Float64}
+    b::Vector{Float64}
 end
 
-function LinearRegression(parameters::Vector{Float64})
-    return LinearRegression(reshape(parameters, 1, length(parameters)))
+function LinearRegression(A::Matrix{Float64})
+    return LinearRegression(A, zeros(size(A, 1)))
+end
+
+function LinearRegression(A::Vector{Float64})
+    return LinearRegression(reshape(A, 1, length(A)), [0.0])
 end
 
 function add_predictor(
@@ -49,6 +57,6 @@ function add_predictor(
 )
     m = size(predictor.parameters, 1)
     y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
-    JuMP.@constraint(model, predictor.parameters * x .== y)
+    JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
     return y
 end

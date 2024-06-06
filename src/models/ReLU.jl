@@ -95,14 +95,14 @@ julia> y = Omelette.add_predictor(model, f, x)
 julia> print(model)
 Feasibility
 Subject to
- x[1] - _[5] + _[6] = 0
- x[2] - _[7] + _[8] = 0
- [_[5], _[6]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
- [_[7], _[8]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+ x[1] - omelette_y[1] + _[5] = 0
+ x[2] - omelette_y[2] + _[6] = 0
+ omelette_y[1] ≥ 0
+ omelette_y[2] ≥ 0
+ [omelette_y[1], _[5]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+ [omelette_y[2], _[6]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
  _[5] ≥ 0
  _[6] ≥ 0
- _[7] ≥ 0
- _[8] ≥ 0
 ```
 """
 struct ReLUSOS1 <: AbstractPredictor
@@ -118,9 +118,10 @@ function _add_predictor_inner(
     y::Vector{JuMP.VariableRef},
 )
     for i in 1:length(x)
-        z = JuMP.@variable(model, [1:2], lower_bound = 0)
-        JuMP.@constraint(model, x[i] == z[1] - z[2])
-        JuMP.@constraint(model, z in MOI.SOS1([1.0, 2.0]))
+        z = JuMP.@variable(model, lower_bound = 0)
+        JuMP.@constraint(model, y[i] >= 0)
+        JuMP.@constraint(model, x[i] == y[i] - z)
+        JuMP.@constraint(model, [y[i], z] in MOI.SOS1([1.0, 2.0]))
     end
     return
 end
@@ -131,8 +132,9 @@ end
 Implements the ReLU constraint \$y = max(0, x)\$ by the reformulation:
 ```math
 \\begin{aligned}
-x = x^+ - x^- \\\\
-x^+ \\times x^- = 0
+x = y - z \\\\
+y \\times z = 0 \\\\
+y, z \\ge 0
 \\end{aligned}
 ```
 
@@ -156,14 +158,14 @@ julia> y = Omelette.add_predictor(model, f, x)
 julia> print(model)
 Feasibility
 Subject to
- x[1] - _z[1]+ + _z[1]- = 0
- x[2] - _z[2]+ + _z[2]- = 0
- _z[1]+*_z[1]- = 0
- _z[2]+*_z[2]- = 0
- _z[1]+ ≥ 0
- _z[1]- ≥ 0
- _z[2]+ ≥ 0
- _z[2]- ≥ 0
+ x[1] - omelette_y[1] + _z[1] = 0
+ x[2] - omelette_y[2] + _z[2] = 0
+ omelette_y[1] ≥ 0
+ omelette_y[2] ≥ 0
+ omelette_y[1]*_z[1] = 0
+ omelette_y[2]*_z[2] = 0
+ _z[1] ≥ 0
+ _z[2] ≥ 0
 ```
 """
 struct ReLUQuadratic <: AbstractPredictor
@@ -179,10 +181,10 @@ function _add_predictor_inner(
     y::Vector{JuMP.VariableRef},
 )
     for i in 1:length(x)
-        z_pos = JuMP.@variable(model, lower_bound = 0, base_name = "_z[$i]+")
-        z_neg = JuMP.@variable(model, lower_bound = 0, base_name = "_z[$i]-")
-        JuMP.@constraint(model, x[i] == z_pos - z_neg)
-        JuMP.@constraint(model, z_pos * z_neg == 0)
+        z = JuMP.@variable(model, lower_bound = 0, base_name = "_z[$i]")
+        JuMP.@constraint(model, y[i] >= 0)
+        JuMP.@constraint(model, x[i] == y[i] - z)
+        JuMP.@constraint(model, y[i] * z == 0)
     end
     return
 end

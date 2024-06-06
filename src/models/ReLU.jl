@@ -108,8 +108,12 @@ function add_predictor(
     x::Vector{JuMP.VariableRef},
 )
     m = length(x)
-    y = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "omelette_y")
+    lb, ub = _get_variable_bounds(x)
+    y = JuMP.@variable(model, [i in 1:m], base_name = "omelette_y")
+    JuMP.set_lower_bound.(y, 0.0)
+    JuMP.set_upper_bound.(y, ub)
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "_z")
+    JuMP.set_upper_bound.(z, -lb)
     JuMP.@constraint(model, x .== y - z)
     for i in 1:m
         JuMP.@constraint(model, [y[i], z[i]] in MOI.SOS1([1.0, 2.0]))

@@ -40,14 +40,19 @@ function test_ReLU_BigM()
 end
 
 function test_ReLU_SOS1()
-    model = Model()
-    @variable(model, x[1:2])
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, -2 <= x[1:2] <= 2)
     f = Omelette.ReLUSOS1()
     y = Omelette.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, Vector{VariableRef}, MOI.SOS1{Float64}) == 2
-    # TODO(odow): add a test for solution with solver that supports SOS1
+    @objective(model, Min, sum(y))
+    @constraint(model, x .>= [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [0.0, 2.0]
     return
 end
 

@@ -56,6 +56,26 @@ julia> print(model)
 """
 function add_predictor end
 
+function _get_variable_bounds(x::Vector{JuMP.VariableRef})
+    lb, ub = fill(-Inf, length(x)), fill(Inf, length(x))
+    for i in 1:length(x)
+        if JuMP.has_upper_bound(x[i])
+            ub[i] = JuMP.upper_bound(x[i])
+        end
+        if JuMP.has_lower_bound(x[i])
+            lb[i] = JuMP.lower_bound(x[i])
+        end
+        if JuMP.is_fixed(x[i])
+            lb[i] = ub[i] = JuMP.fix_value(x[i])
+        end
+        if JuMP.is_binary(x[i])
+            lb[i] = max(0.0, lb[i])
+            ub[i] = min(1.0, ub[i])
+        end
+    end
+    return lb, ub
+end
+
 for file in readdir(joinpath(@__DIR__, "models"); join = true)
     if endswith(file, ".jl")
         include(file)

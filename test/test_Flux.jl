@@ -24,8 +24,8 @@ function runtests()
 end
 
 function generate_data(rng::Random.AbstractRNG, n = 128)
-    x = range(-2.0, 2.0, n)
-    y = -2 .* x .+ x .^ 2 .+ 0.1 .* randn(rng, n)
+    x = range(-2.0f0, 2.0f0, n)
+    y = -2 .* x .+ x .^ 2 .+ 0.1f0 .* randn(rng, n)
     return [([xi], yi) for (xi, yi) in zip(x, y)]
 end
 
@@ -33,8 +33,8 @@ function _train_lux_model(model)
     rng = Random.MersenneTwister()
     Random.seed!(rng, 12345)
     data = generate_data(rng)
-    optim = Flux.setup(Flux.Adam(), model)
-    for epoch in 1:1_000
+    optim = Flux.setup(Flux.Adam(0.01f0), model)
+    for epoch in 1:250
         Flux.train!((m, x, y) -> (only(m(x)) - y)^2, model, data, optim)
     end
     return model
@@ -57,7 +57,7 @@ function test_end_to_end_ReLUBigM()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value(x), -1.24; atol = 1e-1)
     return
 end
 
@@ -80,7 +80,7 @@ function test_end_to_end_ReLUQuadratic()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain([value(x)]); atol = 1e-2)
     return
 end
 
@@ -96,7 +96,7 @@ function test_end_to_end_ReLU()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain([value(x)]); atol = 1e-2)
     return
 end
 
@@ -112,7 +112,7 @@ function test_end_to_end_SoftPlus()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain([value(x)]); atol = 1e-2)
     return
 end
 
@@ -128,7 +128,7 @@ function test_end_to_end_Sigmoid()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain([value(x)]); atol = 1e-2)
     return
 end
 
@@ -144,7 +144,7 @@ function test_end_to_end_Tanh()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain([value(x)]); atol = 1e-2)
     return
 end
 

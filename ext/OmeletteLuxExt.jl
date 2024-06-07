@@ -31,7 +31,7 @@ end
         model::JuMP.Model,
         predictor::Lux.Experimental.TrainState,
         x::Vector{JuMP.VariableRef};
-        relu::Omelette.AbstractPredictor = Omelette.ReLUBigM(1e4),
+        relu::Omelette.AbstractPredictor = Omelette.ReLU(),
     )
 
 Add a trained neural network from Lux.jl to `model`.
@@ -44,7 +44,7 @@ function Omelette.add_predictor(
     model::JuMP.Model,
     predictor::Lux.Experimental.TrainState,
     x::Vector{JuMP.VariableRef};
-    relu::Omelette.AbstractPredictor = Omelette.ReLUBigM(1e4),
+    relu::Omelette.AbstractPredictor = Omelette.ReLU(),
 )
     inner_predictor = Omelette.Pipeline(Omelette.AbstractPredictor[])
     for (layer, parameter) in zip(predictor.model.layers, predictor.parameters)

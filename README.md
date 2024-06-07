@@ -74,9 +74,13 @@ model = Model()
 y = MathOptAI.add_predictor(model, model_glm, x)
 ```
 
+### [Flux.jl](https://github.com/FluxML/Flux.jl)
+
+See [test/test_Flux.jl](test/test_Flux.jl) for an example.
+
 ### [Lux.jl](https://github.com/LuxDL/Lux.jl)
 
-See `test/test_Lux.jl` for an example.
+See [test/test_Lux.jl](test/test_Lux.jl) for an example.
 
 ## Constraints
 

@@ -9,17 +9,20 @@ JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
 [weakdeps]
+Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 
 [extensions]
+MathOptAIFluxExt = "Flux"
 MathOptAIGLMExt = "GLM"
 MathOptAILuxExt = "Lux"
 
 [compat]
 Distributions = "0.25"
+Flux = "0.14"
 GLM = "1.9"
-Lux = "0.5"
 JuMP = "1"
+Lux = "0.5"
 MathOptInterface = "1"
 julia = "1.9"

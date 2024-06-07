@@ -42,16 +42,16 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = Omelette.LinearRegression([2.0, 3.0])
-Omelette.LinearRegression([2.0 3.0])
+Omelette.LinearRegression([2.0 3.0], [0.0])
 
 julia> y = Omelette.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
  omelette_y[1]
 
 julia> print(model)
- Feasibility
- Subject to
-  2 x[1] + 3 x[2] - omelette_y[1] = 0
+Feasibility
+Subject to
+ 2 x[1] + 3 x[2] - omelette_y[1] = 0
 ```
 """
 function add_predictor end

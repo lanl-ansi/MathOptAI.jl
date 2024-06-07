@@ -10,3 +10,7 @@ is_test(x) = startswith(x, "test_") && endswith(x, ".jl")
 @testset "$file" for file in filter(is_test, readdir(@__DIR__))
     include(joinpath(@__DIR__, file))
 end
+
+import Documenter
+import Omelette
+Documenter.doctest(Omelette; manual = false)

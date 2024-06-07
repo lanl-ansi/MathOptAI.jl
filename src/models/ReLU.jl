@@ -11,6 +11,8 @@ Implements the ReLU constraint \$y = max(0, x)\$ directly.
 ## Example
 
 ```jldoctest
+julia> using JuMP, Omelette
+
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
@@ -194,6 +196,8 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
+julia> using JuMP, Omelette
+
 julia> model = Model();
 
 julia> @variable(model, x[1:2] >= -1);

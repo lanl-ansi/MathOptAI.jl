@@ -32,9 +32,9 @@ julia> y = Omelette.add_predictor(model, f, x)
  omelette_y[1]
 
 julia> print(model)
- Feasibility
- Subject to
-  2 x[1] + 3 x[2] - omelette_y[1] = 0
+Feasibility
+Subject to
+ 2 x[1] + 3 x[2] - omelette_y[1] = 0
 ```
 """
 struct LinearRegression <: AbstractPredictor

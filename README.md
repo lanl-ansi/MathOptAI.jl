@@ -24,7 +24,7 @@ This project is inspired by two existing projects:
  * [OMLT](https://github.com/cog-imperial/OMLT)
  * [gurobi-machinelearning](https://github.com/Gurobi/gurobi-machinelearning)
 
-## Supported models
+## Predictors
 
 Use `MathOptAI.add_predictor(model, predictor, x)` to add the relationship
 `y = predictor(x)` to `model`:
@@ -78,7 +78,7 @@ y = MathOptAI.add_predictor(model, model_glm, x)
 
 See `test/test_Lux.jl` for an example.
 
-## Other constraints
+## Constraints
 
 ### UnivariateNormalDistribution
 

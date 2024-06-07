@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
-module ModelTests
+module PredictorTests
 
 using JuMP
 using Test
@@ -182,4 +182,4 @@ end
 
 end  # module
 
-ModelTests.runtests()
+PredictorTests.runtests()

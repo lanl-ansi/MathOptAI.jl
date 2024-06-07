@@ -10,6 +10,7 @@ using Test
 
 import GLM
 import HiGHS
+import Ipopt
 import Omelette
 
 is_test(x) = startswith(string(x), "test_")
@@ -63,4 +64,4 @@ end
 
 end  # module
 
-LuxTests.runtests()
+GLMTests.runtests()

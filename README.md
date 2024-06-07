@@ -36,9 +36,10 @@ The following predictors are supported. See their docstrings for details:
  * `Omelette.LinearRegression`
  * `Omelette.LogisticRegression`
  * `Omelette.Pipeline`
+ * `Omelette.ReLU`
  * `Omelette.ReLUBigM`
- * `Omelette.ReLUSOS1`
  * `Omelette.ReLUQuadratic`
+ * `Omelette.ReLUSOS1`
 
 ## Extensions
 

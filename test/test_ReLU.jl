@@ -21,6 +21,23 @@ function runtests()
     return
 end
 
+function test_ReLU_direct()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = Omelette.ReLU()
+    y = Omelette.add_predictor(model, f, x)
+    @test length(y) == 2
+    @test num_variables(model) == 4
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
+    @objective(model, Min, sum(y))
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [0.0, 2.0]
+    return
+end
+
 function test_ReLU_BigM()
     model = Model(HiGHS.Optimizer)
     set_silent(model)

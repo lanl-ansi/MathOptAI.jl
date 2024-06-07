@@ -59,7 +59,7 @@ function train_cpu(
     return state
 end
 
-function test_end_to_end_highs()
+function test_end_to_end_ReLUBigM()
     rng = Random.MersenneTwister()
     Random.seed!(rng, 12345)
     x, y = generate_data(rng)
@@ -75,16 +75,21 @@ function test_end_to_end_highs()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(model, state, [x])
+    y = Omelette.add_predictor(
+        model,
+        state,
+        [x];
+        relu = Omelette.ReLUBigM(100.0),
+    )
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
-    @assert is_solved_and_feasible(model)
+    @test is_solved_and_feasible(model)
     @test isapprox(value(x), -1.24; atol = 1e-2)
     return
 end
 
-function test_end_to_end_ipopt()
+function test_end_to_end_ReLUQuadratic()
     rng = Random.MersenneTwister()
     Random.seed!(rng, 12345)
     x, y = generate_data(rng)
@@ -111,7 +116,32 @@ function test_end_to_end_ipopt()
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
-    @assert is_solved_and_feasible(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-2)
+    return
+end
+
+function test_end_to_end_ReLU()
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 12345)
+    x, y = generate_data(rng)
+    model = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
+    state = train_cpu(
+        model,
+        x,
+        y;
+        rng = rng,
+        optimizer = Optimisers.Adam(0.03f0),
+        epochs = 250,
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = Omelette.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
     @test isapprox(value(x), -1.24; atol = 1e-2)
     return
 end

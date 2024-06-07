@@ -4,12 +4,52 @@
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
 """
+    ReLU()
+
+Implements the ReLU constraint \$y = max(0, x)\$ directly.
+
+## Example
+
+```jldoctest
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> f = Omelette.ReLU()
+Omelette.ReLU()
+
+julia> y = Omelette.add_predictor(model, f, x)
+2-element Vector{VariableRef}:
+ omelette_y[1]
+ omelette_y[2]
+
+julia> print(model)
+Feasibility
+Subject to
+ omelette_y[1] - max(0.0, x[1]) = 0
+ omelette_y[2] - max(0.0, x[2]) = 0
+ omelette_y[1] ≥ 0
+ omelette_y[2] ≥ 0
+```
+"""
+struct ReLU <: AbstractPredictor end
+
+function add_predictor(
+    model::JuMP.Model,
+    predictor::ReLU,
+    x::Vector{JuMP.VariableRef},
+)
+    _, ub = _get_variable_bounds(x)
+    y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_y")
+    _set_bounds_if_finite.(y, 0.0, ub)
+    JuMP.@constraint(model, y .== max.(0, x))
+    return y
+end
+
+"""
     ReLUBigM(M::Float64)
 
-Represents the rectified linear unit relationship:
-```math
-f(x) = max.(0, x)
-```
+Implements the ReLU constraint \$y = max(0, x)\$ via a big-M MIP reformulation.
 
 ## Example
 

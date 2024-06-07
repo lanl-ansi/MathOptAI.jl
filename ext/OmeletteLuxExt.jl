@@ -53,4 +53,4 @@ function Omelette.add_predictor(
     return Omelette.add_predictor(model, inner_predictor, x)
 end
 
-end #module
+end  # module

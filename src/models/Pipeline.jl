@@ -28,15 +28,15 @@ Omelette.Pipeline(Omelette.AbstractPredictor[Omelette.LinearRegression([1.0 2.0]
 
 julia> y = Omelette.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_y[1]
+ omelette_ReLU[1]
 
 julia> print(model)
 Feasibility
 Subject to
- x[1] + 2 x[2] - omelette_y[1] = 0
- omelette_y[1] - omelette_y[1] + _z[1] = 0
- omelette_y[1]*_z[1] = 0
- omelette_y[1] ≥ 0
+ x[1] + 2 x[2] - omelette_LinearRegression[1] = 0
+ omelette_LinearRegression[1] - omelette_ReLU[1] + _z[1] = 0
+ omelette_ReLU[1]*_z[1] = 0
+ omelette_ReLU[1] ≥ 0
  _z[1] ≥ 0
 ```
 """

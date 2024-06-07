@@ -8,12 +8,11 @@ module FluxTests
 using JuMP
 using Test
 
+import Flux
 import HiGHS
 import Ipopt
-import Flux
 import MathOptAI
 import Random
-import Statistics
 
 is_test(x) = startswith(string(x), "test_")
 

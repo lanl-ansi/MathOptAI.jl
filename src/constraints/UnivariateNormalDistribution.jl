@@ -12,9 +12,9 @@ and `std_dev(x::Vector)`.
 ## Example
 
 ```jldoctest
-julia> import Omelette
+julia> import MathOptAI
 
-julia> Omelette.UnivariateNormalDistribution(;
+julia> MathOptAI.UnivariateNormalDistribution(;
            mean = x -> only(x),
            std_dev = x -> 1.0,
        )
@@ -55,18 +55,18 @@ distributed, so that each side of the constraint holds with `(1 + β) / 2`.
 ## Examples
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, 0 <= x <= 5);
 
-julia> f = Omelette.UnivariateNormalDistribution(;
+julia> f = MathOptAI.UnivariateNormalDistribution(;
            mean = x -> only(x),
            std_dev = x -> 1.0,
        );
 
-julia> Omelette.add_constraint(model, f, [x], MOI.Interval(0.5, Inf), 0.95);
+julia> MathOptAI.add_constraint(model, f, [x], MOI.Interval(0.5, Inf), 0.95);
 
 julia> print(model)
 Feasibility

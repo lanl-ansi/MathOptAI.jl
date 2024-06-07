@@ -10,7 +10,7 @@ using Test
 
 import HiGHS
 import Ipopt
-import Omelette
+import MathOptAI
 
 is_test(x) = startswith(string(x), "test_")
 
@@ -24,8 +24,8 @@ end
 function test_LinearRegression()
     model = Model()
     @variable(model, x[1:2])
-    f = Omelette.LinearRegression([2.0, 3.0])
-    y = Omelette.add_predictor(model, f, x)
+    f = MathOptAI.LinearRegression([2.0, 3.0])
+    y = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
@@ -36,8 +36,8 @@ end
 function test_LogisticRegression()
     model = Model()
     @variable(model, x[1:2])
-    f = Omelette.LogisticRegression([2.0, 3.0])
-    y = Omelette.add_predictor(model, f, x)
+    f = MathOptAI.LogisticRegression([2.0, 3.0])
+    y = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
@@ -50,8 +50,8 @@ function test_ReLU_direct()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    f = Omelette.ReLU()
-    y = Omelette.add_predictor(model, f, x)
+    f = MathOptAI.ReLU()
+    y = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -67,8 +67,8 @@ function test_ReLU_BigM()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    f = Omelette.ReLUBigM(100.0)
-    y = Omelette.add_predictor(model, f, x)
+    f = MathOptAI.ReLUBigM(100.0)
+    y = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, AffExpr, MOI.LessThan{Float64}) == 4
@@ -85,8 +85,8 @@ function test_ReLU_SOS1()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, -2 <= x[1:2] <= 2)
-    f = Omelette.ReLUSOS1()
-    y = Omelette.add_predictor(model, f, x)
+    f = MathOptAI.ReLUSOS1()
+    y = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, Vector{VariableRef}, MOI.SOS1{Float64}) == 2
@@ -102,7 +102,7 @@ function test_ReLU_SOS1_no_bounds()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = Omelette.add_predictor(model, Omelette.ReLUSOS1(), x)
+    y = MathOptAI.add_predictor(model, MathOptAI.ReLUSOS1(), x)
     @test_throws(
         ErrorException(
             "Unable to use SOS1ToMILPBridge because element 1 in the function has a non-finite domain: MOI.VariableIndex(1)",
@@ -116,8 +116,8 @@ function test_ReLU_Quadratic()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    f = Omelette.ReLUQuadratic()
-    y = Omelette.add_predictor(model, f, x)
+    f = MathOptAI.ReLUQuadratic()
+    y = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, QuadExpr, MOI.EqualTo{Float64}) == 2
@@ -133,7 +133,7 @@ function test_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = Omelette.add_predictor(model, Omelette.Sigmoid(), x)
+    y = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -150,7 +150,7 @@ function test_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = Omelette.add_predictor(model, Omelette.SoftPlus(), x)
+    y = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -167,7 +167,7 @@ function test_Tanh()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = Omelette.add_predictor(model, Omelette.Tanh(), x)
+    y = MathOptAI.add_predictor(model, MathOptAI.Tanh(), x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2

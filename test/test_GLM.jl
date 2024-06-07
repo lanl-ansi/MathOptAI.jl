@@ -11,7 +11,7 @@ using Test
 import GLM
 import HiGHS
 import Ipopt
-import Omelette
+import MathOptAI
 
 is_test(x) = startswith(string(x), "test_")
 
@@ -33,7 +33,7 @@ function test_LinearRegression_GLM()
     set_silent(model)
     @variable(model, 0 <= x[1:num_features] <= 1)
     @constraint(model, sum(x) == 1.5)
-    y = Omelette.add_predictor(model, model_glm, x)
+    y = MathOptAI.add_predictor(model, model_glm, x)
     @objective(model, Max, only(y))
     optimize!(model)
     @assert is_solved_and_feasible(model)
@@ -53,7 +53,7 @@ function test_LogisticRegression_GLM()
     set_silent(model)
     @variable(model, 0 <= x[1:num_features] <= 1)
     @constraint(model, sum(x) == 1.5)
-    y = Omelette.add_predictor(model, model_glm, x)
+    y = MathOptAI.add_predictor(model, model_glm, x)
     @objective(model, Max, only(y))
     optimize!(model)
     @assert is_solved_and_feasible(model)

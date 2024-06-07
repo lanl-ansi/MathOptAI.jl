@@ -11,13 +11,13 @@ Implements the Sigmoid constraint \$y = \\frac{1}{1 + e^-x}\$ directly.
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = Omelette.add_predictor(model, Omelette.Sigmoid(), x)
+julia> y = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), x)
 2-element Vector{VariableRef}:
  omelette_Sigmoid[1]
  omelette_Sigmoid[2]

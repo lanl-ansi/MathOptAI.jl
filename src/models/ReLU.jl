@@ -11,16 +11,16 @@ Implements the ReLU constraint \$y = max(0, x)\$ directly.
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = Omelette.ReLU()
-Omelette.ReLU()
+julia> f = MathOptAI.ReLU()
+MathOptAI.ReLU()
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
  omelette_ReLU[1]
  omelette_ReLU[2]
@@ -56,16 +56,16 @@ Implements the ReLU constraint \$y = max(0, x)\$ via a big-M MIP reformulation.
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, -3 <= x[i in 1:2] <= i);
 
-julia> f = Omelette.ReLUBigM(100.0)
-Omelette.ReLUBigM(100.0)
+julia> f = MathOptAI.ReLUBigM(100.0)
+MathOptAI.ReLUBigM(100.0)
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
  omelette_ReLU[1]
  omelette_ReLU[2]
@@ -130,16 +130,16 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2] >= -1);
 
-julia> f = Omelette.ReLUSOS1()
-Omelette.ReLUSOS1()
+julia> f = MathOptAI.ReLUSOS1()
+MathOptAI.ReLUSOS1()
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
  omelette_ReLU[1]
  omelette_ReLU[2]
@@ -196,16 +196,16 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2] >= -1);
 
-julia> f = Omelette.ReLUQuadratic()
-Omelette.ReLUQuadratic()
+julia> f = MathOptAI.ReLUQuadratic()
+MathOptAI.ReLUQuadratic()
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
  omelette_ReLU[1]
  omelette_ReLU[2]

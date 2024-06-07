@@ -3,23 +3,23 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
-module OmeletteLuxExt
+module MathOptAILuxExt
 
 import JuMP
 import Lux
-import Omelette
+import MathOptAI
 
 _default(::typeof(identity)) = nothing
 _default(::Any) = missing
-_default(::typeof(Lux.relu)) = Omelette.ReLU()
-_default(::typeof(Lux.sigmoid_fast)) = Omelette.Sigmoid()
-_default(::typeof(Lux.softplus)) = Omelette.SoftPlus()
-_default(::typeof(Lux.tanh_fast)) = Omelette.Tanh()
+_default(::typeof(Lux.relu)) = MathOptAI.ReLU()
+_default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid()
+_default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus()
+_default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 
 function _add_predictor(
-    predictor::Omelette.Pipeline,
+    predictor::MathOptAI.Pipeline,
     activation,
-    config::Dict{<:Function,<:Omelette.AbstractPredictor},
+    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
 )
     layer = get(config, activation, _default(activation))
     if layer === nothing
@@ -33,22 +33,22 @@ function _add_predictor(
 end
 
 function _add_predictor(
-    predictor::Omelette.Pipeline,
+    predictor::MathOptAI.Pipeline,
     layer::Lux.Dense,
     p,
-    config::Dict{<:Function,<:Omelette.AbstractPredictor},
+    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
 )
-    push!(predictor.layers, Omelette.LinearRegression(p.weight, vec(p.bias)))
+    push!(predictor.layers, MathOptAI.LinearRegression(p.weight, vec(p.bias)))
     _add_predictor(predictor, layer.activation, config)
     return
 end
 
 """
-    Omelette.add_predictor(
+    MathOptAI.add_predictor(
         model::JuMP.Model,
         predictor::Lux.Experimental.TrainState,
         x::Vector{JuMP.VariableRef};
-        config::Dict{<:Function,<:Omelette.AbstractPredictor} = Dict(),
+        config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict(),
     )
 
 Add a trained neural network from Lux.jl to `model`.
@@ -61,28 +61,28 @@ Add a trained neural network from Lux.jl to `model`.
 ## Example
 
 ```julia
-y = Omelette.add_predictor(
+y = MathOptAI.add_predictor(
     model,
     state,
     x;
-    config = Dict(Lux.relu => Omelette.ReLUQuadratic()),
+    config = Dict(Lux.relu => MathOptAI.ReLUQuadratic()),
 )
 ```
 """
-function Omelette.add_predictor(
+function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::Lux.Experimental.TrainState,
     x::Vector{JuMP.VariableRef};
-    config::Dict{<:Function,<:Omelette.AbstractPredictor} = Dict{
+    config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict{
         Function,
-        Omelette.AbstractPredictor,
+        MathOptAI.AbstractPredictor,
     }(),
 )
-    inner_predictor = Omelette.Pipeline(Omelette.AbstractPredictor[])
+    inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for (layer, parameter) in zip(predictor.model.layers, predictor.parameters)
         _add_predictor(inner_predictor, layer, parameter, config)
     end
-    return Omelette.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 
 end  # module

@@ -11,13 +11,13 @@ Implements the SoftPlus constraint \$y = log(1 + e^x)\$ directly.
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = Omelette.add_predictor(model, Omelette.SoftPlus(), x)
+julia> y = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
 2-element Vector{VariableRef}:
  omelette_SoftPlus[1]
  omelette_SoftPlus[2]

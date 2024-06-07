@@ -18,16 +18,16 @@ where \$A\$ is the \$m \\times n\$ matrix `A`.
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = Omelette.LinearRegression([2.0, 3.0])
-Omelette.LinearRegression([2.0 3.0], [0.0])
+julia> f = MathOptAI.LinearRegression([2.0, 3.0])
+MathOptAI.LinearRegression([2.0 3.0], [0.0])
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
  omelette_LinearRegression[1]
 

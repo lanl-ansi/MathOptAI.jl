@@ -12,7 +12,7 @@ import ADTypes
 import HiGHS
 import Ipopt
 import Lux
-import Omelette
+import MathOptAI
 import Optimisers
 import Random
 import Statistics
@@ -81,11 +81,11 @@ function test_end_to_end_ReLUBigM()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(
+    y = MathOptAI.add_predictor(
         model,
         state,
         [x];
-        config = Dict(Lux.relu => Omelette.ReLUBigM(100.0)),
+        config = Dict(Lux.relu => MathOptAI.ReLUBigM(100.0)),
     )
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
@@ -102,11 +102,11 @@ function test_end_to_end_ReLUQuadratic()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(
+    y = MathOptAI.add_predictor(
         model,
         state,
         [x];
-        config = Dict(Lux.relu => Omelette.ReLUQuadratic()),
+        config = Dict(Lux.relu => MathOptAI.ReLUQuadratic()),
     )
     # Ipopt needs a starting point to avoid the local minima.
     set_start_value(only(y), 4.0)
@@ -125,7 +125,7 @@ function test_end_to_end_ReLU()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(model, state, [x])
+    y = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -141,7 +141,7 @@ function test_end_to_end_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(model, state, [x])
+    y = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -157,7 +157,7 @@ function test_end_to_end_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(model, state, [x])
+    y = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -173,7 +173,7 @@ function test_end_to_end_Tanh()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = Omelette.add_predictor(model, state, [x])
+    y = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)

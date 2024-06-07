@@ -12,5 +12,5 @@ is_test(x) = startswith(x, "test_") && endswith(x, ".jl")
 end
 
 import Documenter
-import Omelette
-Documenter.doctest(Omelette; manual = false)
+import MathOptAI
+Documenter.doctest(MathOptAI; manual = false)

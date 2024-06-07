@@ -25,7 +25,10 @@ function Omelette.add_predictor(
     },
     x::Vector{JuMP.VariableRef},
 )
-    inner_predictor = Omelette.LogisticRegression(GLM.coef(predictor))
+    inner_predictor = Omelette.Pipeline(
+        Omelette.LinearRegression(GLM.coef(predictor)),
+        Omelette.Sigmoid(),
+    )
     return Omelette.add_predictor(model, inner_predictor, x)
 end
 

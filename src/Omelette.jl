@@ -46,12 +46,12 @@ Omelette.LinearRegression([2.0 3.0], [0.0])
 
 julia> y = Omelette.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_y[1]
+ omelette_LinearRegression[1]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1] + 3 x[2] - omelette_y[1] = 0
+ 2 x[1] + 3 x[2] - omelette_LinearRegression[1] = 0
 ```
 """
 function add_predictor end
@@ -86,8 +86,10 @@ function _set_bounds_if_finite(x, l, u)
     return
 end
 
-for file in readdir(joinpath(@__DIR__, "models"); join = true)
-    if endswith(file, ".jl")
+_list_of_files(dir) = readdir(joinpath(@__DIR__, dir); join = true)
+
+for dir in ("models", "constraints")
+    for file in filter(x -> endswith(x, ".jl"), _list_of_files(dir))
         include(file)
     end
 end

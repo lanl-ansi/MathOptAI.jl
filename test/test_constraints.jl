@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
-module UnivariateNormalDistributionTests
+module ConstraintTests
 
 using JuMP
 using Test
@@ -54,6 +54,6 @@ function test_normal_upper_limit()
     return
 end
 
-end
+end  # module
 
-UnivariateNormalDistributionTests.runtests()
+ConstraintTests.runtests()

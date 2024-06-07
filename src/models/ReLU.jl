@@ -22,16 +22,16 @@ Omelette.ReLU()
 
 julia> y = Omelette.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_y[1]
- omelette_y[2]
+ omelette_ReLU[1]
+ omelette_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- omelette_y[1] - max(0.0, x[1]) = 0
- omelette_y[2] - max(0.0, x[2]) = 0
- omelette_y[1] ≥ 0
- omelette_y[2] ≥ 0
+ omelette_ReLU[1] - max(0.0, x[1]) = 0
+ omelette_ReLU[2] - max(0.0, x[2]) = 0
+ omelette_ReLU[1] ≥ 0
+ omelette_ReLU[2] ≥ 0
 ```
 """
 struct ReLU <: AbstractPredictor end
@@ -42,7 +42,7 @@ function add_predictor(
     x::Vector{JuMP.VariableRef},
 )
     _, ub = _get_variable_bounds(x)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_y")
+    y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     JuMP.@constraint(model, y .== max.(0, x))
     return y
@@ -67,26 +67,26 @@ Omelette.ReLUBigM(100.0)
 
 julia> y = Omelette.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_y[1]
- omelette_y[2]
+ omelette_ReLU[1]
+ omelette_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- -x[1] + omelette_y[1] ≥ 0
- -x[2] + omelette_y[2] ≥ 0
- omelette_y[1] - _[5] ≤ 0
- -x[1] + omelette_y[1] + 3 _[5] ≤ 3
- omelette_y[2] - 2 _[6] ≤ 0
- -x[2] + omelette_y[2] + 3 _[6] ≤ 3
+ -x[1] + omelette_ReLU[1] ≥ 0
+ -x[2] + omelette_ReLU[2] ≥ 0
+ omelette_ReLU[1] - _[5] ≤ 0
+ -x[1] + omelette_ReLU[1] + 3 _[5] ≤ 3
+ omelette_ReLU[2] - 2 _[6] ≤ 0
+ -x[2] + omelette_ReLU[2] + 3 _[6] ≤ 3
  x[1] ≥ -3
  x[2] ≥ -3
- omelette_y[1] ≥ 0
- omelette_y[2] ≥ 0
+ omelette_ReLU[1] ≥ 0
+ omelette_ReLU[2] ≥ 0
  x[1] ≤ 1
  x[2] ≤ 2
- omelette_y[1] ≤ 1
- omelette_y[2] ≤ 2
+ omelette_ReLU[1] ≤ 1
+ omelette_ReLU[2] ≤ 2
  _[5] binary
  _[6] binary
 ```
@@ -102,7 +102,7 @@ function add_predictor(
 )
     m = length(x)
     lb, ub = _get_variable_bounds(x)
-    y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
+    y = JuMP.@variable(model, [1:m], base_name = "omelette_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     for i in 1:m
         z = JuMP.@variable(model, binary = true)
@@ -141,20 +141,20 @@ Omelette.ReLUSOS1()
 
 julia> y = Omelette.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_y[1]
- omelette_y[2]
+ omelette_ReLU[1]
+ omelette_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- x[1] - omelette_y[1] + _z[1] = 0
- x[2] - omelette_y[2] + _z[2] = 0
- [omelette_y[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
- [omelette_y[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+ x[1] - omelette_ReLU[1] + _z[1] = 0
+ x[2] - omelette_ReLU[2] + _z[2] = 0
+ [omelette_ReLU[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+ [omelette_ReLU[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
  x[1] ≥ -1
  x[2] ≥ -1
- omelette_y[1] ≥ 0
- omelette_y[2] ≥ 0
+ omelette_ReLU[1] ≥ 0
+ omelette_ReLU[2] ≥ 0
  _z[1] ≥ 0
  _z[2] ≥ 0
  _z[1] ≤ 1
@@ -170,7 +170,7 @@ function add_predictor(
 )
     m = length(x)
     lb, ub = _get_variable_bounds(x)
-    y = JuMP.@variable(model, [i in 1:m], base_name = "omelette_y")
+    y = JuMP.@variable(model, [i in 1:m], base_name = "omelette_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "_z")
     _set_bounds_if_finite.(z, -Inf, -lb)
@@ -207,20 +207,20 @@ Omelette.ReLUQuadratic()
 
 julia> y = Omelette.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_y[1]
- omelette_y[2]
+ omelette_ReLU[1]
+ omelette_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- x[1] - omelette_y[1] + _z[1] = 0
- x[2] - omelette_y[2] + _z[2] = 0
- omelette_y[1]*_z[1] = 0
- omelette_y[2]*_z[2] = 0
+ x[1] - omelette_ReLU[1] + _z[1] = 0
+ x[2] - omelette_ReLU[2] + _z[2] = 0
+ omelette_ReLU[1]*_z[1] = 0
+ omelette_ReLU[2]*_z[2] = 0
  x[1] ≥ -1
  x[2] ≥ -1
- omelette_y[1] ≥ 0
- omelette_y[2] ≥ 0
+ omelette_ReLU[1] ≥ 0
+ omelette_ReLU[2] ≥ 0
  _z[1] ≥ 0
  _z[2] ≥ 0
  _z[1] ≤ 1
@@ -236,7 +236,7 @@ function add_predictor(
 )
     m = length(x)
     lb, ub = _get_variable_bounds(x)
-    y = JuMP.@variable(model, [1:m], base_name = "omelette_y")
+    y = JuMP.@variable(model, [1:m], base_name = "omelette_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     z = JuMP.@variable(model, [1:m], base_name = "_z")
     _set_bounds_if_finite.(z, 0.0, -lb)

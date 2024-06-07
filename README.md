@@ -40,6 +40,9 @@ The following predictors are supported. See their docstrings for details:
  * `Omelette.ReLUBigM`
  * `Omelette.ReLUQuadratic`
  * `Omelette.ReLUSOS1`
+ * `Omelette.Sigmoid`
+ * `Omelette.SoftPlus`
+ * `Omelette.Tanh`
 
 ## Extensions
 

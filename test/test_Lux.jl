@@ -59,11 +59,10 @@ function train_cpu(
     return state
 end
 
-function test_end_to_end_ReLUBigM()
+function _train_lux_model(model)
     rng = Random.MersenneTwister()
     Random.seed!(rng, 12345)
     x, y = generate_data(rng)
-    model = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
     state = train_cpu(
         model,
         x,
@@ -72,6 +71,13 @@ function test_end_to_end_ReLUBigM()
         optimizer = Optimisers.Adam(0.03f0),
         epochs = 250,
     )
+    return state
+end
+
+function test_end_to_end_ReLUBigM()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),
+    )
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
@@ -79,7 +85,7 @@ function test_end_to_end_ReLUBigM()
         model,
         state,
         [x];
-        relu = Omelette.ReLUBigM(100.0),
+        config = Dict(Lux.relu => Omelette.ReLUBigM(100.0)),
     )
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
@@ -90,17 +96,8 @@ function test_end_to_end_ReLUBigM()
 end
 
 function test_end_to_end_ReLUQuadratic()
-    rng = Random.MersenneTwister()
-    Random.seed!(rng, 12345)
-    x, y = generate_data(rng)
-    model = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
-    state = train_cpu(
-        model,
-        x,
-        y;
-        rng = rng,
-        optimizer = Optimisers.Adam(0.03f0),
-        epochs = 250,
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -109,7 +106,7 @@ function test_end_to_end_ReLUQuadratic()
         model,
         state,
         [x];
-        relu = Omelette.ReLUQuadratic(),
+        config = Dict(Lux.relu => Omelette.ReLUQuadratic()),
     )
     # Ipopt needs a starting point to avoid the local minima.
     set_start_value(only(y), 4.0)
@@ -122,17 +119,8 @@ function test_end_to_end_ReLUQuadratic()
 end
 
 function test_end_to_end_ReLU()
-    rng = Random.MersenneTwister()
-    Random.seed!(rng, 12345)
-    x, y = generate_data(rng)
-    model = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
-    state = train_cpu(
-        model,
-        x,
-        y;
-        rng = rng,
-        optimizer = Optimisers.Adam(0.03f0),
-        epochs = 250,
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -143,6 +131,54 @@ function test_end_to_end_ReLU()
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value(x), -1.24; atol = 1e-2)
+    return
+end
+
+function test_end_to_end_SoftPlus()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.softplus), Lux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = Omelette.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-1)
+    return
+end
+
+function test_end_to_end_Sigmoid()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.sigmoid), Lux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = Omelette.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-1)
+    return
+end
+
+function test_end_to_end_Tanh()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.tanh), Lux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = Omelette.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-1)
     return
 end
 

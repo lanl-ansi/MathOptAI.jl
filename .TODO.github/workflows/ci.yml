@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Since Omelette doesn't have binary dependencies, only test on a subset of
+        # Since MathOptAI doesn't have binary dependencies, only test on a subset of
         # possible platforms.
         include:
           - version: '1'  # The latest point-release (Linux)

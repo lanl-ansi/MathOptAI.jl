@@ -14,19 +14,19 @@ f(x) = l_N(\\ldots(l_2(l_1(x))
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = Omelette.Pipeline(
-           Omelette.LinearRegression([1.0 2.0], [0.0]),
-           Omelette.ReLUQuadratic(),
+julia> f = MathOptAI.Pipeline(
+           MathOptAI.LinearRegression([1.0 2.0], [0.0]),
+           MathOptAI.ReLUQuadratic(),
        )
-Omelette.Pipeline(Omelette.AbstractPredictor[Omelette.LinearRegression([1.0 2.0], [0.0]), Omelette.ReLUQuadratic()])
+MathOptAI.Pipeline(MathOptAI.AbstractPredictor[MathOptAI.LinearRegression([1.0 2.0], [0.0]), MathOptAI.ReLUQuadratic()])
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
  omelette_ReLU[1]
 

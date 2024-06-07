@@ -19,5 +19,5 @@ jobs:
           using Pkg
           Pkg.add(PackageSpec(name="Aqua"))
           Pkg.develop(PackageSpec(path=pwd()))
-          using Omelette, Aqua
-          Aqua.test_all(Omelette)
+          using MathOptAI, Aqua
+          Aqua.test_all(MathOptAI)

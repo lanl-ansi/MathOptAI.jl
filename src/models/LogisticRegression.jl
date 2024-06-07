@@ -15,16 +15,16 @@ where \$A\$ is the \$m \\times n\$ matrix `parameters`.
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = Omelette.LogisticRegression([2.0, 3.0])
-Omelette.LogisticRegression([2.0 3.0])
+julia> f = MathOptAI.LogisticRegression([2.0, 3.0])
+MathOptAI.LogisticRegression([2.0 3.0])
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
  omelette_LogisticRegression[1]
 

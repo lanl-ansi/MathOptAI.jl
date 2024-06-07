@@ -3,7 +3,7 @@
 # Use of this source code is governed by an MIT-style license that can be found
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
-module Omelette
+module MathOptAI
 
 import Distributions
 import JuMP
@@ -35,16 +35,16 @@ Return a `Vector{JuMP.VariableRef}` representing `y` such that
 ## Example
 
 ```jldoctest
-julia> using JuMP, Omelette
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = Omelette.LinearRegression([2.0, 3.0])
-Omelette.LinearRegression([2.0 3.0], [0.0])
+julia> f = MathOptAI.LinearRegression([2.0, 3.0])
+MathOptAI.LinearRegression([2.0 3.0], [0.0])
 
-julia> y = Omelette.add_predictor(model, f, x)
+julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
  omelette_LinearRegression[1]
 
@@ -94,4 +94,4 @@ for dir in ("models", "constraints")
     end
 end
 
-end # module Omelette
+end # module MathOptAI

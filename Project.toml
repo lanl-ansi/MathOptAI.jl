@@ -1,4 +1,4 @@
-name = "Omelette"
+name = "MathOptAI"
 uuid = "e52c2cb8-508e-4e12-9dd2-9c4755b60e73"
 authors = ["odow <o.dowson@gmail.com>"]
 version = "0.1.0"
@@ -13,8 +13,8 @@ GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 
 [extensions]
-OmeletteGLMExt = "GLM"
-OmeletteLuxExt = "Lux"
+MathOptAIGLMExt = "GLM"
+MathOptAILuxExt = "Lux"
 
 [compat]
 Distributions = "0.25"

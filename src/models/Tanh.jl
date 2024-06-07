@@ -4,9 +4,9 @@
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
 """
-    Tannh()
+    Tanh()
 
-Implements the Sigmoid constraint \$y = tanh(x)\$ directly.
+Implements the Tanh constraint \$y = tanh(x)\$ directly.
 
 ## Example
 

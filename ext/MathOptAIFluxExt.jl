@@ -9,42 +9,6 @@ import Flux
 import JuMP
 import MathOptAI
 
-_default(::typeof(identity)) = nothing
-_default(::Any) = missing
-_default(::typeof(Flux.relu)) = MathOptAI.ReLU()
-_default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid()
-_default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus()
-_default(::typeof(Flux.tanh)) = MathOptAI.Tanh()
-
-function _add_predictor(
-    predictor::MathOptAI.Pipeline,
-    activation::Function,
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
-)
-    layer = get(config, activation, _default(activation))
-    if layer === nothing
-        # Do nothing: a linear activation
-    elseif layer === missing
-        error("Unsupported activation function: $activation")
-    else
-        push!(predictor.layers, layer)
-    end
-    return
-end
-
-function _add_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.Dense,
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
-)
-    push!(
-        predictor.layers,
-        MathOptAI.LinearRegression(layer.weight, layer.bias),
-    )
-    _add_predictor(predictor, layer.σ, config)
-    return
-end
-
 """
     MathOptAI.add_predictor(
         model::JuMP.Model,
@@ -106,6 +70,42 @@ function MathOptAI.add_predictor(
         _add_predictor(inner_predictor, layer, config)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+_default(::typeof(identity)) = nothing
+_default(::Any) = missing
+_default(::typeof(Flux.relu)) = MathOptAI.ReLU()
+_default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid()
+_default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus()
+_default(::typeof(Flux.tanh)) = MathOptAI.Tanh()
+
+function _add_predictor(
+    predictor::MathOptAI.Pipeline,
+    activation::Function,
+    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
+)
+    layer = get(config, activation, _default(activation))
+    if layer === nothing
+        # Do nothing: a linear activation
+    elseif layer === missing
+        error("Unsupported activation function: $activation")
+    else
+        push!(predictor.layers, layer)
+    end
+    return
+end
+
+function _add_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Flux.Dense,
+    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
+)
+    push!(
+        predictor.layers,
+        MathOptAI.LinearRegression(layer.weight, layer.bias),
+    )
+    _add_predictor(predictor, layer.σ, config)
+    return
 end
 
 end  # module

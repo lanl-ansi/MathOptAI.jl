@@ -5,10 +5,37 @@
 
 module MathOptAIGLMExt
 
+import GLM
 import JuMP
 import MathOptAI
-import GLM
 
+"""
+    MathOptAI.add_predictor(
+        model::JuMP.Model,
+        predictor::GLM.LinearModel,
+        x::Vector{JuMP.VariableRef},
+    )
+
+Add a trained linear model from GLM.jl to `model`.
+
+## Example
+
+```jldoctest
+julia> using GLM, JuMP, MathOptAI
+
+julia> X, Y = rand(10, 2), rand(10);
+
+julia> model_glm = GLM.lm(X, Y);
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> y = MathOptAI.add_predictor(model, model_glm, x)
+1-element Vector{VariableRef}:
+ omelette_LinearRegression[1]
+```
+"""
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::GLM.LinearModel,
@@ -18,6 +45,35 @@ function MathOptAI.add_predictor(
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 
+"""
+    MathOptAI.add_predictor(
+        model::JuMP.Model,
+        predictorr::GLM.GeneralizedLinearModel{
+            GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
+        },
+        x::Vector{JuMP.VariableRef},
+    )
+
+Add a trained logistic regression model from GLM.jl to `model`.
+
+## Example
+
+```jldoctest
+julia> using GLM, JuMP, MathOptAI
+
+julia> X, Y = rand(10, 2), rand(Bool, 10);
+
+julia> model_glm = GLM.glm(X, Y, GLM.Bernoulli());
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> y = MathOptAI.add_predictor(model, model_glm, x)
+1-element Vector{VariableRef}:
+ omelette_Sigmoid[1]
+```
+"""
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::GLM.GeneralizedLinearModel{

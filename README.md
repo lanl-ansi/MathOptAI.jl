@@ -52,35 +52,96 @@ The following third-party package extensions are supported.
 
 ### [GLM.jl](https://github.com/JuliaStats/GLM.jl)
 
-#### LinearRegression
+#### Linear regression
 
 ```julia
-using MathOptAI, GLM
-X, Y = rand(10, 2), rand(10)
-model_glm = GLM.lm(X, Y)
-model = Model()
-@variable(model, x[1:2])
-y = MathOptAI.add_predictor(model, model_glm, x)
+julia> using GLM, JuMP, MathOptAI
+
+julia> X, Y = rand(10, 2), rand(10);
+
+julia> model_glm = GLM.lm(X, Y);
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> y = MathOptAI.add_predictor(model, model_glm, x)
+1-element Vector{VariableRef}:
+ omelette_LinearRegression[1]
 ```
 
-#### LogisticRegression
+#### Logistic regression
 
 ```julia
-using JuMP, MathOptAI, GLM
-X, Y = rand(10, 2), rand(Bool, 10)
-model_glm = GLM.glm(X, Y, GLM.Bernoulli())
-model = Model()
-@variable(model, x[1:2])
-y = MathOptAI.add_predictor(model, model_glm, x)
+julia> using GLM, JuMP, MathOptAI
+
+julia> X, Y = rand(10, 2), rand(Bool, 10);
+
+julia> model_glm = GLM.glm(X, Y, GLM.Bernoulli());
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> y = MathOptAI.add_predictor(model, model_glm, x)
+1-element Vector{VariableRef}:
+ omelette_Sigmoid[1]
 ```
 
 ### [Flux.jl](https://github.com/FluxML/Flux.jl)
 
-See [test/test_Flux.jl](test/test_Flux.jl) for an example.
+#### Neural networks
+
+```julia
+julia> using JuMP, Flux, MathOptAI
+
+julia> chain = Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1));
+
+julia> model = Model();
+
+julia> @variable(model, x[1:1]);
+
+julia> y = MathOptAI.add_predictor(
+           model,
+           chain,
+           x;
+           config = Dict(Flux.relu => MathOptAI.ReLU()),
+       )
+1-element Vector{VariableRef}:
+ omelette_LinearRegression[1]
+```
+
+See [test/test_Flux.jl](test/test_Flux.jl) for more details.
+
 
 ### [Lux.jl](https://github.com/LuxDL/Lux.jl)
 
-See [test/test_Lux.jl](test/test_Lux.jl) for an example.
+#### Neural networks
+
+```julia
+julia> using JuMP, Lux, MathOptAI, Random, Optimisers
+
+julia> predictor = Lux.Experimental.TrainState(
+           Random.MersenneTwister(),
+           Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),
+           Optimisers.Adam(0.03f0),
+       );
+
+julia> model = Model();
+
+julia> @variable(model, x[1:1]);
+
+julia> y = MathOptAI.add_predictor(
+           model,
+           predictor,
+           x;
+           config = Dict(Lux.relu => MathOptAI.ReLU()),
+       )
+1-element Vector{VariableRef}:
+ omelette_LinearRegression[1]
+```
+
+See [test/test_Lux.jl](test/test_Lux.jl) for details.
 
 ## Constraints
 

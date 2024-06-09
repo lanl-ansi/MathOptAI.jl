@@ -1,6 +1,9 @@
 [deps]
 ADTypes = "47edcb42-4c32-4615-8424-f2b9edc5f35b"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
@@ -17,7 +20,10 @@ Zygote = "e88e6eb3-aa80-5325-afca-941959d7151f"
 
 [compat]
 ADTypes = "1"
+CSV = "0.10"
+DataFrames = "1"
 Documenter = "1"
+Downloads = "<0.0.1, 1.6"
 Flux = "0.14"
 GLM = "1"
 HiGHS = "1"

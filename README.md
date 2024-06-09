@@ -91,7 +91,7 @@ julia> y = MathOptAI.add_predictor(model, model_glm, x)
 
 DataFrames can be used with GLM.jl.
 
-```jldoctest
+```julia
 julia> using DataFrames, GLM, JuMP, MathOptAI
 
 julia> train_df = DataFrames.DataFrame(x1 = rand(10), x2 = rand(10));

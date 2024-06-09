@@ -51,7 +51,7 @@ function test_student_enrollment()
     @test objective_value(model) > 2488
     application_df.merit_sol = value.(application_df.merit)
     application_df.enroll_sol = value.(application_df.enroll)
-    @test sum(application_df.enroll_sol) == objective_value(model)
+    @test ≈(sum(application_df.enroll_sol), objective_value(model); atol = 1e-6)
     return
 end
 

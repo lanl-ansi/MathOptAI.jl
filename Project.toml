@@ -4,12 +4,12 @@ authors = ["odow <o.dowson@gmail.com>"]
 version = "0.1.0"
 
 [deps]
-DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
 [weakdeps]
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
@@ -19,7 +19,7 @@ StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 MathOptAIFluxExt = "Flux"
 MathOptAIGLMExt = "GLM"
 MathOptAILuxExt = "Lux"
-MathOptAIStatsModelsExt = "StatsModels"
+MathOptAIStatsModelsExt = ["DataFrames", "StatsModels"]
 
 [compat]
 DataFrames = "1"
@@ -29,5 +29,5 @@ GLM = "1.9"
 JuMP = "1"
 Lux = "0.5"
 MathOptInterface = "1"
-StatsModels = "0.14"
+StatsModels = "0.7"
 julia = "1.9"

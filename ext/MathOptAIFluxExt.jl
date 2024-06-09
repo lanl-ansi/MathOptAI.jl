@@ -100,10 +100,7 @@ function _add_predictor(
     layer::Flux.Dense,
     config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
 )
-    push!(
-        predictor.layers,
-        MathOptAI.Affine(layer.weight, layer.bias),
-    )
+    push!(predictor.layers, MathOptAI.Affine(layer.weight, layer.bias))
     _add_predictor(predictor, layer.σ, config)
     return
 end

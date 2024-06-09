@@ -36,7 +36,6 @@ y = MathOptAI.add_predictor(model, predictor, x)
 The following predictors are supported. See their docstrings for details:
 
  * `MathOptAI.Affine`
- * `MathOptAI.LogisticRegression`
  * `MathOptAI.Pipeline`
  * `MathOptAI.ReLU`
  * `MathOptAI.ReLUBigM`

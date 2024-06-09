@@ -22,7 +22,7 @@ function runtests()
     return
 end
 
-function test_Affine_GLM()
+function test_GLM_lm()
     num_features = 2
     num_observations = 10
     X = rand(num_observations, num_features)
@@ -42,7 +42,7 @@ function test_Affine_GLM()
     return
 end
 
-function test_LogisticRegression_GLM()
+function test_GLM_glm()
     num_features = 2
     num_observations = 10
     X = rand(num_observations, num_features)

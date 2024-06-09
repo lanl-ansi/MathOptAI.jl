@@ -26,7 +26,7 @@ abstract type AbstractPredictor end
     add_predictor(
         model::JuMP.Model,
         predictor::AbstractPredictor,
-        x::Vector{JuMP.VariableRef},
+        x::Vector,
     )::Vector{JuMP.VariableRef}
 
 Return a `Vector{JuMP.VariableRef}` representing `y` such that

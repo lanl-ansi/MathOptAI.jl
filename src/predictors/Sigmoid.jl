@@ -35,11 +35,7 @@ Subject to
 """
 struct Sigmoid <: AbstractPredictor end
 
-function add_predictor(
-    model::JuMP.Model,
-    predictor::Sigmoid,
-    x::Vector{JuMP.VariableRef},
-)
+function add_predictor(model::JuMP.Model, predictor::Sigmoid, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_Sigmoid")
     _set_bounds_if_finite.(y, 0.0, 1.0)
     JuMP.@constraint(model, [i in 1:length(x)], y[i] == 1 / (1 + exp(-x[i])))

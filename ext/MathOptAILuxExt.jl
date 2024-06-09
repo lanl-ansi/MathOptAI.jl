@@ -13,7 +13,7 @@ import MathOptAI
     MathOptAI.add_predictor(
         model::JuMP.Model,
         predictor::Lux.Experimental.TrainState,
-        x::Vector{JuMP.VariableRef};
+        x::Vector;
         config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict(),
     )
 
@@ -63,7 +63,7 @@ julia> y = MathOptAI.add_predictor(
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::Lux.Experimental.TrainState,
-    x::Vector{JuMP.VariableRef};
+    x::Vector;
     config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict{
         Function,
         MathOptAI.AbstractPredictor,

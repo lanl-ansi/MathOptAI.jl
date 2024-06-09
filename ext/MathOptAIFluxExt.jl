@@ -53,7 +53,7 @@ julia> y = MathOptAI.add_predictor(
            config = Dict(Flux.relu => MathOptAI.ReLU()),
        )
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 ```
 """
 function MathOptAI.add_predictor(
@@ -100,10 +100,7 @@ function _add_predictor(
     layer::Flux.Dense,
     config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
 )
-    push!(
-        predictor.layers,
-        MathOptAI.LinearRegression(layer.weight, layer.bias),
-    )
+    push!(predictor.layers, MathOptAI.Affine(layer.weight, layer.bias))
     _add_predictor(predictor, layer.σ, config)
     return
 end

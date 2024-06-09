@@ -4,12 +4,12 @@
 # in the LICENSE.md file or at https://opensource.org/licenses/MIT.
 
 """
-    LinearRegression(
+    Affine(
         A::Matrix{Float64},
         b::Vector{Float64} = zeros(size(A, 1)),
     )
 
-Represents the linear relationship:
+Represents the affine relationship:
 ```math
 f(x) = A x + b
 ```
@@ -24,39 +24,39 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.LinearRegression([2.0, 3.0])
-MathOptAI.LinearRegression([2.0 3.0], [0.0])
+julia> f = MathOptAI.Affine([2.0, 3.0])
+MathOptAI.Affine([2.0 3.0], [0.0])
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1] + 3 x[2] - omelette_LinearRegression[1] = 0
+ 2 x[1] + 3 x[2] - omelette_Affine[1] = 0
 ```
 """
-struct LinearRegression <: AbstractPredictor
+struct Affine <: AbstractPredictor
     A::Matrix{Float64}
     b::Vector{Float64}
 end
 
-function LinearRegression(A::Matrix{Float64})
-    return LinearRegression(A, zeros(size(A, 1)))
+function Affine(A::Matrix{Float64})
+    return Affine(A, zeros(size(A, 1)))
 end
 
-function LinearRegression(A::Vector{Float64})
-    return LinearRegression(reshape(A, 1, length(A)), [0.0])
+function Affine(A::Vector{Float64})
+    return Affine(reshape(A, 1, length(A)), [0.0])
 end
 
 function add_predictor(
     model::JuMP.Model,
-    predictor::LinearRegression,
+    predictor::Affine,
     x::Vector{JuMP.VariableRef},
 )
     m = size(predictor.A, 1)
-    y = JuMP.@variable(model, [1:m], base_name = "omelette_LinearRegression")
+    y = JuMP.@variable(model, [1:m], base_name = "omelette_Affine")
     lb, ub = _get_variable_bounds(x)
     for i in 1:size(predictor.A, 1)
         y_lb, y_ub = predictor.b[i], predictor.b[i]

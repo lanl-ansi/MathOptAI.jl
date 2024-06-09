@@ -21,10 +21,10 @@ function runtests()
     return
 end
 
-function test_LinearRegression()
+function test_Affine()
     model = Model()
     @variable(model, x[1:2])
-    f = MathOptAI.LinearRegression([2.0, 3.0])
+    f = MathOptAI.Affine([2.0, 3.0])
     y = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))

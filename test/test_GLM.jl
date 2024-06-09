@@ -22,7 +22,7 @@ function runtests()
     return
 end
 
-function test_LinearRegression_GLM()
+function test_Affine_GLM()
     num_features = 2
     num_observations = 10
     X = rand(num_observations, num_features)

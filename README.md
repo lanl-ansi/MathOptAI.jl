@@ -10,7 +10,9 @@ optimization model.
 
 ## License
 
-MathOptAI.jl is licensed under the [MIT license](https://github.com/lanl-ansi/jump-ml/blob/main/LICENSE.md)
+MathOptAI.jl is provided under a BSD license.
+
+See [LICENSE.md](LICENSE.md) for details.
 
 ## Getting help
 

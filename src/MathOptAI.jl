@@ -41,17 +41,17 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.LinearRegression([2.0, 3.0])
-MathOptAI.LinearRegression([2.0 3.0], [0.0])
+julia> f = MathOptAI.Affine([2.0, 3.0])
+MathOptAI.Affine([2.0 3.0], [0.0])
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1] + 3 x[2] - omelette_LinearRegression[1] = 0
+ 2 x[1] + 3 x[2] - omelette_Affine[1] = 0
 ```
 """
 function add_predictor end

@@ -33,7 +33,7 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, model_glm, x)
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 ```
 """
 function MathOptAI.add_predictor(
@@ -41,7 +41,7 @@ function MathOptAI.add_predictor(
     predictor::GLM.LinearModel,
     x::Vector{JuMP.VariableRef},
 )
-    inner_predictor = MathOptAI.LinearRegression(GLM.coef(predictor))
+    inner_predictor = MathOptAI.Affine(GLM.coef(predictor))
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 
@@ -82,7 +82,7 @@ function MathOptAI.add_predictor(
     x::Vector{JuMP.VariableRef},
 )
     inner_predictor = MathOptAI.Pipeline(
-        MathOptAI.LinearRegression(GLM.coef(predictor)),
+        MathOptAI.Affine(GLM.coef(predictor)),
         MathOptAI.Sigmoid(),
     )
     return MathOptAI.add_predictor(model, inner_predictor, x)

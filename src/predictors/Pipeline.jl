@@ -21,10 +21,10 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = MathOptAI.Pipeline(
-           MathOptAI.LinearRegression([1.0 2.0], [0.0]),
+           MathOptAI.Affine([1.0 2.0], [0.0]),
            MathOptAI.ReLUQuadratic(),
        )
-MathOptAI.Pipeline(MathOptAI.AbstractPredictor[MathOptAI.LinearRegression([1.0 2.0], [0.0]), MathOptAI.ReLUQuadratic()])
+MathOptAI.Pipeline(MathOptAI.AbstractPredictor[MathOptAI.Affine([1.0 2.0], [0.0]), MathOptAI.ReLUQuadratic()])
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
@@ -33,8 +33,8 @@ julia> y = MathOptAI.add_predictor(model, f, x)
 julia> print(model)
 Feasibility
 Subject to
- x[1] + 2 x[2] - omelette_LinearRegression[1] = 0
- omelette_LinearRegression[1] - omelette_ReLU[1] + _z[1] = 0
+ x[1] + 2 x[2] - omelette_Affine[1] = 0
+ omelette_Affine[1] - omelette_ReLU[1] + _z[1] = 0
  omelette_ReLU[1]*_z[1] = 0
  omelette_ReLU[1] ≥ 0
  _z[1] ≥ 0

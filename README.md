@@ -35,7 +35,7 @@ y = MathOptAI.add_predictor(model, predictor, x)
 
 The following predictors are supported. See their docstrings for details:
 
- * `MathOptAI.LinearRegression`
+ * `MathOptAI.Affine`
  * `MathOptAI.LogisticRegression`
  * `MathOptAI.Pipeline`
  * `MathOptAI.ReLU`
@@ -67,7 +67,7 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, model_glm, x)
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 ```
 
 #### Logistic regression
@@ -108,7 +108,7 @@ julia> y = MathOptAI.add_predictor(
            config = Dict(Flux.relu => MathOptAI.ReLU()),
        )
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 ```
 
 See [test/test_Flux.jl](test/test_Flux.jl) for more details.
@@ -138,7 +138,7 @@ julia> y = MathOptAI.add_predictor(
            config = Dict(Lux.relu => MathOptAI.ReLU()),
        )
 1-element Vector{VariableRef}:
- omelette_LinearRegression[1]
+ omelette_Affine[1]
 ```
 
 See [test/test_Lux.jl](test/test_Lux.jl) for details.

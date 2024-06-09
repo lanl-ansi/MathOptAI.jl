@@ -56,6 +56,49 @@ Subject to
 """
 function add_predictor end
 
+"""
+    add_predictor(
+        model::JuMP.Model,
+        predictor::AbstractPredictor,
+        x::Matrix,
+    )::Matrix{JuMP.VariableRef}
+
+Return a `Matrix{JuMP.VariableRef}`, representing `y` such that
+`y[:, i] = predictor(x[:, i])` for each columnn `i`.
+
+## Example
+
+```jldoctest
+julia> using JuMP, MathOptAI
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2, 1:3]);
+
+julia> f = MathOptAI.Affine([2.0, 3.0])
+MathOptAI.Affine([2.0 3.0], [0.0])
+
+julia> y = MathOptAI.add_predictor(model, f, x)
+1×3 Matrix{VariableRef}:
+ omelette_Affine[1]  omelette_Affine[1]  omelette_Affine[1]
+
+julia> print(model)
+Feasibility
+Subject to
+ 2 x[1,1] + 3 x[2,1] - omelette_Affine[1] = 0
+ 2 x[1,2] + 3 x[2,2] - omelette_Affine[1] = 0
+ 2 x[1,3] + 3 x[2,3] - omelette_Affine[1] = 0
+```
+"""
+function add_predictor(
+    model::JuMP.Model,
+    predictor,
+    x::Matrix,
+)::Matrix{JuMP.VariableRef}
+    y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
+    return reduce(hcat, y)
+end
+
 include("utilities.jl")
 
 for dir in ("predictors", "constraints")

@@ -33,19 +33,6 @@ function test_Affine()
     return
 end
 
-function test_LogisticRegression()
-    model = Model()
-    @variable(model, x[1:2])
-    f = MathOptAI.LogisticRegression([2.0, 3.0])
-    y = MathOptAI.add_predictor(model, f, x)
-    cons = all_constraints(model; include_variable_in_set_constraints = false)
-    obj = constraint_object(only(cons))
-    @test obj.set == MOI.EqualTo(0.0)
-    g = 1.0 / (1.0 + exp(-2.0 * x[1] - 3.0 * x[2])) - y[1]
-    @test isequal_canonical(obj.func, g)
-    return
-end
-
 function test_ReLU_direct()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

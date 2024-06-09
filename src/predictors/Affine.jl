@@ -50,20 +50,17 @@ function Affine(A::Vector{Float64})
     return Affine(reshape(A, 1, length(A)), [0.0])
 end
 
-function add_predictor(
-    model::JuMP.Model,
-    predictor::Affine,
-    x::Vector{JuMP.VariableRef},
-)
+function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "omelette_Affine")
-    lb, ub = _get_variable_bounds(x)
+    bounds = _get_variable_bounds.(x)
     for i in 1:size(predictor.A, 1)
         y_lb, y_ub = predictor.b[i], predictor.b[i]
         for j in 1:size(predictor.A, 2)
             a_ij = predictor.A[i, j]
-            y_ub += a_ij * ifelse(a_ij >= 0, ub[j], lb[j])
-            y_lb += a_ij * ifelse(a_ij >= 0, lb[j], ub[j])
+            lb, ub = bounds[j]
+            y_ub += a_ij * ifelse(a_ij >= 0, ub, lb)
+            y_lb += a_ij * ifelse(a_ij >= 0, lb, ub)
         end
         _set_bounds_if_finite(y[i], y_lb, y_ub)
     end

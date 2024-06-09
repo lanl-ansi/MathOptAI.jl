@@ -79,7 +79,7 @@ Subject to
 function add_constraint(
     model::JuMP.Model,
     N::UnivariateNormalDistribution,
-    x::Vector{JuMP.VariableRef},
+    x::Vector,
     set::MOI.Interval,
     β::Float64,
 )

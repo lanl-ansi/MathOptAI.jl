@@ -33,6 +33,18 @@ function test_Affine()
     return
 end
 
+function test_Affine_affine()
+    model = Model()
+    @variable(model, x[1:2])
+    f = MathOptAI.Affine([2.0, 3.0])
+    y = MathOptAI.add_predictor(model, f, 2.0 .* x)
+    cons = all_constraints(model; include_variable_in_set_constraints = false)
+    obj = constraint_object(only(cons))
+    @test obj.set == MOI.EqualTo(0.0)
+    @test isequal_canonical(obj.func, 4.0 * x[1] + 6.0 * x[2] - y[1])
+    return
+end
+
 function test_ReLU_direct()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

@@ -33,11 +33,7 @@ Subject to
 """
 struct SoftPlus <: AbstractPredictor end
 
-function add_predictor(
-    model::JuMP.Model,
-    predictor::SoftPlus,
-    x::Vector{JuMP.VariableRef},
-)
+function add_predictor(model::JuMP.Model, predictor::SoftPlus, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_SoftPlus")
     _set_bounds_if_finite.(y, 0.0, Inf)
     JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))

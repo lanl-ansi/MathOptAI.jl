@@ -39,7 +39,7 @@ Add a trained neural network from Lux.jl to `model`.
 
 ## Example
 
-```jldoctest
+```jldoctest; filter=r"[┌|└].+"
 julia> using JuMP, Lux, MathOptAI, Random, Optimisers
 
 julia> predictor = Lux.Experimental.TrainState(

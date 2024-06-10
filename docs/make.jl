@@ -11,7 +11,7 @@ import GLM
 import Lux
 import MathOptAI
 
-Documenter.makedocs(
+Documenter.makedocs(;
     sitename = "MathOptAI.jl",
     authors = "The MathOptAI contributors",
     format = Documenter.HTML(;

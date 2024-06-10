@@ -68,7 +68,7 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, model_glm, x)
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 ```
 
 #### Logistic regression
@@ -86,7 +86,7 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, model_glm, x)
 1-element Vector{VariableRef}:
- omelette_Sigmoid[1]
+ moai_Sigmoid[1]
 ```
 
 ### [DataFrames.jl](https://github.com/JuliaData/DataFrames.jl)
@@ -111,12 +111,12 @@ julia> test_df = DataFrames.DataFrame(
 
 julia> test_df.y = MathOptAI.add_predictor(model, predictor, test_df)
 6-element Vector{VariableRef}:
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
 ```
 
 ### [Flux.jl](https://github.com/FluxML/Flux.jl)
@@ -139,7 +139,7 @@ julia> y = MathOptAI.add_predictor(
            config = Dict(Flux.relu => MathOptAI.ReLU()),
        )
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 ```
 
 See [test/test_Flux.jl](test/test_Flux.jl) for more details.
@@ -169,7 +169,7 @@ julia> y = MathOptAI.add_predictor(
            config = Dict(Lux.relu => MathOptAI.ReLU()),
        )
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 ```
 
 See [test/test_Lux.jl](test/test_Lux.jl) for details.

@@ -49,12 +49,12 @@ MathOptAI.Affine([2.0 3.0], [0.0])
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1] + 3 x[2] - omelette_Affine[1] = 0
+ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
 ```
 """
 function add_predictor end
@@ -85,14 +85,14 @@ MathOptAI.Affine([2.0 3.0], [0.0])
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1×3 Matrix{VariableRef}:
- omelette_Affine[1]  omelette_Affine[1]  omelette_Affine[1]
+ moai_Affine[1]  moai_Affine[1]  moai_Affine[1]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1,1] + 3 x[2,1] - omelette_Affine[1] = 0
- 2 x[1,2] + 3 x[2,2] - omelette_Affine[1] = 0
- 2 x[1,3] + 3 x[2,3] - omelette_Affine[1] = 0
+ 2 x[1,1] + 3 x[2,1] - moai_Affine[1] = 0
+ 2 x[1,2] + 3 x[2,2] - moai_Affine[1] = 0
+ 2 x[1,3] + 3 x[2,3] - moai_Affine[1] = 0
 ```
 """
 function add_predictor(

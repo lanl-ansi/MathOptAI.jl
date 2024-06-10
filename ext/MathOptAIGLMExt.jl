@@ -34,7 +34,7 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, model_glm, x)
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 ```
 """
 function MathOptAI.add_predictor(
@@ -72,7 +72,7 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, model_glm, x)
 1-element Vector{VariableRef}:
- omelette_Sigmoid[1]
+ moai_Sigmoid[1]
 ```
 """
 function MathOptAI.add_predictor(

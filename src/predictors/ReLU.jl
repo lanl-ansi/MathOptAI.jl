@@ -26,23 +26,23 @@ MathOptAI.ReLU()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_ReLU[1]
- omelette_ReLU[2]
+ moai_ReLU[1]
+ moai_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- omelette_ReLU[1] - max(0.0, x[1]) = 0
- omelette_ReLU[2] - max(0.0, x[2]) = 0
- omelette_ReLU[1] ≥ 0
- omelette_ReLU[2] ≥ 0
+ moai_ReLU[1] - max(0.0, x[1]) = 0
+ moai_ReLU[2] - max(0.0, x[2]) = 0
+ moai_ReLU[1] ≥ 0
+ moai_ReLU[2] ≥ 0
 ```
 """
 struct ReLU <: AbstractPredictor end
 
 function add_predictor(model::JuMP.Model, predictor::ReLU, x::Vector)
     ub = last.(_get_variable_bounds.(x))
-    y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_ReLU")
+    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     JuMP.@constraint(model, y .== max.(0, x))
     return y
@@ -70,26 +70,26 @@ MathOptAI.ReLUBigM(100.0)
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_ReLU[1]
- omelette_ReLU[2]
+ moai_ReLU[1]
+ moai_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- -x[1] + omelette_ReLU[1] ≥ 0
- -x[2] + omelette_ReLU[2] ≥ 0
- omelette_ReLU[1] - _[5] ≤ 0
- -x[1] + omelette_ReLU[1] + 3 _[5] ≤ 3
- omelette_ReLU[2] - 2 _[6] ≤ 0
- -x[2] + omelette_ReLU[2] + 3 _[6] ≤ 3
+ -x[1] + moai_ReLU[1] ≥ 0
+ -x[2] + moai_ReLU[2] ≥ 0
+ moai_ReLU[1] - _[5] ≤ 0
+ -x[1] + moai_ReLU[1] + 3 _[5] ≤ 3
+ moai_ReLU[2] - 2 _[6] ≤ 0
+ -x[2] + moai_ReLU[2] + 3 _[6] ≤ 3
  x[1] ≥ -3
  x[2] ≥ -3
- omelette_ReLU[1] ≥ 0
- omelette_ReLU[2] ≥ 0
+ moai_ReLU[1] ≥ 0
+ moai_ReLU[2] ≥ 0
  x[1] ≤ 1
  x[2] ≤ 2
- omelette_ReLU[1] ≤ 1
- omelette_ReLU[2] ≤ 2
+ moai_ReLU[1] ≤ 1
+ moai_ReLU[2] ≤ 2
  _[5] binary
  _[6] binary
 ```
@@ -101,7 +101,7 @@ end
 function add_predictor(model::JuMP.Model, predictor::ReLUBigM, x::Vector)
     m = length(x)
     bounds = _get_variable_bounds.(x)
-    y = JuMP.@variable(model, [1:m], base_name = "omelette_ReLU")
+    y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, last.(bounds))
     for i in 1:m
         lb, ub = bounds[i]
@@ -144,20 +144,20 @@ MathOptAI.ReLUSOS1()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_ReLU[1]
- omelette_ReLU[2]
+ moai_ReLU[1]
+ moai_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- x[1] - omelette_ReLU[1] + _z[1] = 0
- x[2] - omelette_ReLU[2] + _z[2] = 0
- [omelette_ReLU[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
- [omelette_ReLU[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+ x[1] - moai_ReLU[1] + _z[1] = 0
+ x[2] - moai_ReLU[2] + _z[2] = 0
+ [moai_ReLU[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+ [moai_ReLU[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
  x[1] ≥ -1
  x[2] ≥ -1
- omelette_ReLU[1] ≥ 0
- omelette_ReLU[2] ≥ 0
+ moai_ReLU[1] ≥ 0
+ moai_ReLU[2] ≥ 0
  _z[1] ≥ 0
  _z[2] ≥ 0
  _z[1] ≤ 1
@@ -169,7 +169,7 @@ struct ReLUSOS1 <: AbstractPredictor end
 function add_predictor(model::JuMP.Model, predictor::ReLUSOS1, x::Vector)
     m = length(x)
     bounds = _get_variable_bounds.(x)
-    y = JuMP.@variable(model, [i in 1:m], base_name = "omelette_ReLU")
+    y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, last.(bounds))
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "_z")
     _set_bounds_if_finite.(z, -Inf, -first.(bounds))
@@ -209,20 +209,20 @@ MathOptAI.ReLUQuadratic()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
- omelette_ReLU[1]
- omelette_ReLU[2]
+ moai_ReLU[1]
+ moai_ReLU[2]
 
 julia> print(model)
 Feasibility
 Subject to
- x[1] - omelette_ReLU[1] + _z[1] = 0
- x[2] - omelette_ReLU[2] + _z[2] = 0
- omelette_ReLU[1]*_z[1] = 0
- omelette_ReLU[2]*_z[2] = 0
+ x[1] - moai_ReLU[1] + _z[1] = 0
+ x[2] - moai_ReLU[2] + _z[2] = 0
+ moai_ReLU[1]*_z[1] = 0
+ moai_ReLU[2]*_z[2] = 0
  x[1] ≥ -1
  x[2] ≥ -1
- omelette_ReLU[1] ≥ 0
- omelette_ReLU[2] ≥ 0
+ moai_ReLU[1] ≥ 0
+ moai_ReLU[2] ≥ 0
  _z[1] ≥ 0
  _z[2] ≥ 0
  _z[1] ≤ 1
@@ -234,7 +234,7 @@ struct ReLUQuadratic <: AbstractPredictor end
 function add_predictor(model::JuMP.Model, predictor::ReLUQuadratic, x::Vector)
     m = length(x)
     bounds = _get_variable_bounds.(x)
-    y = JuMP.@variable(model, [1:m], base_name = "omelette_ReLU")
+    y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, last.(bounds))
     z = JuMP.@variable(model, [1:m], base_name = "_z")
     _set_bounds_if_finite.(z, 0.0, -first.(bounds))

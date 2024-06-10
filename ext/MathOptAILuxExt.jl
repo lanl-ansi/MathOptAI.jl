@@ -59,7 +59,7 @@ julia> y = MathOptAI.add_predictor(
            config = Dict(Lux.relu => MathOptAI.ReLU()),
        )
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 ```
 """
 function MathOptAI.add_predictor(

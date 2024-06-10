@@ -71,7 +71,10 @@ Documenter.makedocs(;
     ),
     pages = [
         "index.md",
-        "Tutorials" => ["tutorials/student_enrollment.md"],
+        "Tutorials" => [
+            "tutorials/student_enrollment.md",
+            "tutorials/mnist.md",
+        ],
         "api.md",
     ],
     modules = [

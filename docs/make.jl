@@ -8,8 +8,58 @@ import DataFrames
 import Documenter
 import Flux
 import GLM
+import Literate
 import Lux
 import MathOptAI
+import Test
+
+# ==============================================================================
+#  Literate
+# ==============================================================================
+
+function _file_list(full_dir, relative_dir, extension)
+    return map(
+        file -> joinpath(relative_dir, file),
+        filter(file -> endswith(file, extension), sort(readdir(full_dir))),
+    )
+end
+
+function _include_sandbox(filename)
+    mod = @eval module $(gensym()) end
+    return Base.include(mod, filename)
+end
+
+function _literate_directory(dir)
+    for filename in _file_list(dir, dir, ".md")
+        rm(filename)
+    end
+    for filename in _file_list(dir, dir, ".jl")
+        # `include` the file to test it before `#src` lines are removed. It is
+        # in a testset to isolate local variables between files.
+        Test.@testset "$(filename)" begin
+            _include_sandbox(filename)
+        end
+        Literate.markdown(
+            filename,
+            dir;
+            documenter = true,
+        )
+    end
+    # Convert `@example` blocks into `@repl` blocks in the following files:
+    for file in ["student_enrollment.md"]
+        filename = joinpath(@__DIR__, "src", "tutorials", file)
+        content = read(filename, String)
+        content = replace(content, "@example" => "@repl")
+        write(filename, content)
+    end
+    return
+end
+
+_literate_directory(joinpath(@__DIR__, "src", "tutorials"))
+
+# ==============================================================================
+#  makedocs
+# ==============================================================================
 
 Documenter.makedocs(;
     sitename = "MathOptAI.jl",
@@ -19,7 +69,11 @@ Documenter.makedocs(;
         prettyurls = get(ENV, "CI", nothing) == "true",
         collapselevel = 1,
     ),
-    pages = ["index.md", "api.md"],
+    pages = [
+        "index.md",
+        "Tutorials" => ["tutorials/student_enrollment.md"],
+        "api.md",
+    ],
     modules = [
         MathOptAI,
         Base.get_extension(MathOptAI, :MathOptAIFluxExt),

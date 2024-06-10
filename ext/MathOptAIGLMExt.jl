@@ -49,13 +49,18 @@ end
 """
     MathOptAI.add_predictor(
         model::JuMP.Model,
-        predictorr::GLM.GeneralizedLinearModel{
+        predictor::GLM.GeneralizedLinearModel{
             GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
         },
-        x::Vector,
+        x::Vector;
+        sigmoid::AbstractPredictor = MathOptAI.Sigmoid(),
     )
 
 Add a trained logistic regression model from GLM.jl to `model`.
+
+## Keyword arguments
+
+ * `sigmoid`: the predictor to use for the sigmoid layer.
 
 ## Example
 
@@ -70,7 +75,12 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(model, model_glm, x)
+julia> y = MathOptAI.add_predictor(
+           model,
+           model_glm,
+           x;
+           sigmoid = MathOptAI.Sigmoid(),
+       )
 1-element Vector{VariableRef}:
  moai_Sigmoid[1]
 ```
@@ -80,12 +90,11 @@ function MathOptAI.add_predictor(
     predictor::GLM.GeneralizedLinearModel{
         GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
     },
-    x::Vector,
+    x::Vector;
+    sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
 )
-    inner_predictor = MathOptAI.Pipeline(
-        MathOptAI.Affine(GLM.coef(predictor)),
-        MathOptAI.Sigmoid(),
-    )
+    affine = MathOptAI.Affine(GLM.coef(predictor))
+    inner_predictor = MathOptAI.Pipeline(affine, sigmoid)
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 

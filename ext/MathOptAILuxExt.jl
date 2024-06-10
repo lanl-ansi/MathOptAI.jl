@@ -14,8 +14,8 @@ import MathOptAI
     MathOptAI.add_predictor(
         model::JuMP.Model,
         predictor::Lux.Experimental.TrainState,
-        x::Vector;
-        config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict(),
+        x::Vector,
+        config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
     )
 
 Add a trained neural network from Lux.jl to `model`.
@@ -30,12 +30,6 @@ Add a trained neural network from Lux.jl to `model`.
  * `Lux.sigmoid`
  * `Lux.softplus`
  * `Lux.tanh`
-
-## Keyword arguments
-
- * `config`: a dictionary that maps `Lux` activation functions to an
-   [`AbstractPredictor`](@ref) to control how the activation functions are
-   reformulated.
 
 ## Example
 
@@ -52,12 +46,7 @@ julia> model = Model();
 
 julia> @variable(model, x[1:1]);
 
-julia> y = MathOptAI.add_predictor(
-           model,
-           predictor,
-           x;
-           config = Dict(Lux.relu => MathOptAI.ReLU()),
-       )
+julia> y = MathOptAI.add_predictor(model, predictor, x)
 1-element Vector{VariableRef}:
  moai_Affine[1]
 ```
@@ -65,11 +54,8 @@ julia> y = MathOptAI.add_predictor(
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::Lux.Experimental.TrainState,
-    x::Vector;
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict{
-        Function,
-        MathOptAI.AbstractPredictor,
-    }(),
+    x::Vector,
+    config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
 )
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for (layer, parameter) in zip(predictor.model.layers, predictor.parameters)
@@ -88,15 +74,15 @@ _default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 function _add_predictor(
     predictor::MathOptAI.Pipeline,
     activation,
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
+    config::MathOptAI.AbstractConfig,
 )
-    layer = get(config, activation, _default(activation))
+    layer = _default(activation)
     if layer === nothing
         # Do nothing: a linear activation
     elseif layer === missing
         error("Unsupported activation function: $activation")
     else
-        push!(predictor.layers, layer)
+        push!(predictor.layers, MathOptAI.convert_predictor(config, layer))
     end
     return
 end
@@ -105,9 +91,10 @@ function _add_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Lux.Dense,
     p,
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
+    config::MathOptAI.AbstractConfig,
 )
-    push!(predictor.layers, MathOptAI.Affine(p.weight, vec(p.bias)))
+    affine = MathOptAI.Affine(p.weight, vec(p.bias))
+    push!(predictor.layers, MathOptAI.convert_predictor(config, affine))
     _add_predictor(predictor, layer.activation, config)
     return
 end

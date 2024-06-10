@@ -51,8 +51,8 @@ function test_end_to_end_ReLUBigM()
     y = MathOptAI.add_predictor(
         model,
         chain,
-        [x];
-        config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
+        [x],
+        MathOptAI.ReplaceConfig(MathOptAI.ReLU() => MathOptAI.ReLUBigM(100.0)),
     )
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
@@ -72,8 +72,8 @@ function test_end_to_end_ReLUQuadratic()
     y = MathOptAI.add_predictor(
         model,
         chain,
-        [x];
-        config = Dict(Flux.relu => MathOptAI.ReLUQuadratic()),
+        [x],
+        MathOptAI.ReplaceConfig(MathOptAI.ReLU() => MathOptAI.ReLUQuadratic()),
     )
     # Ipopt needs a starting point to avoid the local minima.
     set_start_value(only(y), 4.0)

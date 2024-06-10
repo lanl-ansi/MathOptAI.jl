@@ -13,21 +13,62 @@ import MathOptInterface as MOI
 """
     abstract type AbstractPredictor end
 
-An abstract type representig different types of prediction models.
+An abstract type representing different types of prediction models.
 
 ## Methods
 
 All subtypes must implement:
 
- * `add_predictor`
+ * [`add_predictor`](@ref)
 """
 abstract type AbstractPredictor end
+
+"""
+    abstract type AbstractConfig end
+
+An abstract type representig different formulations of prediction models.
+
+## Methods
+
+All subtypes must implement:
+
+ * [`convert_predictor`](@ref)
+"""
+abstract type AbstractConfig end
+
+"""
+    convert_predictor(::AbstractConfig, p::AbstractPredictor) = p
+"""
+convert_predictor(::AbstractConfig, p::AbstractPredictor) = p
+
+"""
+    DefaultConfig() <: AbstractConfig
+"""
+struct DefaultConfig <: AbstractConfig end
+
+"""
+    ReplaceConfig(args::Pair{AbstractPredictor,AbstractPredictor}...)
+"""
+struct ReplaceConfig <: AbstractConfig
+    replace::Dict{Any,Any}
+
+    function ReplaceConfig(
+        args::Pair{<:AbstractPredictor,<:AbstractPredictor}...,
+    )
+        return new(Dict{Any,Any}(args...))
+    end
+end
+
+function convert_predictor(config::ReplaceConfig, p::AbstractPredictor)
+    return get(config.replace, p, p)
+end
 
 """
     add_predictor(
         model::JuMP.Model,
         predictor::AbstractPredictor,
         x::Vector,
+        config::AbstractConfig = DefaultConfig(),
     )::Vector{JuMP.VariableRef}
 
 Return a `Vector{JuMP.VariableRef}` representing `y` such that
@@ -57,13 +98,21 @@ Subject to
  2 x[1] + 3 x[2] - moai_Affine[1] = 0
 ```
 """
-function add_predictor end
+function add_predictor(
+    model::JuMP.Model,
+    predictor::AbstractPredictor,
+    x,
+    ::AbstractConfig,
+)
+    return add_predictor(model, predictor, x)
+end
 
 """
     add_predictor(
         model::JuMP.Model,
         predictor::AbstractPredictor,
         x::Matrix,
+        config::AbstractConfig = DefaultConfig(),
     )::Matrix{JuMP.VariableRef}
 
 Return a `Matrix{JuMP.VariableRef}`, representing `y` such that
@@ -99,8 +148,9 @@ function add_predictor(
     model::JuMP.Model,
     predictor,
     x::Matrix,
+    config::AbstractConfig = DefaultConfig(),
 )::Matrix{JuMP.VariableRef}
-    y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
+    y = map(j -> add_predictor(model, predictor, x[:, j], config), 1:size(x, 2))
     return reduce(hcat, y)
 end
 

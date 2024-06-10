@@ -16,6 +16,7 @@ import StatsModels
         model::JuMP.Model,
         predictor::StatsModels.TableRegressionModel,
         x::DataFrames.DataFrame,
+        config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
     )
 
 Add a trained regression model from StatsModels.jl to `model`, using the
@@ -59,9 +60,10 @@ function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::StatsModels.TableRegressionModel,
     x::DataFrames.DataFrame,
+    config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
 )
     resp = StatsModels.modelcols(StatsModels.MatrixTerm(predictor.mf.f.rhs), x)
-    y = MathOptAI.add_predictor(model, predictor.model, Matrix(resp'))
+    y = MathOptAI.add_predictor(model, predictor.model, Matrix(resp'), config)
     @assert size(y, 1) == 1
     return reshape(y, length(y))
 end

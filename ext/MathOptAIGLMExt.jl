@@ -15,6 +15,7 @@ import MathOptAI
         model::JuMP.Model,
         predictor::GLM.LinearModel,
         x::Vector,
+        config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
     )
 
 Add a trained linear model from GLM.jl to `model`.
@@ -41,9 +42,11 @@ function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::GLM.LinearModel,
     x::Vector,
+    config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
 )
-    inner_predictor = MathOptAI.Affine(GLM.coef(predictor))
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    affine = MathOptAI.Affine(GLM.coef(predictor))
+    inner = MathOptAI.convert_predictor(config, affine)
+    return MathOptAI.add_predictor(model, inner, x)
 end
 
 """
@@ -53,6 +56,7 @@ end
             GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
         },
         x::Vector,
+        config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
     )
 
 Add a trained logistic regression model from GLM.jl to `model`.
@@ -81,10 +85,12 @@ function MathOptAI.add_predictor(
         GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
     },
     x::Vector,
+    config::MathOptAI.AbstractConfig = MathOptAI.DefaultConfig(),
 )
+    affine = MathOptAI.Affine(GLM.coef(predictor))
     inner_predictor = MathOptAI.Pipeline(
-        MathOptAI.Affine(GLM.coef(predictor)),
-        MathOptAI.Sigmoid(),
+        MathOptAI.convert_predictor(config, affine),
+        MathOptAI.convert_predictor(config, MathOptAI.Sigmoid()),
     )
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end

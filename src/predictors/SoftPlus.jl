@@ -5,9 +5,10 @@
 # in the LICENSE.md file.
 
 """
-    SoftPlus()
+    SoftPlus() <: AbstractPredictor
 
-Implements the SoftPlus constraint \$y = log(1 + e^x)\$ directly.
+An [`AbstractPredictor`](@ref) that implements the SoftPlus constraint
+\$y = \\log(1 + e^x)\$ as a smooth nonlinear constraint.
 
 ## Example
 

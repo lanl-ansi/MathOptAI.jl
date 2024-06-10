@@ -5,9 +5,9 @@
 # in the LICENSE.md file.
 
 """
-    Pipeline(layers::Vector{AbstractPredictor})
+    Pipeline(layers::Vector{AbstractPredictor}) <: AbstractPredictor
 
-A pipeline of nested layers
+An [`AbstractPredictor`](@ref) that represents a pipeline of nested layers
 ```math
 f(x) = l_N(\\ldots(l_2(l_1(x))
 ```
@@ -15,7 +15,9 @@ f(x) = l_N(\\ldots(l_2(l_1(x))
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 

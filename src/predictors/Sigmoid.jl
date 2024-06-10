@@ -5,9 +5,10 @@
 # in the LICENSE.md file.
 
 """
-    Sigmoid()
+    Sigmoid() <: AbstractPredictor
 
-Implements the Sigmoid constraint \$y = \\frac{1}{1 + e^-x}\$ directly.
+An [`AbstractPredictor`](@ref) that implements the Sigmoid constraint
+\$y = \\frac{1}{1 + e^{-x}}\$ as a smooth nonlinear constraint.
 
 ## Example
 

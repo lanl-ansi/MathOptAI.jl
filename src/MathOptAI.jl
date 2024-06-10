@@ -36,7 +36,9 @@ Return a `Vector{JuMP.VariableRef}` representing `y` such that
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 
@@ -70,7 +72,9 @@ Return a `Matrix{JuMP.VariableRef}`, representing `y` such that
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 
@@ -109,6 +113,15 @@ for dir in ("predictors", "constraints")
     )
         include(file)
     end
+end
+
+for sym in names(@__MODULE__; all = true)
+    if !Base.isidentifier(sym) || sym in (:eval, :include)
+        continue
+    elseif startswith("$sym", "_")
+        continue
+    end
+    @eval export $sym
 end
 
 end  # module MathOptAI

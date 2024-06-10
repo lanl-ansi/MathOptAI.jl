@@ -5,9 +5,10 @@
 # in the LICENSE.md file.
 
 """
-    Tanh()
+    Tanh() <: AbstractPredictor
 
-Implements the Tanh constraint \$y = tanh(x)\$ directly.
+An [`AbstractPredictor`](@ref) that implements the Tanh constraint
+\$y = \\tanh(x)\$ as a smooth nonlinear constraint.
 
 ## Example
 

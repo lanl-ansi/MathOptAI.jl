@@ -34,11 +34,12 @@ Add a trained neural network from Lux.jl to `model`.
 ## Keyword arguments
 
  * `config`: a dictionary that maps `Lux` activation functions to an
-   `AbstractPredictor` to control how the activation functions are reformulated.
+   [`AbstractPredictor`](@ref) to control how the activation functions are
+   reformulated.
 
 ## Example
 
-```jldoctest
+```jldoctest; filter=r"[┌|└].+"
 julia> using JuMP, Lux, MathOptAI, Random, Optimisers
 
 julia> predictor = Lux.Experimental.TrainState(

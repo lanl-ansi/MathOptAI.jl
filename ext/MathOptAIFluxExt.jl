@@ -34,7 +34,8 @@ Add a trained neural network from Flux.jl to `model`.
 ## Keyword arguments
 
  * `config`: a dictionary that maps `Flux` activation functions to an
-   `AbstractPredictor` to control how the activation functions are reformulated.
+   [`AbstractPredictor`](@ref) to control how the activation functions are
+   reformulated.
 
 ## Example
 

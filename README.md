@@ -44,6 +44,7 @@ The following predictors are supported. See their docstrings for details:
  * `MathOptAI.ReLUQuadratic`
  * `MathOptAI.ReLUSOS1`
  * `MathOptAI.Sigmoid`
+ * `MathOptAI.SoftMax`
  * `MathOptAI.SoftPlus`
  * `MathOptAI.Tanh`
 

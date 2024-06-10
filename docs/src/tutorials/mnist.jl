@@ -115,11 +115,7 @@ Plots.plot(
 # ## JuMP
 
 # Now that we have a trained machine learning model, we can embed it in a JuMP
-# model. However, one complication is that our network includes a `Flux.softmax`
-# layer, which MathOptAI does not yet support. Happily, Flux makes it easy to
-# create a new network by selecting a subset of the trained layers:
-
-ml_model_no_softmax = ml_model[1:end-1]
+# model.
 
 # Here's a function which takes a test case and returns an example that
 # maximizes the probability of the adversarial example.
@@ -129,8 +125,7 @@ function find_adversarial_image(test_case; adversary_label, δ = 0.05)
     set_silent(model)
     @variable(model, 0 <= x[1:28, 1:28] <= 1)
     @constraint(model, -δ .<= x .- test_case.features .<= δ)
-    ## Use ml_model[1:end-1] to drop the softmax layer
-    y = MathOptAI.add_predictor(model, ml_model[1:end-1], vec(x))
+    y = MathOptAI.add_predictor(model, ml_model, vec(x))
     @objective(model, Max, y[adversary_label+1] - y[test_case.targets+1])
     optimize!(model)
     @assert is_solved_and_feasible(model)

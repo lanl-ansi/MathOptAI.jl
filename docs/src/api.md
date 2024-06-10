@@ -61,6 +61,11 @@ ReLUSOS1
 Sigmoid
 ```
 
+## `SoftMax`
+```@docs
+SoftMax
+```
+
 ## `SoftPlus`
 ```@docs
 SoftPlus

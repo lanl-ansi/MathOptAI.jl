@@ -24,7 +24,7 @@ Add a trained neural network from Lux.jl to `model`.
 
  * `Lux.Dense`
 
-## Supported activation funnctions
+## Supported activation functions
 
  * `Lux.relu`
  * `Lux.sigmoid`

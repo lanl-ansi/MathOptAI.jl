@@ -146,6 +146,23 @@ function test_Sigmoid()
     return
 end
 
+function test_SoftMax()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y = MathOptAI.add_predictor(model, MathOptAI.SoftMax(), x)
+    @test length(y) == 2
+    @test num_variables(model) == 5
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 3
+    @objective(model, Min, sum(y))
+    X = [-1.0, 2.0]
+    fix.(x, X)
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ exp.(X) ./ sum(exp.(X))
+    return
+end
+
 function test_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

@@ -23,8 +23,9 @@ Add a trained neural network from Flux.jl to `model`.
 ## Supported layers
 
  * `Flux.Dense`
+ * `Flux.softmax`
 
-## Supported activation funnctions
+## Supported activation functions
 
  * `Flux.relu`
  * `Flux.sigmoid`
@@ -79,6 +80,7 @@ _default(::Any) = missing
 _default(::typeof(Flux.relu)) = MathOptAI.ReLU()
 _default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid()
 _default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus()
+_default(::typeof(Flux.softmax)) = MathOptAI.SoftMax()
 _default(::typeof(Flux.tanh)) = MathOptAI.Tanh()
 
 function _add_predictor(

@@ -133,9 +133,9 @@ function find_adversarial_image(test_case; adversary_label, δ = 0.05)
 end
 
 # Let's try finding an adversarial example to the third test image. The image on
-# the left is our input image. The network this this is a `1` with probability
-# 99%. The image on the right is the adversarial image. The network this this is
-# a `7`, although it is less confident.
+# the left is our input image. The network thinks this is a `1` with probability
+# 99%. The image on the right is the adversarial image. The network thinks this
+# is a `7`, although it is less confident.
 
 x_adversary = find_adversarial_image(test_data[3]; adversary_label = 7);
 Plots.plot(

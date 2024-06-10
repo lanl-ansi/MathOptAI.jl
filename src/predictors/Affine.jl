@@ -8,18 +8,19 @@
     Affine(
         A::Matrix{Float64},
         b::Vector{Float64} = zeros(size(A, 1)),
-    )
+    ) <: AbstractPredictor
 
-Represents the affine relationship:
+An [`AbstractPredictor`](@ref) that represents the affine relationship:
 ```math
 f(x) = A x + b
 ```
-where \$A\$ is the \$m \\times n\$ matrix `A`.
 
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 

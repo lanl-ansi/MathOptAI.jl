@@ -5,14 +5,17 @@
 # in the LICENSE.md file.
 
 """
-    ReLU()
+    ReLU() <: AbstractPredictor
 
-Implements the ReLU constraint \$y = max(0, x)\$ directly.
+An [`AbstractPredictor`](@ref) that implements the ReLU constraint
+\$y = \\max(0, x)\$ as a non-smooth nonlinear constraint.
 
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 
@@ -46,14 +49,17 @@ function add_predictor(model::JuMP.Model, predictor::ReLU, x::Vector)
 end
 
 """
-    ReLUBigM(M::Float64)
+    ReLUBigM(M::Float64) <: AbstractPredictor
 
-Implements the ReLU constraint \$y = max(0, x)\$ via a big-M MIP reformulation.
+An [`AbstractPredictor`](@ref) that implements the ReLU constraint
+\$y = \\max(0, x)\$ via a big-M MIP reformulation.
 
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 
@@ -110,9 +116,10 @@ function add_predictor(model::JuMP.Model, predictor::ReLUBigM, x::Vector)
 end
 
 """
-    ReLUSOS1()
+    ReLUSOS1() <: AbstractPredictor
 
-Implements the ReLU constraint \$y = max(0, x)\$ by the reformulation:
+An [`AbstractPredictor`](@ref) that implements the ReLU constraint
+\$y = \\max(0, x)\$ by the reformulation:
 ```math
 \\begin{aligned}
 x = y - z \\\\
@@ -124,7 +131,9 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 
@@ -172,9 +181,10 @@ function add_predictor(model::JuMP.Model, predictor::ReLUSOS1, x::Vector)
 end
 
 """
-    ReLUQuadratic()
+    ReLUQuadratic() <: AbstractPredictor
 
-Implements the ReLU constraint \$y = max(0, x)\$ by the reformulation:
+An [`AbstractPredictor`](@ref) that implements the ReLU constraint
+\$y = \\max(0, x)\$ by the reformulation:
 ```math
 \\begin{aligned}
 x = y - z \\\\
@@ -186,7 +196,9 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
-julia> using JuMP, MathOptAI
+julia> using JuMP
+
+julia> import MathOptAI
 
 julia> model = Model();
 

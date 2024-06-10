@@ -15,7 +15,7 @@ import MathOptAI
         model::JuMP.Model,
         predictor::Lux.Experimental.TrainState,
         x::Vector;
-        config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict(),
+        config::Dict = Dict{Any,Any}(),
     )
 
 Add a trained neural network from Lux.jl to `model`.
@@ -66,10 +66,7 @@ function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::Lux.Experimental.TrainState,
     x::Vector;
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor} = Dict{
-        Function,
-        MathOptAI.AbstractPredictor,
-    }(),
+    config::Dict = Dict{Any,Any}(),
 )
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for (layer, parameter) in zip(predictor.model.layers, predictor.parameters)
@@ -88,7 +85,7 @@ _default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 function _add_predictor(
     predictor::MathOptAI.Pipeline,
     activation,
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
+    config::Dict,
 )
     layer = get(config, activation, _default(activation))
     if layer === nothing
@@ -105,7 +102,7 @@ function _add_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Lux.Dense,
     p,
-    config::Dict{<:Function,<:MathOptAI.AbstractPredictor},
+    config::Dict,
 )
     push!(predictor.layers, MathOptAI.Affine(p.weight, vec(p.bias)))
     _add_predictor(predictor, layer.activation, config)

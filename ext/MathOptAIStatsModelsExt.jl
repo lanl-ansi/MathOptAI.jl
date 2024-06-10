@@ -15,7 +15,8 @@ import StatsModels
     MathOptAI.add_predictor(
         model::JuMP.Model,
         predictor::StatsModels.TableRegressionModel,
-        x::DataFrames.DataFrame,
+        x::DataFrames.DataFrame;
+        kwargs...,
     )
 
 Add a trained regression model from StatsModels.jl to `model`, using the
@@ -26,6 +27,11 @@ but trained using `@formula` and a `DataFrame` instead of the raw matrix input.
 
 In general, `x` may have some columns that are constant (`Float64`) and some
 columns that are JuMP decision variables.
+
+## Keyword arguments
+
+All keyword arguments are passed to the corresponding [`add_predictor`](@ref) of
+the GLM extension.
 
 ## Example
 
@@ -58,10 +64,12 @@ julia> test_df.y = MathOptAI.add_predictor(model, predictor, test_df)
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::StatsModels.TableRegressionModel,
-    x::DataFrames.DataFrame,
+    df::DataFrames.DataFrame;
+    kwargs...,
 )
-    resp = StatsModels.modelcols(StatsModels.MatrixTerm(predictor.mf.f.rhs), x)
-    y = MathOptAI.add_predictor(model, predictor.model, Matrix(resp'))
+    resp = StatsModels.modelcols(StatsModels.MatrixTerm(predictor.mf.f.rhs), df)
+    x = Matrix(resp')
+    y = MathOptAI.add_predictor(model, predictor.model, x; kwargs...)
     @assert size(y, 1) == 1
     return reshape(y, length(y))
 end

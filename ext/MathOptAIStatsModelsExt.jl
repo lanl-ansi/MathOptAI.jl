@@ -47,12 +47,12 @@ julia> test_df = DataFrames.DataFrame(
 
 julia> test_df.y = MathOptAI.add_predictor(model, predictor, test_df)
 6-element Vector{VariableRef}:
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
- omelette_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
 ```
 """
 function MathOptAI.add_predictor(

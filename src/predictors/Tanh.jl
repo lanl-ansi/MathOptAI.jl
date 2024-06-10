@@ -21,24 +21,24 @@ julia> @variable(model, x[1:2]);
 
 julia> y = MathOptAI.add_predictor(model, MathOptAI.Tanh(), x)
 2-element Vector{VariableRef}:
- omelette_Tanh[1]
- omelette_Tanh[2]
+ moai_Tanh[1]
+ moai_Tanh[2]
 
 julia> print(model)
 Feasibility
 Subject to
- omelette_Tanh[1] - tanh(x[1]) = 0
- omelette_Tanh[2] - tanh(x[2]) = 0
- omelette_Tanh[1] ≥ -1
- omelette_Tanh[2] ≥ -1
- omelette_Tanh[1] ≤ 1
- omelette_Tanh[2] ≤ 1
+ moai_Tanh[1] - tanh(x[1]) = 0
+ moai_Tanh[2] - tanh(x[2]) = 0
+ moai_Tanh[1] ≥ -1
+ moai_Tanh[2] ≥ -1
+ moai_Tanh[1] ≤ 1
+ moai_Tanh[2] ≤ 1
 ```
 """
 struct Tanh <: AbstractPredictor end
 
 function add_predictor(model::JuMP.Model, predictor::Tanh, x::Vector)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "omelette_Tanh")
+    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
     _set_bounds_if_finite.(y, -1.0, 1.0)
     JuMP.@constraint(model, y .== tanh.(x))
     return y

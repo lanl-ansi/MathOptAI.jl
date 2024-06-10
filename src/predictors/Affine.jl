@@ -31,12 +31,12 @@ MathOptAI.Affine([2.0 3.0], [0.0])
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_Affine[1]
+ moai_Affine[1]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1] + 3 x[2] - omelette_Affine[1] = 0
+ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
 ```
 """
 struct Affine <: AbstractPredictor
@@ -54,7 +54,7 @@ end
 
 function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
     m = size(predictor.A, 1)
-    y = JuMP.@variable(model, [1:m], base_name = "omelette_Affine")
+    y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")
     bounds = _get_variable_bounds.(x)
     for i in 1:size(predictor.A, 1)
         y_lb, y_ub = predictor.b[i], predictor.b[i]

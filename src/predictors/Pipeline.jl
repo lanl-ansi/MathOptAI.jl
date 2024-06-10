@@ -31,15 +31,15 @@ MathOptAI.Pipeline(MathOptAI.AbstractPredictor[MathOptAI.Affine([1.0 2.0], [0.0]
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- omelette_ReLU[1]
+ moai_ReLU[1]
 
 julia> print(model)
 Feasibility
 Subject to
- x[1] + 2 x[2] - omelette_Affine[1] = 0
- omelette_Affine[1] - omelette_ReLU[1] + _z[1] = 0
- omelette_ReLU[1]*_z[1] = 0
- omelette_ReLU[1] ≥ 0
+ x[1] + 2 x[2] - moai_Affine[1] = 0
+ moai_Affine[1] - moai_ReLU[1] + _z[1] = 0
+ moai_ReLU[1]*_z[1] = 0
+ moai_ReLU[1] ≥ 0
  _z[1] ≥ 0
 ```
 """

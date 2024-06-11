@@ -9,14 +9,12 @@ module LuxTests
 using JuMP
 using Test
 
-import ADTypes
 import HiGHS
 import Ipopt
 import Lux
 import MathOptAI
 import Optimisers
 import Random
-import Statistics
 import Zygote
 
 is_test(x) = startswith(string(x), "test_")
@@ -34,45 +32,21 @@ function generate_data(rng::Random.AbstractRNG, n = 128)
     return reshape(collect(x), (1, n)), reshape(y, (1, n))
 end
 
-function loss_function_mse(model, ps, state, (input, output))
-    y_pred, updated_state = Lux.apply(model, input, ps, state)
-    loss = Statistics.mean(abs2, y_pred .- output)
-    return loss, updated_state, ()
-end
-
-function train_cpu(
-    model,
-    input,
-    output;
-    loss_function::Function = loss_function_mse,
-    vjp = ADTypes.AutoZygote(),
-    rng,
-    optimizer,
-    epochs::Int,
-)
-    state = Lux.Experimental.TrainState(rng, model, optimizer)
-    data = (input, output) .|> Lux.cpu_device()
-    for epoch in 1:epochs
-        grads, loss, stats, state =
-            Lux.Experimental.compute_gradients(vjp, loss_function, data, state)
-        state = Lux.Experimental.apply_gradients!(state, grads)
-    end
-    return state
-end
-
 function _train_lux_model(model)
     rng = Random.MersenneTwister()
     Random.seed!(rng, 12345)
-    x, y = generate_data(rng)
-    state = train_cpu(
-        model,
-        x,
-        y;
-        rng = rng,
-        optimizer = Optimisers.Adam(0.03f0),
-        epochs = 250,
-    )
-    return state
+    x_data, y_data = generate_data(rng)
+    parameters, state = Lux.setup(rng, model)
+    st_opt = Optimisers.setup(Optimisers.Adam(0.03f0), parameters)
+    for epoch in 1:250
+        (loss, state), pullback = Zygote.pullback(parameters) do p
+            y, new_state = model(x_data, p, state)
+            return sum(abs2, y .- y_data), new_state
+        end
+        gradients = only(pullback((one(loss), nothing)))
+        Optimisers.update!(st_opt, parameters, gradients)
+    end
+    return (model, parameters, state)
 end
 
 function test_end_to_end_ReLUBigM()

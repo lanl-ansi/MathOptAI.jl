@@ -15,13 +15,20 @@ of:
 Here is an example:
 
 ```jldoctest
-julia> using JuMP, Lux, MathOptAI, Random, Optimisers
+julia> using JuMP, Lux, MathOptAI, Random
 
-julia> predictor = Lux.Experimental.TrainState(
-           Random.MersenneTwister(),
-           Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),
-           Optimisers.Adam(0.03f0),
-       );
+julia> rng = Random.MersenneTwister();
+
+julia> chain = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
+Chain(
+    layer_1 = Dense(1 => 16, relu),     # 32 parameters
+    layer_2 = Dense(16 => 1),           # 17 parameters
+)         # Total: 49 parameters,
+          #        plus 0 states.
+
+julia> parameters, state = Lux.setup(rng, chain);
+
+julia> predictor = (chain, parameters, state);
 
 julia> model = Model();
 

@@ -81,6 +81,7 @@ Documenter.makedocs(;
             "tutorials/student_enrollment.md",
             "tutorials/mnist.md",
         ],
+        "Developers" => ["developers/design_principles.md"],
         "api.md",
     ],
     modules = [

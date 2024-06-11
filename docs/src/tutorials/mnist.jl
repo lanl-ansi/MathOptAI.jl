@@ -19,7 +19,6 @@ import Ipopt
 import MathOptAI
 import MLDatasets
 import Plots
-import Statistics
 
 # ## Data
 

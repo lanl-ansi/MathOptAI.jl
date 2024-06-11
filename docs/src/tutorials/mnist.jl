@@ -45,10 +45,7 @@ function plot_image(instance)
     )
 end
 
-Plots.plot(
-    [plot_image(train_data[i]) for i in 1:6]...;
-    layout = (2, 3),
-)
+Plots.plot([plot_image(train_data[i]) for i in 1:6]...; layout = (2, 3))
 
 # ## Training
 
@@ -70,11 +67,8 @@ ml_model = Flux.Chain(
 begin
     x2dim = reshape(train_data.features, 28^2, :)
     yhot = Flux.onehotbatch(train_data.targets, 0:9)
-    train_loader = Flux.DataLoader(
-        (x2dim, yhot);
-        batchsize = 256,
-        shuffle = true,
-    )
+    train_loader =
+        Flux.DataLoader((x2dim, yhot); batchsize = 256, shuffle = true)
     opt_state = Flux.setup(Flux.Adam(3e-4), ml_model)
     ## Run only 30 epochs. You can improve the loss by traing further.
     for epoch in 1:30
@@ -107,7 +101,7 @@ function plot_image(ml_model, x::Matrix)
 end
 
 Plots.plot(
-    [plot_image(ml_model, test_data[i].features) for i in 1:16]...,
+    [plot_image(ml_model, test_data[i].features) for i in 1:16]...;
     size = (1200, 1200),
 )
 
@@ -139,5 +133,5 @@ end
 x_adversary = find_adversarial_image(test_data[3]; adversary_label = 7);
 Plots.plot(
     plot_image(ml_model, test_data[3].features),
-    plot_image(ml_model, x_adversary)
+    plot_image(ml_model, x_adversary),
 )

@@ -39,11 +39,7 @@ function _literate_directory(dir)
         Test.@testset "$(filename)" begin
             _include_sandbox(filename)
         end
-        Literate.markdown(
-            filename,
-            dir;
-            documenter = true,
-        )
+        Literate.markdown(filename, dir; documenter = true)
     end
     # Convert `@example` blocks into `@repl` blocks in the following files:
     for file in ["student_enrollment.md"]
@@ -77,10 +73,8 @@ Documenter.makedocs(;
             "manual/GLM.md",
             "manual/Lux.md",
         ],
-        "Tutorials" => [
-            "tutorials/student_enrollment.md",
-            "tutorials/mnist.md",
-        ],
+        "Tutorials" =>
+            ["tutorials/student_enrollment.md", "tutorials/mnist.md"],
         "Developers" => ["developers/design_principles.md"],
         "api.md",
     ],

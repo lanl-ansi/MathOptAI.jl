@@ -90,11 +90,7 @@ _default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid()
 _default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus()
 _default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 
-function _add_predictor(
-    predictor::MathOptAI.Pipeline,
-    activation,
-    config::Dict,
-)
+function _add_predictor(predictor::MathOptAI.Pipeline, activation, config::Dict)
     layer = get(config, activation, _default(activation))
     if layer === nothing
         # Do nothing: a linear activation

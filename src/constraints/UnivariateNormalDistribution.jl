@@ -47,11 +47,11 @@ Add the constraint:
 ```math
 \\mathbb{P}(f(x) \\in [l, u]) \\ge β
 ```
-where \$f(x)~\\mathcal{N}(\\mu, \\sigma)\$ is a normally distributed random
-variable given by the `UnivariateNormalDistribution`.
+where \$f(x)\\sim\\mathcal{N}(\\mu, \\sigma)\$ is a normally distributed random
+variable given by the [`UnivariateNormalDistribution`](@ref).
 
 If both `l` and `u` are finite, then the probability mass is equally
-distributed, so that each side of the constraint holds with `(1 + β) / 2`.
+distributed, so that each side of the constraint holds with \$(1 + \\beta) / 2\$.
 
 ## Examples
 

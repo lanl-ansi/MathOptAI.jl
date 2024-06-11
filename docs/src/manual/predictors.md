@@ -24,5 +24,5 @@ The following predictors are supported. See their docstrings for details:
 | [`Tanh`](@ref)     |  $f(x) = \tanh.(x)$                    |
 
 Note that some predictors, such as the ReLU ones, offer multiple formulations of
-the same mathematical relationship. The ``right'' choice is solver- and
+the same mathematical relationship. The ''right'' choice is solver- and
 problem-dependent.

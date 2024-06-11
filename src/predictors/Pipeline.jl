@@ -7,9 +7,10 @@
 """
     Pipeline(layers::Vector{AbstractPredictor}) <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents a pipeline of nested layers
+An [`AbstractPredictor`](@ref) that represents a pipeline (composition) of
+nested layers:
 ```math
-f(x) = l_N(\\ldots(l_2(l_1(x))
+f(x) = (l_1 \\cdots l_N)(x)
 ```
 
 ## Example

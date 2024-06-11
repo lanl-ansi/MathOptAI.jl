@@ -21,6 +21,11 @@ import MathOptAI
 ```
 and then prefix all calls with `MathOptAI.` to create `MathOptAI.<NAME>`.
 
+## `AbstractPredictor`
+```@docs
+AbstractPredictor
+```
+
 ## `add_predictor`
 ```@docs
 add_predictor
@@ -84,9 +89,4 @@ add_constraint
 ## `UnivariateNormalDistribution`
 ```@docs
 UnivariateNormalDistribution
-```
-
-## `AbstractPredictor`
-```@docs
-AbstractPredictor
 ```

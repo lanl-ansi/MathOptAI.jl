@@ -13,13 +13,13 @@ import MathOptInterface as MOI
 """
     abstract type AbstractPredictor end
 
-An abstract type representig different types of prediction models.
+An abstract type representing different types of prediction models.
 
 ## Methods
 
 All subtypes must implement:
 
- * `add_predictor`
+ * [`add_predictor`](@ref)
 """
 abstract type AbstractPredictor end
 

@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
-module TestStatsModels
+module TestStatsModelsExt
 
 using JuMP
 using Test
@@ -58,4 +58,4 @@ end
 
 end  # module
 
-TestStatsModels.runtests()
+TestStatsModelsExt.runtests()

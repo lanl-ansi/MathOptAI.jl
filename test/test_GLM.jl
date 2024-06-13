@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
-module GLMTests
+module TestGLMExt
 
 using JuMP
 using Test
@@ -65,4 +65,4 @@ end
 
 end  # module
 
-GLMTests.runtests()
+TestGLMExt.runtests()

@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
-module LuxTests
+module TestLuxExt
 
 using JuMP
 using Test
@@ -159,4 +159,4 @@ end
 
 end  # module
 
-LuxTests.runtests()
+TestLuxExt.runtests()

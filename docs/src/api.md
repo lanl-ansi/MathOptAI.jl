@@ -33,6 +33,7 @@ add_predictor
 
 ```@autodocs
 Modules = [
+    Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
     Base.get_extension(MathOptAI, :MathOptAIFluxExt),
     Base.get_extension(MathOptAI, :MathOptAIGLMExt),
     Base.get_extension(MathOptAI, :MathOptAILuxExt),

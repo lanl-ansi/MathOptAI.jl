@@ -4,7 +4,7 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
-module PredictorTests
+module TestPredictors
 
 using JuMP
 using Test
@@ -215,4 +215,4 @@ end
 
 end  # module
 
-PredictorTests.runtests()
+TestPredictors.runtests()

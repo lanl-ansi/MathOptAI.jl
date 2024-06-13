@@ -36,6 +36,11 @@ add_predictor
 Affine
 ```
 
+## `BinaryDecisionTree`
+```@docs
+BinaryDecisionTree
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

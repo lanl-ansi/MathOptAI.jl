@@ -1,6 +1,7 @@
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DecisionTree = "7806a523-6efd-50cb-b5f6-3fa6f1930dbb"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Downloads = "f43a241f-c20a-4ad4-852c-f6b1247861c6"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"

@@ -46,6 +46,22 @@ function test_Affine_affine()
     return
 end
 
+function test_BinaryDecisionTree()
+    rhs = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 1.0, 0, 1)
+    f = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 0.0, -1, rhs)
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, -3 <= x <= 5)
+    y = MathOptAI.add_predictor(model, f, [x])
+    @constraint(model, c_rhs, x == 0.0)
+    for (xi, yi) in (-0.4 => -1, -0.3 => -1, 0.4 => 0, 1.3 => 1)
+        set_normalized_rhs(c_rhs, xi)
+        optimize!(model)
+        @test ≈(value(only(y)), yi; atol = 1e-6)
+    end
+    return
+end
+
 function test_ReLU_direct()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

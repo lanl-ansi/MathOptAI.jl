@@ -10,12 +10,14 @@ MathOptInterface = "b8f27783-ece8-5eb3-8dc8-9495eed66fee"
 
 [weakdeps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+DecisionTree = "7806a523-6efd-50cb-b5f6-3fa6f1930dbb"
 Flux = "587475ba-b771-5e3f-ad9e-33799f191a9c"
 GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
 Lux = "b2108857-7c20-44ae-9111-449ecde12c47"
 StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 
 [extensions]
+MathOptAIDecisionTreeExt = "DecisionTree"
 MathOptAIFluxExt = "Flux"
 MathOptAIGLMExt = "GLM"
 MathOptAILuxExt = "Lux"
@@ -23,6 +25,7 @@ MathOptAIStatsModelsExt = ["DataFrames", "StatsModels"]
 
 [compat]
 DataFrames = "1"
+DecisionTree = "0.12"
 Distributions = "0.25"
 Flux = "0.14"
 GLM = "1.9"

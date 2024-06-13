@@ -31,6 +31,15 @@ AbstractPredictor
 add_predictor
 ```
 
+```@autodocs
+Modules = [
+    Base.get_extension(MathOptAI, :MathOptAIFluxExt),
+    Base.get_extension(MathOptAI, :MathOptAIGLMExt),
+    Base.get_extension(MathOptAI, :MathOptAILuxExt),
+    Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt),
+]
+```
+
 ## `Affine`
 ```@docs
 Affine

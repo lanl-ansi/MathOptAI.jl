@@ -13,6 +13,7 @@ The following predictors are supported. See their docstrings for details:
 | Predictor          | Relationship                           |
 | :----------------- | :------------------------------------- |
 | [`Affine`](@ref)   |  $f(x) = Ax + b$                       |
+| [`BinaryDecisionTree`](@ref) | A binary decision tree       |
 | [`Pipeline`](@ref) |  $f(x) = (l_1 \circ \ldots \circ l_N)(x)$ |
 | [`ReLU`](@ref)     |  $f(x) = \max.(0, x)$                  |
 | [`ReLUBigM`](@ref) |  $f(x) = \max.(0, x)$                  |

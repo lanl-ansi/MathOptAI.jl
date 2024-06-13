@@ -40,21 +40,21 @@ MathOptAI.BinaryDecisionTree{Float64, Int64}(1, 0.0, -1, MathOptAI.BinaryDecisio
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
- moai_leaf_value
+ moai_BinaryDecisionTree_value
 
 julia> print(model)
 Feasibility
 Subject to
- moai_leaf_z[1] + moai_leaf_z[2] + moai_leaf_z[3] = 1
- moai_leaf_z[1] - moai_leaf_z[3] + moai_leaf_value = 0
- moai_leaf_z[1] --> {x[1] ≤ 0}
- moai_leaf_z[2] --> {x[1] ≤ 1}
- moai_leaf_z[1] binary
- moai_leaf_z[2] binary
- moai_leaf_z[3] binary
- moai_leaf_z[2] --> {x[1] ≥ 0}
- moai_leaf_z[3] --> {x[1] ≥ 0}
- moai_leaf_z[3] --> {x[1] ≥ 1}
+ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
+ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
+ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0}
+ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 1}
+ moai_BinaryDecisionTree_z[1] binary
+ moai_BinaryDecisionTree_z[2] binary
+ moai_BinaryDecisionTree_z[3] binary
+ moai_BinaryDecisionTree_z[2] --> {x[1] ≥ 0}
+ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
+ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
 ```
 """
 struct BinaryDecisionTree{K,V}
@@ -75,10 +75,10 @@ function add_predictor(
         model,
         [1:length(paths)],
         binary = true,
-        base_name = "moai_leaf_z",
+        base_name = "moai_BinaryDecisionTree_z",
     )
     JuMP.@constraint(model, sum(z) == 1)
-    y = JuMP.@variable(model, base_name = "moai_leaf_value")
+    y = JuMP.@variable(model, base_name = "moai_BinaryDecisionTree_value")
     y_expr = JuMP.AffExpr(0.0)
     for (zi, (leaf, path)) in zip(z, paths)
         JuMP.add_to_expression!(y_expr, leaf, zi)

@@ -2,8 +2,6 @@
 
 # MathOptAI (Mo'ai)
 
-_If you can come up with a better name, please open an issue._
-
 MathOptAI.jl (Mo'ai) is a [JuMP](https://jump.dev) extension for embedding
 trained AI, machine learning, and statistical learning models into a JuMP
 optimization model.
@@ -16,10 +14,7 @@ See [LICENSE.md](LICENSE.md) for details.
 
 ## Getting help
 
-_This package is under active development. Breaking changes may be made at any
-time._
-
-For help, questions, comments, and suggestions, please open a GitHub issue.
+For help, questions, comments, and suggestions, please [open a GitHub issue](https://github.com/lanl-ansi/MathOptAI.jl/issues/new).
 
 ## Inspiration
 

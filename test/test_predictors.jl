@@ -9,6 +9,7 @@ module TestPredictors
 using JuMP
 using Test
 
+import Distributions
 import HiGHS
 import Ipopt
 import MathOptAI
@@ -59,6 +60,23 @@ function test_BinaryDecisionTree()
         optimize!(model)
         @test ≈(value(only(y)), yi; atol = 1e-6)
     end
+    return
+end
+
+function test_Quantile()
+    model = Model(Ipopt.Optimizer)
+    @variable(model, 1 <= x <= 2)
+    predictor = MathOptAI.Quantile([0.1, 0.9]) do x
+        return Distributions.Normal(x, 3 - x)
+    end
+    y = MathOptAI.add_predictor(model, predictor, [x])
+    @objective(model, Min, y[2] - y[1])
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test ≈(value(x), 2; atol = 1e-4)
+    d = Distributions.Normal(value(x), 3 - value(x))
+    y_target = Distributions.quantile(d, [0.1, 0.9])
+    @test ≈(value.(y), y_target; atol = 1e-4)
     return
 end
 

@@ -4,7 +4,9 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
+import AbstractGPs
 import DataFrames
+import DecisionTree
 import Documenter
 import Flux
 import GLM
@@ -69,6 +71,8 @@ Documenter.makedocs(;
         "index.md",
         "Manual" => [
             "manual/predictors.md",
+            "manual/AbstractGPs.md",
+            "manual/DecisionTree.md",
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",
@@ -80,6 +84,7 @@ Documenter.makedocs(;
     ],
     modules = [
         MathOptAI,
+        Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt),
         Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
         Base.get_extension(MathOptAI, :MathOptAIFluxExt),
         Base.get_extension(MathOptAI, :MathOptAIGLMExt),

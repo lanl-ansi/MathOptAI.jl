@@ -101,13 +101,3 @@ SoftPlus
 ```@docs
 Tanh
 ```
-
-## `add_constraint`
-```@docs
-add_constraint
-```
-
-## `UnivariateNormalDistribution`
-```@docs
-UnivariateNormalDistribution
-```

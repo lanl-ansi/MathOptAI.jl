@@ -106,13 +106,11 @@ end
 
 include("utilities.jl")
 
-for dir in ("predictors", "constraints")
-    for file in filter(
-        x -> endswith(x, ".jl"),
-        readdir(joinpath(@__DIR__, dir); join = true),
-    )
-        include(file)
-    end
+for file in filter(
+    x -> endswith(x, ".jl"),
+    readdir(joinpath(@__DIR__, "predictors"); join = true),
+)
+    include(file)
 end
 
 for sym in names(@__MODULE__; all = true)

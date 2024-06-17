@@ -12,7 +12,6 @@ using Test
 import DecisionTree
 import HiGHS
 import MathOptAI
-import Random
 
 is_test(x) = startswith(string(x), "test_")
 
@@ -35,6 +34,9 @@ function test_DecisionTree()
     @constraint(model, c_rhs, x .== 0.0)
     for _ in 1:10
         xi = rand(2)
+        if minimum(abs.(xi .- [0.5, 0.3])) < 1e-2
+            continue  # Skip points near kink
+        end
         set_normalized_rhs.(c_rhs, xi)
         optimize!(model)
         @test ≈(value(only(y)), truth(xi); atol = 1e-6)

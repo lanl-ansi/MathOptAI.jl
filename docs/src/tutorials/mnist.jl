@@ -36,7 +36,7 @@ test_data = MLDatasets.MNIST(; split = :test)
 # transpose and reversing the rows to get the orientation correct.)
 
 function plot_image(x::Matrix; kwargs...)
-    Plots.heatmap(
+    return Plots.heatmap(
         x'[size(x, 1):-1:1, :];
         xlims = (1, size(x, 2)),
         ylims = (1, size(x, 1)),
@@ -44,7 +44,7 @@ function plot_image(x::Matrix; kwargs...)
         legend = false,
         xaxis = false,
         yaxis = false,
-        kwargs...
+        kwargs...,
     )
 end
 

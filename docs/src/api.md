@@ -33,6 +33,7 @@ add_predictor
 
 ```@autodocs
 Modules = [
+    Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt),
     Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
     Base.get_extension(MathOptAI, :MathOptAIFluxExt),
     Base.get_extension(MathOptAI, :MathOptAIGLMExt),
@@ -54,6 +55,11 @@ BinaryDecisionTree
 ## `Pipeline`
 ```@docs
 Pipeline
+```
+
+## `Quantile`
+```@docs
+Quantile
 ```
 
 ## `ReLU`

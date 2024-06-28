@@ -13,6 +13,7 @@ import GLM
 import Literate
 import Lux
 import MathOptAI
+import PythonCall
 import Test
 
 # ==============================================================================
@@ -77,8 +78,11 @@ Documenter.makedocs(;
             "manual/GLM.md",
             "manual/Lux.md",
         ],
-        "Tutorials" =>
-            ["tutorials/student_enrollment.md", "tutorials/mnist.md"],
+        "Tutorials" => [
+            "tutorials/student_enrollment.md",
+            "tutorials/mnist.md",
+            "tutorials/pytorch.md",
+        ],
         "Developers" => ["developers/design_principles.md"],
         "api.md",
     ],
@@ -89,6 +93,7 @@ Documenter.makedocs(;
         Base.get_extension(MathOptAI, :MathOptAIFluxExt),
         Base.get_extension(MathOptAI, :MathOptAIGLMExt),
         Base.get_extension(MathOptAI, :MathOptAILuxExt),
+        Base.get_extension(MathOptAI, :MathOptAIPythonCallExt),
         Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt),
     ],
     checkdocs = :exports,

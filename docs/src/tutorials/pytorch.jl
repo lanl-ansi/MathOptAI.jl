@@ -53,7 +53,7 @@ PythonCall.pyexec(
 
     n = 1024
     x = torch.arange(-2, 2 + 4 / (n - 1), 4 / (n - 1)).reshape(n, 1)
-    for epoch in range(250):
+    for epoch in range(100):
         N = torch.normal(torch.zeros(n, 1), torch.ones(n, 1))
         y = -2 * x + x ** 2 + 0.1 * N
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)

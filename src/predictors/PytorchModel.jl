@@ -6,6 +6,14 @@
 
 """
     PytorchModel(filename::String)
+
+A wrapper struct for loading a Pytorch model.
+
+```jldoctest
+julia> using PythonCall, MathOptAI
+
+julia> ml_model = PytorchModel("model.pt");
+```
 """
 struct PytorchModel
     filename::String

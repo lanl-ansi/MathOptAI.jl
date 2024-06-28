@@ -58,6 +58,11 @@ BinaryDecisionTree
 Pipeline
 ```
 
+## `PytorchModel`
+```@docs
+PytorchModel
+```
+
 ## `Quantile`
 ```@docs
 Quantile

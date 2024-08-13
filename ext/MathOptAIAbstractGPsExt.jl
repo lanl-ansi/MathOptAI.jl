@@ -51,7 +51,9 @@ moai_quantile[2] - moai_quantile[1]
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::MathOptAI.Quantile{<:AbstractGPs.PosteriorGP},
-    x::Vector,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
 )
     M, N = length(x), length(predictor.quantiles)
     function _evaluate(op::Function, distribution, x...)
@@ -74,6 +76,9 @@ function MathOptAI.add_predictor(
     # Outputs
     dist = Distributions.Normal(0, 1)
     λ = Distributions.invlogcdf.(dist, log.(predictor.quantiles))
+    if reduced_space
+        return μ .+ λ .* sqrt(σ²)
+    end
     y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     JuMP.set_start_value.(y, λ)
     JuMP.@constraint(model, y .== μ .+ λ .* sqrt(σ²))

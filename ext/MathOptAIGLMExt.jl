@@ -40,10 +40,11 @@ julia> y = MathOptAI.add_predictor(model, model_glm, x)
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::GLM.LinearModel,
-    x::Vector,
+    x::Vector;
+    kwargs...,
 )
     inner_predictor = MathOptAI.Affine(GLM.coef(predictor))
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x; kwargs...)
 end
 
 """
@@ -92,10 +93,11 @@ function MathOptAI.add_predictor(
     },
     x::Vector;
     sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
+    kwargs...,
 )
     affine = MathOptAI.Affine(GLM.coef(predictor))
     inner_predictor = MathOptAI.Pipeline(affine, sigmoid)
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x; kwargs...)
 end
 
 end  # module

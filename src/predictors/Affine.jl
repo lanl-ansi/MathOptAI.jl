@@ -52,7 +52,16 @@ function Affine(A::Vector{Float64})
     return Affine(reshape(A, 1, length(A)), [0.0])
 end
 
-function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    predictor::Affine,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
+    if reduced_space
+        return JuMP.@expression(model, predictor.A * x .+ predictor.b)
+    end
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")
     bounds = _get_variable_bounds.(x)

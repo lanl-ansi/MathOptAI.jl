@@ -33,10 +33,27 @@ struct Quantile{D} <: AbstractPredictor
     quantiles::Vector{Float64}
 end
 
-function add_predictor(model::JuMP.Model, predictor::Quantile, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    predictor::Quantile,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
     M, N = length(x), length(predictor.quantiles)
-    y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     quantile(q, x...) = Distributions.quantile(predictor.distribution(x...), q)
+    if reduced_space
+        return map(predictor.quantiles) do qi
+            op_i = JuMP.add_nonlinear_operator(
+                model,
+                M,
+                (x...) -> quantile(qi, x...);
+                name = Symbol("op_quantile_$qi"),
+            )
+            return op_i(x...)
+        end
+    end
+    y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     for (qi, yi) in zip(predictor.quantiles, y)
         op_i = JuMP.add_nonlinear_operator(
             model,

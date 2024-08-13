@@ -69,6 +69,7 @@ function add_predictor(
     predictor::BinaryDecisionTree,
     x::Vector;
     atol::Float64 = 0.0,
+    kwargs...,
 )
     paths = _tree_to_paths(predictor)
     z = JuMP.@variable(

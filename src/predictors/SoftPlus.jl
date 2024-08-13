@@ -35,7 +35,16 @@ Subject to
 """
 struct SoftPlus <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::SoftPlus, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    ::SoftPlus,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
+    if reduced_space
+        return log.(1 .+ exp.(x))
+    end
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     _set_bounds_if_finite.(y, 0.0, Inf)
     JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))

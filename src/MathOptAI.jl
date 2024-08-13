@@ -27,7 +27,8 @@ abstract type AbstractPredictor end
     add_predictor(
         model::JuMP.Model,
         predictor::AbstractPredictor,
-        x::Vector,
+        x::Vector;
+        reduced_space::Bool = false,
     )::Vector{JuMP.VariableRef}
 
 Return a `Vector{JuMP.VariableRef}` representing `y` such that
@@ -63,7 +64,8 @@ function add_predictor end
     add_predictor(
         model::JuMP.Model,
         predictor::AbstractPredictor,
-        x::Matrix,
+        x::Matrix;
+        reduced_space::Bool = false,
     )::Matrix{JuMP.VariableRef}
 
 Return a `Matrix{JuMP.VariableRef}`, representing `y` such that
@@ -98,10 +100,12 @@ Subject to
 function add_predictor(
     model::JuMP.Model,
     predictor,
-    x::Matrix,
+    x::Matrix;
+    kwargs...,
 )::Matrix{JuMP.VariableRef}
-    y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
-    return reduce(hcat, y)
+    return mapreduce(hcat, 1:size(x, 2)) do j
+        return add_predictor(model, predictor, x[:, j]; kwargs...)
+    end
 end
 
 include("utilities.jl")

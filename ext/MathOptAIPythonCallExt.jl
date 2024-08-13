@@ -38,12 +38,13 @@ function MathOptAI.add_predictor(
     predictor::MathOptAI.PytorchModel,
     x::Vector;
     config::Dict = Dict{Any,Any}(),
+    kwargs...,
 )
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
     torch_model = torch.load(predictor.filename)
     inner_predictor = _predictor(nn, torch_model, config)
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x; kwargs...)
 end
 
 function _predictor(nn, layer, config)

@@ -64,12 +64,13 @@ function MathOptAI.add_predictor(
     predictor::Flux.Chain,
     x::Vector;
     config::Dict = Dict{Any,Any}(),
+    kwargs...,
 )
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
         _add_predictor(inner_predictor, layer, config)
     end
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x; kwargs...)
 end
 
 _default(::typeof(identity)) = nothing

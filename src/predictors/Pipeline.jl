@@ -50,9 +50,14 @@ end
 
 Pipeline(args::AbstractPredictor...) = Pipeline(collect(args))
 
-function add_predictor(model::JuMP.Model, predictor::Pipeline, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    predictor::Pipeline,
+    x::Vector;
+    kwargs...,
+)
     for layer in predictor.layers
-        x = add_predictor(model, layer, x)
+        x = add_predictor(model, layer, x; kwargs...)
     end
     return x
 end

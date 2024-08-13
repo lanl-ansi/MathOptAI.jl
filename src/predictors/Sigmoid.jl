@@ -37,7 +37,16 @@ Subject to
 """
 struct Sigmoid <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::Sigmoid, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    ::Sigmoid,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
+    if reduced_space
+        return 1 ./ (1 .+ exp.(-x))
+    end
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Sigmoid")
     _set_bounds_if_finite.(y, 0.0, 1.0)
     JuMP.@constraint(model, [i in 1:length(x)], y[i] == 1 / (1 + exp(-x[i])))

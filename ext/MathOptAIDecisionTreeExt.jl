@@ -51,10 +51,11 @@ julia> y = MathOptAI.add_predictor(model, ml_model, x)
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::DecisionTree.Root,
-    x::Vector,
+    x::Vector;
+    kwargs...,
 )
     inner_predictor = _tree_or_leaf(predictor.node)
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x; kwargs...)
 end
 
 function _tree_or_leaf(node::DecisionTree.Node{K,V}) where {K,V}

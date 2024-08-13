@@ -39,12 +39,21 @@ Subject to
 """
 struct SoftMax <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::SoftMax, x::Vector)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftMax")
-    _set_bounds_if_finite.(y, 0.0, 1.0)
+function add_predictor(
+    model::JuMP.Model,
+    ::SoftMax,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
     denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
     JuMP.set_lower_bound(denom, 0.0)
     JuMP.@constraint(model, denom == sum(exp.(x)))
+    if reduced_space
+        return exp.(x) ./ denom
+    end
+    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftMax")
+    _set_bounds_if_finite.(y, 0.0, 1.0)
     JuMP.@constraint(model, y .== exp.(x) ./ denom)
     return y
 end

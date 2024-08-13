@@ -74,13 +74,14 @@ function MathOptAI.add_predictor(
     predictor::Tuple{<:Lux.Chain,<:NamedTuple,<:NamedTuple},
     x::Vector;
     config::Dict = Dict{Any,Any}(),
+    kwargs...,
 )
     chain, parameters, _ = predictor
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for (layer, parameter) in zip(chain.layers, parameters)
         _add_predictor(inner_predictor, layer, parameter, config)
     end
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return MathOptAI.add_predictor(model, inner_predictor, x; kwargs...)
 end
 
 _default(::typeof(identity)) = nothing

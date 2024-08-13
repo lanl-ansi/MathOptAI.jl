@@ -40,7 +40,16 @@ Subject to
 """
 struct ReLU <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLU, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    ::ReLU,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
+    if reduced_space
+        return max.(0, x)
+    end
     ub = last.(_get_variable_bounds.(x))
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
@@ -98,7 +107,12 @@ struct ReLUBigM <: AbstractPredictor
     M::Float64
 end
 
-function add_predictor(model::JuMP.Model, predictor::ReLUBigM, x::Vector)
+function add_predictor(
+    model::JuMP.Model,
+    predictor::ReLUBigM,
+    x::Vector;
+    kwargs...,
+)
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
@@ -166,7 +180,7 @@ Subject to
 """
 struct ReLUSOS1 <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLUSOS1, x::Vector)
+function add_predictor(model::JuMP.Model, ::ReLUSOS1, x::Vector; kwargs...)
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
@@ -231,7 +245,7 @@ Subject to
 """
 struct ReLUQuadratic <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLUQuadratic, x::Vector)
+function add_predictor(model::JuMP.Model, ::ReLUQuadratic, x::Vector; kwargs...)
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")

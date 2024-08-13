@@ -56,3 +56,14 @@ function add_predictor(model::JuMP.Model, predictor::Pipeline, x::Vector)
     end
     return x
 end
+
+function add_predictor(
+    model::JuMP.Model,
+    predictor::ReducedSpace{Pipeline},
+    x::Vector,
+)
+    for layer in predictor.layers
+        x = add_predictor(model, ReducedSpace(layer), x)
+    end
+    return x
+end

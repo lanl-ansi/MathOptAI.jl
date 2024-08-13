@@ -109,6 +109,22 @@ function test_end_to_end_ReLU()
     return
 end
 
+function test_end_to_end_ReLU_reduced_space()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = MathOptAI.add_predictor(model, state, [x]; reduced_space = true)
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-2)
+    return
+end
+
 function test_end_to_end_SoftPlus()
     state = _train_lux_model(
         Lux.Chain(Lux.Dense(1 => 16, Lux.softplus), Lux.Dense(16 => 1)),

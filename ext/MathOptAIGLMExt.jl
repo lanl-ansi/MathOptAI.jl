@@ -40,9 +40,13 @@ julia> y = MathOptAI.add_predictor(model, model_glm, x)
 function MathOptAI.add_predictor(
     model::JuMP.Model,
     predictor::GLM.LinearModel,
-    x::Vector,
+    x::Vector;
+    reduced_space::Bool = false,
 )
     inner_predictor = MathOptAI.Affine(GLM.coef(predictor))
+    if reduced_space
+        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
+    end
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 
@@ -54,6 +58,7 @@ end
         },
         x::Vector;
         sigmoid::AbstractPredictor = MathOptAI.Sigmoid(),
+        reduced_space::Bool = false,
     )
 
 Add a trained logistic regression model from GLM.jl to `model`.
@@ -92,9 +97,13 @@ function MathOptAI.add_predictor(
     },
     x::Vector;
     sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
+    reduced_space::Bool = false,
 )
     affine = MathOptAI.Affine(GLM.coef(predictor))
     inner_predictor = MathOptAI.Pipeline(affine, sigmoid)
+    if reduced_space
+        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
+    end
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 

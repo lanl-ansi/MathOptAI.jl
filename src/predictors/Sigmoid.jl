@@ -38,8 +38,8 @@ Subject to
 
 julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 2-element Vector{NonlinearExpr}:
- (1.0 / (1.0 + exp(-x[1])))
- (1.0 / (1.0 + exp(-x[2])))
+ 1.0 / (1.0 + exp(-x[1]))
+ 1.0 / (1.0 + exp(-x[2]))
 ```
 """
 struct Sigmoid <: AbstractPredictor end

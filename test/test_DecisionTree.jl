@@ -12,6 +12,7 @@ using Test
 import DecisionTree
 import HiGHS
 import MathOptAI
+import Random
 
 is_test(x) = startswith(string(x), "test_")
 
@@ -24,7 +25,8 @@ end
 
 function test_DecisionTree()
     truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
-    features = rand(10, 2)
+    rng = Random.MersenneTwister(1234)
+    features = rand(rng, 10, 2)
     labels = truth.(Vector.(eachrow(features)))
     ml_model = DecisionTree.build_tree(labels, features)
     model = Model(HiGHS.Optimizer)
@@ -33,7 +35,7 @@ function test_DecisionTree()
     y = MathOptAI.add_predictor(model, ml_model, x)
     @constraint(model, c_rhs, x .== 0.0)
     for _ in 1:10
-        xi = rand(2)
+        xi = rand(rng, 2)
         if minimum(abs.(xi .- [0.5, 0.3])) < 1e-2
             continue  # Skip points near kink
         end

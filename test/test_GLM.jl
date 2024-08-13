@@ -13,6 +13,7 @@ import GLM
 import HiGHS
 import Ipopt
 import MathOptAI
+import Random
 
 is_test(x) = startswith(string(x), "test_")
 
@@ -24,10 +25,11 @@ function runtests()
 end
 
 function test_GLM_lm()
+    rng = Random.MersenneTwister(1234)
     num_features = 2
     num_observations = 10
-    X = rand(num_observations, num_features)
-    θ = rand(num_features)
+    X = rand(rng, num_observations, num_features)
+    θ = rand(rng, num_features)
     Y = X * θ + randn(num_observations)
     model_glm = GLM.lm(X, Y)
     model = Model(HiGHS.Optimizer)
@@ -44,10 +46,11 @@ function test_GLM_lm()
 end
 
 function test_GLM_lm_reduced_space()
+    rng = Random.MersenneTwister(1234)
     num_features = 2
     num_observations = 10
-    X = rand(num_observations, num_features)
-    θ = rand(num_features)
+    X = rand(rng, num_observations, num_features)
+    θ = rand(rng, num_features)
     Y = X * θ + randn(num_observations)
     model_glm = GLM.lm(X, Y)
     model = Model(HiGHS.Optimizer)
@@ -64,10 +67,11 @@ function test_GLM_lm_reduced_space()
 end
 
 function test_GLM_glm()
+    rng = Random.MersenneTwister(1234)
     num_features = 2
     num_observations = 10
-    X = rand(num_observations, num_features)
-    θ = rand(num_features)
+    X = rand(rng, num_observations, num_features)
+    θ = rand(rng, num_features)
     Y = X * θ + randn(num_observations) .>= 0
     model_glm = GLM.glm(X, Y, GLM.Bernoulli())
     model = Model(Ipopt.Optimizer)
@@ -84,10 +88,11 @@ function test_GLM_glm()
 end
 
 function test_GLM_glm_reduced_space()
+    rng = Random.MersenneTwister(1234)
     num_features = 2
     num_observations = 10
-    X = rand(num_observations, num_features)
-    θ = rand(num_features)
+    X = rand(rng, num_observations, num_features)
+    θ = rand(rng, num_features)
     Y = X * θ + randn(num_observations) .>= 0
     model_glm = GLM.glm(X, Y, GLM.Bernoulli())
     model = Model(Ipopt.Optimizer)

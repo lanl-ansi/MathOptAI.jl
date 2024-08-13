@@ -36,6 +36,11 @@ Subject to
  moai_ReLU[2] - max(0.0, x[2]) = 0
  moai_ReLU[1] ≥ 0
  moai_ReLU[2] ≥ 0
+
+julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+2-element Vector{NonlinearExpr}:
+ max(0.0, x[1])
+ max(0.0, x[2])
 ```
 """
 struct ReLU <: AbstractPredictor end

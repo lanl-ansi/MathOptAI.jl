@@ -37,6 +37,10 @@ julia> print(model)
 Feasibility
 Subject to
  2 x[1] + 3 x[2] - moai_Affine[1] = 0
+
+julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+1-element Vector{AffExpr}:
+ 2 x[1] + 3 x[2]
 ```
 """
 struct Affine <: AbstractPredictor
@@ -50,15 +54,6 @@ end
 
 function Affine(A::Vector{Float64})
     return Affine(reshape(A, 1, length(A)), [0.0])
-end
-
-function add_predictor(
-    model::JuMP.Model,
-    predictor::ReducedSpace{Affine},
-    x::Vector,
-)
-    A, b = predictor.predictor.A, predictor.predictor.b
-    return JuMP.@expression(model, A * x .+ b)
 end
 
 function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
@@ -77,4 +72,13 @@ function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
     end
     JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
     return y
+end
+
+function add_predictor(
+    model::JuMP.Model,
+    predictor::ReducedSpace{Affine},
+    x::Vector,
+)
+    A, b = predictor.predictor.A, predictor.predictor.b
+    return JuMP.@expression(model, A * x .+ b)
 end

@@ -19,7 +19,9 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(model, MathOptAI.Tanh(), x)
+julia> f = MathOptAI.Tanh();
+
+julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
  moai_Tanh[1]
  moai_Tanh[2]
@@ -33,11 +35,16 @@ Subject to
  moai_Tanh[2] ≥ -1
  moai_Tanh[1] ≤ 1
  moai_Tanh[2] ≤ 1
+
+julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+2-element Vector{NonlinearExpr}:
+ tanh(x[1])
+ tanh(x[2])
 ```
 """
 struct Tanh <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::Tanh, x::Vector)
+function add_predictor(model::JuMP.Model, ::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
     _set_bounds_if_finite.(y, -1.0, 1.0)
     JuMP.@constraint(model, y .== tanh.(x))

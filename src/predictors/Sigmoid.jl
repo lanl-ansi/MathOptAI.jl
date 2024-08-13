@@ -43,3 +43,7 @@ function add_predictor(model::JuMP.Model, predictor::Sigmoid, x::Vector)
     JuMP.@constraint(model, [i in 1:length(x)], y[i] == 1 / (1 + exp(-x[i])))
     return y
 end
+
+function add_predictor(::JuMP.Model, ::ReducedSpace{Sigmoid}, x::Vector)
+    return 1 ./ (1 .+ exp.(-x))
+end

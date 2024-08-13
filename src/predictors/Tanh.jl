@@ -43,3 +43,5 @@ function add_predictor(model::JuMP.Model, predictor::Tanh, x::Vector)
     JuMP.@constraint(model, y .== tanh.(x))
     return y
 end
+
+add_predictor(::JuMP.Model, ::ReducedSpace{Tanh}, x::Vector) = tanh.(x)

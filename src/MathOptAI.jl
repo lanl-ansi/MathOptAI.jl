@@ -104,6 +104,19 @@ function add_predictor(
     return reduce(hcat, y)
 end
 
+"""
+    ReducedSpace(P::AbstractPredictor)
+
+## Examples
+"""
+struct ReducedSpace{P<:AbstractPredictor} <: AbstractPredictor
+    predictor::P
+end
+
+function add_predictor(model::JuMP.Model, predictor::ReducedSpace, x::Vector)
+    return add_predictor(model, predictor.predictor, x)
+end
+
 include("utilities.jl")
 
 for file in filter(

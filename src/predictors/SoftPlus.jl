@@ -41,3 +41,7 @@ function add_predictor(model::JuMP.Model, predictor::SoftPlus, x::Vector)
     JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
     return y
 end
+
+function add_predictor(::JuMP.Model, ::ReducedSpace{SoftPlus}, x::Vector)
+    return log.(1 .+ exp.(x))
+end

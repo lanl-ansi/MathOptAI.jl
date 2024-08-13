@@ -40,13 +40,15 @@ Subject to
 """
 struct ReLU <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLU, x::Vector)
+function add_predictor(model::JuMP.Model, ::ReLU, x::Vector)
     ub = last.(_get_variable_bounds.(x))
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     JuMP.@constraint(model, y .== max.(0, x))
     return y
 end
+
+add_predictor(::JuMP.Model, ::ReducedSpace{ReLU}, x::Vector) = max.(0, x)
 
 """
     ReLUBigM(M::Float64) <: AbstractPredictor

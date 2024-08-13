@@ -52,6 +52,15 @@ function Affine(A::Vector{Float64})
     return Affine(reshape(A, 1, length(A)), [0.0])
 end
 
+function add_predictor(
+    model::JuMP.Model,
+    predictor::ReducedSpace{Affine},
+    x::Vector,
+)
+    A, b = predictor.predictor.A, predictor.predictor.b
+    return JuMP.@expression(model, A * x .+ b)
+end
+
 function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")

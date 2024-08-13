@@ -48,3 +48,10 @@ function add_predictor(model::JuMP.Model, predictor::SoftMax, x::Vector)
     JuMP.@constraint(model, y .== exp.(x) ./ denom)
     return y
 end
+
+function add_predictor(model::JuMP.Model, ::ReducedSpace{SoftMax}, x::Vector)
+    denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
+    JuMP.set_lower_bound(denom, 0.0)
+    JuMP.@constraint(model, denom == sum(exp.(x)))
+    return exp.(x) ./ denom
+end

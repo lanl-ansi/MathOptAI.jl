@@ -12,14 +12,15 @@
 # ## Python integration
 
 # This tutorial uses [PythonCall.jl](https://github.com/JuliaPy/PythonCall.jl)
-# to call from Julia into Python. It assumes that you have an existing Python
-# installation (with Pytorch installed), and that it is available in the current
-# conda environment.
-
-ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
-
+# to call from Julia into Python.
+#
 # See [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl) for more control
-# over how to link Julia to an existing Python environment.
+# over how to link Julia to an existing Python environment. For example, if you
+# have an existing Python installation (with Pytorch installed), and it is
+# available in the current conda environment, set:
+# ```julia
+# julia> ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
+# ```
 
 # ## Required packages
 

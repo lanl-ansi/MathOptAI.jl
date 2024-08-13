@@ -62,7 +62,7 @@ function add_predictor(
     predictor::ReducedSpace{Pipeline},
     x::Vector,
 )
-    for layer in predictor.layers
+    for layer in predictor.predictor.layers
         x = add_predictor(model, ReducedSpace(layer), x)
     end
     return x

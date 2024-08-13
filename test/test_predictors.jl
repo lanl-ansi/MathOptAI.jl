@@ -139,7 +139,7 @@ function test_ReLU_SOS1_no_bounds()
     y = MathOptAI.add_predictor(model, MathOptAI.ReLUSOS1(), x)
     @test_throws(
         ErrorException(
-            "Unable to use SOS1ToMILPBridge because element 1 in the function has a non-finite domain: MOI.VariableIndex(1)",
+            "Unable to use SOS1ToMILPBridge because element 1 in the function has a non-finite domain: MOI.VariableIndex(3)",
         ),
         optimize!(model),
     )

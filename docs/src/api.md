@@ -38,6 +38,7 @@ Modules = [
     Base.get_extension(MathOptAI, :MathOptAIFluxExt),
     Base.get_extension(MathOptAI, :MathOptAIGLMExt),
     Base.get_extension(MathOptAI, :MathOptAILuxExt),
+    Base.get_extension(MathOptAI, :MathOptAIPythonCallExt),
     Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt),
 ]
 ```
@@ -55,6 +56,11 @@ BinaryDecisionTree
 ## `Pipeline`
 ```@docs
 Pipeline
+```
+
+## `PytorchModel`
+```@docs
+PytorchModel
 ```
 
 ## `Quantile`

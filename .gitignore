@@ -1,3 +1,7 @@
 Manifest.toml
+dev
+docs/.CondaPkg
 docs/build
 docs/src/tutorials/*.md
+docs/src/tutorials/model.pt
+test/.CondaPkg

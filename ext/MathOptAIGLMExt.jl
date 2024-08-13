@@ -14,7 +14,8 @@ import MathOptAI
     MathOptAI.add_predictor(
         model::JuMP.Model,
         predictor::GLM.LinearModel,
-        x::Vector,
+        x::Vector;
+        reduced_space::Bool = false,
     )
 
 Add a trained linear model from GLM.jl to `model`.

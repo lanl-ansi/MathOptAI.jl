@@ -45,6 +45,9 @@ function MathOptAI.add_predictor(
     torch_model = torch.load(predictor.filename)
     inner_predictor = _predictor(nn, torch_model, config)
     if reduced_space
+        # If config maps to a ReducedSpace predictor, we'll get a MethodError
+        # when trying to add the nested redcued space predictors.
+        # TODO: raise a nicer error or try to handle this gracefully.
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)

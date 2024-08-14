@@ -38,11 +38,15 @@ function MathOptAI.add_predictor(
     predictor::MathOptAI.PytorchModel,
     x::Vector;
     config::Dict = Dict{Any,Any}(),
+    reduced_space::Bool = false,
 )
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
     torch_model = torch.load(predictor.filename)
     inner_predictor = _predictor(nn, torch_model, config)
+    if reduced_space
+        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
+    end
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 

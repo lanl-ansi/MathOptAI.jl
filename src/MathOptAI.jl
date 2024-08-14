@@ -104,6 +104,34 @@ function add_predictor(
     return reduce(hcat, y)
 end
 
+"""
+    ReducedSpace(predictor::AbstractPredictor)
+
+A wrapper type for other predictors that implement a reduced-space formulation.
+
+## Example
+
+```jldoctest
+julia> using JuMP
+
+julia> import MathOptAI
+
+julia> model = Model();
+
+julia> @variable(model, x[1:2]);
+
+julia> predictor = MathOptAI.ReducedSpace(MathOptAI.ReLU());
+
+julia> y = MathOptAI.add_predictor(model, predictor, x)
+2-element Vector{NonlinearExpr}:
+ max(0.0, x[1])
+ max(0.0, x[2])
+```
+"""
+struct ReducedSpace{P<:AbstractPredictor} <: AbstractPredictor
+    predictor::P
+end
+
 include("utilities.jl")
 
 for file in filter(

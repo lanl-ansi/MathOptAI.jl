@@ -51,10 +51,8 @@ In general, the full-space formulations have more variables and constraints but
 simpler nonlinear expressions, whereas the reduced-space formulations have fewer
 variables and constraints but more complicated nonlinear expressions.
 
-MathOptAI.jl implements the full-space formulation. It cannot model a
-reduced-space formulation. We choose the full-space formulation for simplicity,
-and because, in our experience, "simpler" models with more variables and
-constraints are faster to formulate, compute derivatives of, and solve.
+MathOptAI.jl implements the full-space formulation by default, but some layers
+support the reduced-space formulation with the [`ReducedSpace`](@ref) wrapper.
 
 ## Inputs are provided, outputs are returned
 

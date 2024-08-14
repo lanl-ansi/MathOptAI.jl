@@ -68,6 +68,11 @@ PytorchModel
 Quantile
 ```
 
+## `ReducedSpace`
+```@docs
+ReducedSpace
+```
+
 ## `ReLU`
 ```@docs
 ReLU

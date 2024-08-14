@@ -19,7 +19,9 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
+julia> f = MathOptAI.SoftPlus();
+
+julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
  moai_SoftPlus[1]
  moai_SoftPlus[2]
@@ -31,13 +33,22 @@ Subject to
  moai_SoftPlus[2] - log(1.0 + exp(x[2])) = 0
  moai_SoftPlus[1] ≥ 0
  moai_SoftPlus[2] ≥ 0
+
+julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+2-element Vector{NonlinearExpr}:
+ log(1.0 + exp(x[1]))
+ log(1.0 + exp(x[2]))
 ```
 """
 struct SoftPlus <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::SoftPlus, x::Vector)
+function add_predictor(model::JuMP.Model, ::SoftPlus, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     _set_bounds_if_finite.(y, 0.0, Inf)
     JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
     return y
+end
+
+function add_predictor(::JuMP.Model, ::ReducedSpace{SoftPlus}, x::Vector)
+    return log.(1 .+ exp.(x))
 end

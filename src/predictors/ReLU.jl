@@ -36,17 +36,24 @@ Subject to
  moai_ReLU[2] - max(0.0, x[2]) = 0
  moai_ReLU[1] ≥ 0
  moai_ReLU[2] ≥ 0
+
+julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+2-element Vector{NonlinearExpr}:
+ max(0.0, x[1])
+ max(0.0, x[2])
 ```
 """
 struct ReLU <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLU, x::Vector)
+function add_predictor(model::JuMP.Model, ::ReLU, x::Vector)
     ub = last.(_get_variable_bounds.(x))
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0.0, ub)
     JuMP.@constraint(model, y .== max.(0, x))
     return y
 end
+
+add_predictor(::JuMP.Model, ::ReducedSpace{ReLU}, x::Vector) = max.(0, x)
 
 """
     ReLUBigM(M::Float64) <: AbstractPredictor

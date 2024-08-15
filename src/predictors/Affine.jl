@@ -27,7 +27,7 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = MathOptAI.Affine([2.0, 3.0])
-MathOptAI.Affine([2.0 3.0], [0.0])
+Affine(A, b) [input: 2, output: 1]
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
@@ -54,6 +54,11 @@ end
 
 function Affine(A::Vector{Float64})
     return Affine(reshape(A, 1, length(A)), [0.0])
+end
+
+function Base.show(io::IO, p::Affine)
+    m, n = size(p.A)
+    return print(io, "Affine(A, b) [input: $n, output: $m]")
 end
 
 function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)

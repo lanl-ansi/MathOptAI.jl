@@ -13,16 +13,14 @@ An [`AbstractPredictor`](@ref) that implements the ReLU constraint
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
 julia> f = MathOptAI.ReLU()
-MathOptAI.ReLU()
+ReLU()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
@@ -64,16 +62,14 @@ An [`AbstractPredictor`](@ref) that implements the ReLU constraint
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, -3 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.ReLUBigM(100.0)
-MathOptAI.ReLUBigM(100.0)
+ReLUBigM(100.0)
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
@@ -138,16 +134,14 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2] >= -1);
 
 julia> f = MathOptAI.ReLUSOS1()
-MathOptAI.ReLUSOS1()
+ReLUSOS1()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:
@@ -203,16 +197,14 @@ y, z \\ge 0
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2] >= -1);
 
 julia> f = MathOptAI.ReLUQuadratic()
-MathOptAI.ReLUQuadratic()
+ReLUQuadratic()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:

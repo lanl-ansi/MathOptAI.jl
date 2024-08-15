@@ -16,9 +16,7 @@ f(x) = (l_1 \\cdots l_N)(x)
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
@@ -28,7 +26,9 @@ julia> f = MathOptAI.Pipeline(
            MathOptAI.Affine([1.0 2.0], [0.0]),
            MathOptAI.ReLUQuadratic(),
        )
-MathOptAI.Pipeline(MathOptAI.AbstractPredictor[MathOptAI.Affine([1.0 2.0], [0.0]), MathOptAI.ReLUQuadratic()])
+Pipeline with layers:
+ * Affine(A, b) [input: 2, output: 1]
+ * ReLUQuadratic()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
@@ -49,6 +49,15 @@ struct Pipeline <: AbstractPredictor
 end
 
 Pipeline(args::AbstractPredictor...) = Pipeline(collect(args))
+
+function Base.show(io::IO, p::Pipeline)
+    print(io, "Pipeline with layers:")
+    for l in p.layers
+        print(io, "\n * ")
+        show(io, l)
+    end
+    return
+end
 
 function add_predictor(model::JuMP.Model, predictor::Pipeline, x::Vector)
     for layer in predictor.layers

@@ -61,7 +61,6 @@ function Base.show(io::IO, p::Affine)
     return print(io, "Affine(A, b) [input: $n, output: $m]")
 end
 
-
 function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")

@@ -43,7 +43,7 @@ function test_student_enrollment()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     application_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5)
-    application_df.enroll =
+    application_df.enroll, _ =
         MathOptAI.add_predictor(model, model_glm, application_df)
     @objective(model, Max, sum(application_df.enroll))
     @constraint(model, sum(application_df.merit) <= 0.2 * n_students)

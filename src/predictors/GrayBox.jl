@@ -40,7 +40,9 @@ julia> f = MathOptAI.GrayBox(
            x -> (value = x.^2, jacobian = [2 * x[1] 0.0; 0.0 2 * x[2]]),
        );
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, _ = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_GrayBox[1]
  moai_GrayBox[2]
@@ -51,7 +53,9 @@ Subject to
  op_##238(x[1], x[2]) - moai_GrayBox[1] = 0
  op_##239(x[1], x[2]) - moai_GrayBox[2] = 0
 
-julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+julia> y, _ = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia> y
 2-element Vector{NonlinearExpr}:
  op_##240(x[1], x[2])
  op_##241(x[1], x[2])
@@ -72,10 +76,10 @@ struct GrayBox{F<:Function,G<:Function} <: AbstractPredictor
 end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
-    op = add_predictor(model, ReducedSpace(predictor), x)
+    op, _ = add_predictor(model, ReducedSpace(predictor), x)
     y = JuMP.@variable(model, [1:length(op)], base_name = "moai_GrayBox")
-    JuMP.@constraint(model, op .== y)
-    return y
+    cons = JuMP.@constraint(model, op .== y)
+    return y, SimpleFormulation(predictor, y, cons)
 end
 
 function add_predictor(
@@ -107,7 +111,7 @@ function add_predictor(
         end
         return
     end
-    return map(1:predictor.predictor.output_size(x)) do i
+    y = map(1:predictor.predictor.output_size(x)) do i
         callbacks = if predictor.predictor.has_hessian
             ∇²fi = (H, x...) -> ∇²f(H, i, x...)
             ((x...) -> f(i, x...), (g, x...) -> ∇f(g, i, x...), ∇²fi)
@@ -118,4 +122,5 @@ function add_predictor(
         op_i = JuMP.add_nonlinear_operator(model, length(x), callbacks...; name)
         return op_i(x...)
     end
+    return y, SimpleFormulation(predictor)
 end

@@ -33,7 +33,9 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(model, model_glm, x)
+julia> y, _ = MathOptAI.add_predictor(model, model_glm, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_Affine[1]
 ```
@@ -103,12 +105,14 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(
+julia> y, _ = MathOptAI.add_predictor(
            model,
            model_glm,
            x;
            sigmoid = MathOptAI.Sigmoid(),
-       )
+       );
+
+julia> y
 1-element Vector{VariableRef}:
  moai_Sigmoid[1]
 ```

@@ -23,7 +23,9 @@ julia> predictor = MathOptAI.Quantile([0.1, 0.9]) do x
        end
 Quantile(_, [0.1, 0.9])
 
-julia> y = MathOptAI.add_predictor(model, predictor, [x])
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, [x]);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_quantile[1]
  moai_quantile[2]
@@ -46,6 +48,7 @@ function add_predictor(
     M, N = length(x), length(predictor.quantiles)
     y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     quantile(q, x...) = Distributions.quantile(predictor.distribution(x...), q)
+    cons = Any[]
     for (qi, yi) in zip(predictor.quantiles, y)
         op_i = JuMP.add_nonlinear_operator(
             model,
@@ -53,7 +56,7 @@ function add_predictor(
             (x...) -> quantile(qi, x...);
             name = Symbol("op_quantile_$qi"),
         )
-        JuMP.@constraint(model, yi == op_i(x...))
+        push!(cons, JuMP.@constraint(model, yi == op_i(x...)))
     end
-    return y
+    return y, SimpleFormulation(predictor, y, cons)
 end

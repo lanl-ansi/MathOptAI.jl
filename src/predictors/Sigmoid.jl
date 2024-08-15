@@ -22,7 +22,9 @@ julia> @variable(model, x[1:2]);
 julia> f = MathOptAI.Sigmoid()
 Sigmoid()
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_Sigmoid[1]
  moai_Sigmoid[2]
@@ -37,7 +39,9 @@ Subject to
  moai_Sigmoid[1] ≤ 1
  moai_Sigmoid[2] ≤ 1
 
-julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia> y
 2-element Vector{NonlinearExpr}:
  1.0 / (1.0 + exp(-x[1]))
  1.0 / (1.0 + exp(-x[2]))
@@ -45,13 +49,17 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 """
 struct Sigmoid <: AbstractPredictor end
 
-function add_predictor(model::JuMP.AbstractModel, ::Sigmoid, x::Vector)
+function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Sigmoid")
     _set_bounds_if_finite.(y, 0, 1)
-    JuMP.@constraint(model, [i in 1:length(x)], y[i] == 1 / (1 + exp(-x[i])))
-    return y
+    cons = JuMP.@constraint(model, y .== 1 ./ (1 .+ exp.(-x)))
+    return y, SimpleFormulation(predictor, y, cons)
 end
 
-function add_predictor(::JuMP.AbstractModel, ::ReducedSpace{Sigmoid}, x::Vector)
-    return 1 ./ (1 .+ exp.(-x))
+function add_predictor(
+    ::JuMP.AbstractModel,
+    predictor::ReducedSpace{Sigmoid},
+    x::Vector,
+)
+    return 1 ./ (1 .+ exp.(-x)), SimpleFormulation(predictor)
 end

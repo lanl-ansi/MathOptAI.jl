@@ -27,7 +27,7 @@ function test_Affine()
     model = Model()
     @variable(model, x[1:2])
     f = MathOptAI.Affine([2.0, 3.0])
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
@@ -39,7 +39,7 @@ function test_Affine_affine()
     model = Model()
     @variable(model, x[1:2])
     f = MathOptAI.Affine([2.0, 3.0])
-    y = MathOptAI.add_predictor(model, f, 2.0 .* x)
+    y, formulation = MathOptAI.add_predictor(model, f, 2.0 .* x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
@@ -51,7 +51,7 @@ function test_ReducedSpace_Affine()
     model = Model()
     @variable(model, x[1:2])
     predictor = MathOptAI.ReducedSpace(MathOptAI.Affine([2.0, 3.0]))
-    y = MathOptAI.add_predictor(model, predictor, x)
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     @test isempty(cons)
     @test isequal_canonical(y, [2x[1] + 3x[2]])
@@ -64,7 +64,7 @@ function test_BinaryDecisionTree()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, -3 <= x <= 5)
-    y = MathOptAI.add_predictor(model, f, [x])
+    y, formulation = MathOptAI.add_predictor(model, f, [x])
     @constraint(model, c_rhs, x == 0.0)
     for (xi, yi) in (-0.4 => -1, -0.3 => -1, 0.4 => 0, 1.3 => 1)
         set_normalized_rhs(c_rhs, xi)
@@ -80,7 +80,7 @@ function test_Quantile()
     predictor = MathOptAI.Quantile([0.1, 0.9]) do x
         return Distributions.Normal(x, 3 - x)
     end
-    y = MathOptAI.add_predictor(model, predictor, [x])
+    y, formulation = MathOptAI.add_predictor(model, predictor, [x])
     @objective(model, Min, y[2] - y[1])
     optimize!(model)
     @test is_solved_and_feasible(model)
@@ -96,7 +96,7 @@ function test_ReLU_direct()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReLU()
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -113,7 +113,7 @@ function test_ReducedSpace_ReLU_direct()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReducedSpace(MathOptAI.ReLU())
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 2
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
@@ -130,7 +130,7 @@ function test_ReLU_BigM()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReLUBigM(100.0)
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, AffExpr, MOI.LessThan{Float64}) == 4
@@ -148,7 +148,7 @@ function test_ReLU_SOS1()
     set_silent(model)
     @variable(model, -2 <= x[1:2] <= 2)
     f = MathOptAI.ReLUSOS1()
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, Vector{VariableRef}, MOI.SOS1{Float64}) == 2
@@ -164,7 +164,7 @@ function test_ReLU_SOS1_no_bounds()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = MathOptAI.add_predictor(model, MathOptAI.ReLUSOS1(), x)
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLUSOS1(), x)
     @test_throws(
         ErrorException(
             "Unable to use SOS1ToMILPBridge because element 1 in the function has a non-finite domain: MOI.VariableIndex(3)",
@@ -179,7 +179,7 @@ function test_ReLU_Quadratic()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReLUQuadratic()
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
     @test num_constraints(model, QuadExpr, MOI.EqualTo{Float64}) == 2
@@ -195,7 +195,7 @@ function test_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), x)
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -213,7 +213,7 @@ function test_ReducedSpace_Sigmoid()
     set_silent(model)
     @variable(model, x[1:2])
     predictor = MathOptAI.ReducedSpace(MathOptAI.Sigmoid())
-    y = MathOptAI.add_predictor(model, predictor, x)
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
     @test length(y) == 2
     @test num_variables(model) == 2
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
@@ -230,7 +230,7 @@ function test_SoftMax()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = MathOptAI.add_predictor(model, MathOptAI.SoftMax(), x)
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.SoftMax(), x)
     @test length(y) == 2
     @test num_variables(model) == 5
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 3
@@ -248,7 +248,7 @@ function test_ReducedSpace_SoftMax()
     set_silent(model)
     @variable(model, x[1:2])
     predictor = MathOptAI.ReducedSpace(MathOptAI.SoftMax())
-    y = MathOptAI.add_predictor(model, predictor, x)
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
     @test length(y) == 2
     @test num_variables(model) == 3
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 1
@@ -265,7 +265,7 @@ function test_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -283,7 +283,7 @@ function test_ReducedSpace_SoftPlus()
     set_silent(model)
     @variable(model, x[1:2])
     predictor = MathOptAI.ReducedSpace(MathOptAI.SoftPlus())
-    y = MathOptAI.add_predictor(model, predictor, x)
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
     @test length(y) == 2
     @test num_variables(model) == 2
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
@@ -300,7 +300,7 @@ function test_Tanh()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y = MathOptAI.add_predictor(model, MathOptAI.Tanh(), x)
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.Tanh(), x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -318,7 +318,7 @@ function test_ReducedSpace_Tanh()
     set_silent(model)
     @variable(model, x[1:2])
     predictor = MathOptAI.ReducedSpace(MathOptAI.Tanh())
-    y = MathOptAI.add_predictor(model, predictor, x)
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
     @test length(y) == 2
     @test num_variables(model) == 2
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
@@ -342,7 +342,7 @@ function test_Scale()
     @variable(model, x[1:2])
     f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
     @test sprint(show, f) == "Scale(scale, bias)"
-    y = MathOptAI.add_predictor(model, f, x)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     @test length(cons) == 2
     objs = constraint_object.(cons)
@@ -350,7 +350,8 @@ function test_Scale()
     @test objs[2].set == MOI.EqualTo(-5.0)
     @test isequal_canonical(objs[1].func, 2.0 * x[1] - y[1])
     @test isequal_canonical(objs[2].func, 3.0 * x[2] - y[2])
-    y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+    y, formulation =
+        MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     @test length(cons) == 2
     @test isequal_canonical(y, [2.0 * x[1] + 4.0, 3.0 * x[2] + 5.0])

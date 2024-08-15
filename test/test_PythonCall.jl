@@ -58,7 +58,7 @@ function test_model_ReLU()
     set_silent(model)
     @variable(model, x[1:1])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         ml_model,
         x;
@@ -92,7 +92,7 @@ function test_model_Sigmoid()
     set_silent(model)
     @variable(model, x[1:1])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(model, ml_model, x)
+    y, formulation = MathOptAI.add_predictor(model, ml_model, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -121,7 +121,8 @@ function test_model_Sigmoid_ReducedSpace()
     set_silent(model)
     @variable(model, x[1:1])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(model, ml_model, x; reduced_space = true)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, x; reduced_space = true)
     @test num_variables(model) == 1
     @test num_constraints(model; count_variable_in_set_constraints = true) == 0
     optimize!(model)
@@ -152,7 +153,7 @@ function test_model_Tanh()
     set_silent(model)
     @variable(model, x[1:1])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(model, ml_model, x)
+    y, formulation = MathOptAI.add_predictor(model, ml_model, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -181,7 +182,8 @@ function test_model_Tanh_scalar_GrayBox()
     set_silent(model)
     @variable(model, x[1:2])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 3
     @test num_constraints(model; count_variable_in_set_constraints = true) == 1
     optimize!(model)
@@ -250,7 +252,8 @@ function test_model_Tanh_vector_GrayBox()
     set_silent(model)
     @variable(model, x[1:3])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 5
     @test num_constraints(model; count_variable_in_set_constraints = true) == 2
     optimize!(model)
@@ -261,7 +264,7 @@ function test_model_Tanh_vector_GrayBox()
     set_silent(model)
     @variable(model, x[1:3])
     ml_model = MathOptAI.PytorchModel(filename)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         ml_model,
         x;

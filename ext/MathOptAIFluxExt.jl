@@ -55,12 +55,14 @@ julia> model = Model();
 
 julia> @variable(model, x[1:1]);
 
-julia> y = MathOptAI.add_predictor(
+julia> y, _ = MathOptAI.add_predictor(
            model,
            chain,
            x;
            config = Dict(Flux.relu => MathOptAI.ReLU()),
-       )
+       );
+
+julia> y
 1-element Vector{VariableRef}:
  moai_Affine[1]
 ```

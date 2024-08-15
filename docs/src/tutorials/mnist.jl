@@ -152,7 +152,7 @@ function find_adversarial_image(test_case; adversary_label, δ = 0.05)
     @constraint(model, -δ .<= x .- test_case.features .<= δ)
     ## Note: we need to use `vec` here because `x` is a 28-by-28 Matrix, but our
     ## neural network expects a 28^2 length vector.
-    y = MathOptAI.add_predictor(model, ml_model, vec(x))
+    y, _ = MathOptAI.add_predictor(model, ml_model, vec(x))
     @objective(model, Max, y[adversary_label+1] - y[test_case.targets+1])
     optimize!(model)
     @assert is_solved_and_feasible(model)

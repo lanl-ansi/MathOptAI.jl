@@ -39,7 +39,9 @@ julia> @variable(model, 1 <= x[1:1] <= 6, start = 3);
 
 julia> predictor = MathOptAI.Quantile(p_fx, [0.1, 0.9]);
 
-julia> y = MathOptAI.add_predictor(model, predictor, x)
+julia> y, _ = MathOptAI.add_predictor(model, predictor, x);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_quantile[1]
  moai_quantile[2]
@@ -77,7 +79,7 @@ function MathOptAI.add_predictor(
     y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     JuMP.set_start_value.(y, λ)
     JuMP.@constraint(model, y .== μ .+ λ .* sqrt(σ²))
-    return y
+    return y, MathOptAI.SimpleFormulation(predictor)
 end
 
 end  # module

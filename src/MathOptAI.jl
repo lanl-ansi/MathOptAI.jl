@@ -24,6 +24,71 @@ All subtypes must implement:
 abstract type AbstractPredictor end
 
 """
+    abstract type AbstractFormulation end
+
+An abstract type representing different formulations.
+"""
+abstract type AbstractFormulation end
+
+"""
+    struct SimpleFormulation{P<:AbstractPredictor} <: AbstractFormulation
+        predictor::P
+        variables::Vector{Any}
+        constraints::Vector{Any}
+    end
+
+## Fields
+
+ * `predictor`: the predictor object used to build the formulation
+ * `variables`: a vector of new decision variables added to the model
+ * `constraints`: a vector of new constraints added to the model
+
+Check the docstring of the predictor for an explanation of the formulation and
+the order of the elements in `.variables` and `.constraints`.
+"""
+struct SimpleFormulation{P<:AbstractPredictor} <: AbstractFormulation
+    predictor::P
+    variables::Vector{Any}
+    constraints::Vector{Any}
+end
+
+function SimpleFormulation(
+    predictor::P,
+    variables,
+    constraints,
+) where {P<:AbstractPredictor}
+    return SimpleFormulation(
+        predictor,
+        convert(Vector{Any}, variables),
+        convert(Vector{Any}, constraints),
+    )
+end
+
+function SimpleFormulation(predictor::AbstractPredictor)
+    return SimpleFormulation(predictor, Any[], Any[])
+end
+
+"""
+    struct PipelineFormulation{P<:AbstractPredictor} <: AbstractFormulation
+        predictor::P
+        layers::Vector{Any}
+    end
+
+## Fields
+
+ * `predictor`: the predictor object used to build the formulation
+ * `layers`: the formulation associated with each of the layers in the pipeline
+"""
+struct PipelineFormulation{P<:AbstractPredictor} <: AbstractFormulation
+    predictor::P
+    layers::Vector{Any}
+end
+
+function PipelineFormulation(predictor::P, layers) where {P<:AbstractPredictor}
+    return PipelineFormulation(predictor, convert(Vector{Any}, layers))
+end
+
+"""
     add_predictor(
         model::JuMP.AbstractModel,
         predictor::AbstractPredictor,
@@ -48,7 +113,9 @@ julia> @variable(model, x[1:2]);
 julia> f = MathOptAI.Affine([2.0, 3.0])
 Affine(A, b) [input: 2, output: 1]
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_Affine[1]
 
@@ -78,7 +145,9 @@ julia> @variable(model, x[1:2, 1:3]);
 julia> f = MathOptAI.Affine([2.0, 3.0])
 Affine(A, b) [input: 2, output: 1]
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 1×3 Matrix{VariableRef}:
  moai_Affine[1]  moai_Affine[1]  moai_Affine[1]
 
@@ -91,8 +160,10 @@ Subject to
 ```
 """
 function add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
-    y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
-    return reduce(hcat, y)
+    inner_predictor = build_predictor(predictor)
+    ret = map(j -> add_predictor(model, inner_predictor, x[:, j]), 1:size(x, 2))
+    formulation = PipelineFormulation(inner_predictor, last.(ret))
+    return reduce(hcat, first.(ret)), formulation
 end
 
 """
@@ -103,7 +174,7 @@ A uniform interface to convert various extension types to an
 
 See the various extension docstrings for details.
 """
-function build_predictor end
+build_predictor(predictor::AbstractPredictor; kwargs...) = predictor
 
 """
     ReducedSpace(predictor::AbstractPredictor)
@@ -121,7 +192,9 @@ julia> @variable(model, x[1:2]);
 
 julia> predictor = MathOptAI.ReducedSpace(MathOptAI.ReLU());
 
-julia> y = MathOptAI.add_predictor(model, predictor, x)
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
+
+julia> y
 2-element Vector{NonlinearExpr}:
  max(0.0, x[1])
  max(0.0, x[2])

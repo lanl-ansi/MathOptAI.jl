@@ -32,7 +32,7 @@ function test_DecisionTree()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, 0 <= x[1:2] <= 1)
-    y = MathOptAI.add_predictor(model, ml_model, x)
+    y, formulation = MathOptAI.add_predictor(model, ml_model, x)
     @constraint(model, c_rhs, x .== 0.0)
     for _ in 1:10
         xi = rand(rng, 2)

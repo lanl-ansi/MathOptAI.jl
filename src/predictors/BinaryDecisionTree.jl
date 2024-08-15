@@ -36,7 +36,9 @@ julia> f = MathOptAI.BinaryDecisionTree{Float64,Int}(
        )
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_BinaryDecisionTree_value
 
@@ -81,21 +83,23 @@ function add_predictor(
         binary = true,
         base_name = "moai_BinaryDecisionTree_z",
     )
-    JuMP.@constraint(model, sum(z) == 1)
+    c = JuMP.@constraint(model, sum(z) == 1)
     y = JuMP.@variable(model, base_name = "moai_BinaryDecisionTree_value")
     y_expr = JuMP.AffExpr(0.0)
+    formulation = SimpleFormulation(predictor, Any[y; z], Any[c])
     for (zi, (leaf, path)) in zip(z, paths)
         JuMP.add_to_expression!(y_expr, leaf, zi)
         for (id, value, branch) in path
-            if branch
+            c = if branch
                 JuMP.@constraint(model, zi --> {x[id] <= value})
             else
                 JuMP.@constraint(model, zi --> {x[id] >= value + atol})
             end
+            push!(formulation.constraints, c)
         end
     end
-    JuMP.@constraint(model, y == y_expr)
-    return [y]
+    push!(formulation.constraints, JuMP.@constraint(model, y == y_expr))
+    return [y], formulation
 end
 
 function _tree_to_paths(predictor::BinaryDecisionTree{K,V}) where {K,V}

@@ -22,7 +22,9 @@ julia> @variable(model, 1 <= x[1:1] <= 6, start = 3);
 
 julia> predictor = MathOptAI.Quantile(p_fx, [0.1, 0.9]);
 
-julia> y = MathOptAI.add_predictor(model, predictor, x)
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_quantile[1]
  moai_quantile[2]

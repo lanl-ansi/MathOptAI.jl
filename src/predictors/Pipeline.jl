@@ -30,7 +30,9 @@ Pipeline with layers:
  * Affine(A, b) [input: 2, output: 1]
  * ReLUQuadratic()
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_ReLU[1]
 
@@ -64,10 +66,12 @@ function add_predictor(
     predictor::Pipeline,
     x::Vector,
 )
+    formulation = PipelineFormulation(predictor, Any[])
     for layer in predictor.layers
-        x = add_predictor(model, layer, x)
+        x, inner_formulation = add_predictor(model, layer, x)
+        push!(formulation.layers, inner_formulation)
     end
-    return x
+    return x, formulation
 end
 
 function add_predictor(
@@ -75,8 +79,10 @@ function add_predictor(
     predictor::ReducedSpace{Pipeline},
     x::Vector,
 )
+    formulation = PipelineFormulation(predictor, Any[])
     for layer in predictor.predictor.layers
-        x = add_predictor(model, ReducedSpace(layer), x)
+        x, inner_formulation = add_predictor(model, ReducedSpace(layer), x)
+        push!(formulation.layers, inner_formulation)
     end
-    return x
+    return x, formulation
 end

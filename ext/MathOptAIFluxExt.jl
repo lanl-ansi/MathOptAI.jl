@@ -67,14 +67,74 @@ function MathOptAI.add_predictor(
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
 )
-    inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
-    for layer in predictor.layers
-        _add_predictor(inner_predictor, layer, config)
-    end
+    inner_predictor = MathOptAI.build_predictor(predictor; config)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.build_predictor(
+        predictor::Flux.Chain;
+        config::Dict = Dict{Any,Any}(),
+    )
+
+Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
+
+## Supported layers
+
+ * `Flux.Dense`
+ * `Flux.softmax`
+
+## Supported activation functions
+
+ * `Flux.relu`
+ * `Flux.sigmoid`
+ * `Flux.softplus`
+ * `Flux.tanh`
+
+## Keyword arguments
+
+ * `config`: a dictionary that maps `Flux` activation functions to an
+   [`AbstractPredictor`](@ref) to control how the activation functions are
+   reformulated.
+
+## Example
+
+```jldoctest
+julia> using Flux, MathOptAI
+
+julia> chain = Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1));
+
+julia> MathOptAI.build_predictor(
+           chain;
+           config = Dict(Flux.relu => MathOptAI.ReLU()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLU()
+ * Affine(A, b) [input: 16, output: 1]
+
+julia> MathOptAI.build_predictor(
+           chain;
+           config = Dict(Flux.relu => MathOptAI.ReLUQuadratic()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLUQuadratic()
+ * Affine(A, b) [input: 16, output: 1]
+```
+"""
+function MathOptAI.build_predictor(
+    predictor::Flux.Chain;
+    config::Dict = Dict{Any,Any}(),
+)
+    inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
+    for layer in predictor.layers
+        _add_predictor(inner_predictor, layer, config)
+    end
+    return inner_predictor
 end
 
 _default(::typeof(identity)) = nothing

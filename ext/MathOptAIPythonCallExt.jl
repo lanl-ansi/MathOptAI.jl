@@ -41,10 +41,7 @@ function MathOptAI.add_predictor(
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
 )
-    torch = PythonCall.pyimport("torch")
-    nn = PythonCall.pyimport("torch.nn")
-    torch_model = torch.load(predictor.filename)
-    inner_predictor = _predictor(nn, torch_model, config)
+    inner_predictor = MathOptAI.build_predictor(predictor; config)
     if reduced_space
         # If config maps to a ReducedSpace predictor, we'll get a MethodError
         # when trying to add the nested redcued space predictors.
@@ -52,6 +49,38 @@ function MathOptAI.add_predictor(
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.build_predictor(
+        predictor::MathOptAI.PytorchModel;
+        config::Dict = Dict{Any,Any}(),
+    )
+
+Convert a trained neural network from Pytorch via PythonCall.jl to a
+[`Pipeline`](@ref).
+
+## Supported layers
+
+ * `nn.Linear`
+ * `nn.ReLU`
+ * `nn.Sequential`
+ * `nn.Sigmoid`
+ * `nn.Tanh`
+
+## Keyword arguments
+
+ * `config`: a dictionary that maps symbols to an [`AbstractPredictor`](@ref)
+   to control how the activation functions are reformulated.
+"""
+function MathOptAI.build_predictor(
+    predictor::MathOptAI.PytorchModel;
+    config::Dict = Dict{Any,Any}(),
+)
+    torch = PythonCall.pyimport("torch")
+    nn = PythonCall.pyimport("torch.nn")
+    torch_model = torch.load(predictor.filename)
+    return _predictor(nn, torch_model, config)
 end
 
 function _predictor(nn, layer, config)

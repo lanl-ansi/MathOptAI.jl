@@ -105,6 +105,16 @@ function add_predictor(
 end
 
 """
+    build_predictor(extension; kwargs...)::AbstractPredictor
+
+A uniform interface to convert various extension types to an
+[`AbstractPredictor`](@ref).
+
+See the various extension docstrings for details.
+"""
+function build_predictor end
+
+"""
     ReducedSpace(predictor::AbstractPredictor)
 
 A wrapper type for other predictors that implement a reduced-space formulation.

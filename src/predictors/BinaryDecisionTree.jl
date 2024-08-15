@@ -22,9 +22,7 @@ An [`AbstractPredictor`](@ref) that represents a binary decision tree.
 To represent the tree `x[1] <= 0.0 ? -1 : (x[1] <= 1.0 ? 0 : 1)`, do:
 
 ```jldoctest doc_decision_tree
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
@@ -36,7 +34,7 @@ julia> f = MathOptAI.BinaryDecisionTree{Float64,Int}(
            -1,
            MathOptAI.BinaryDecisionTree{Float64,Int}(1, 1.0, 0, 1),
        )
-MathOptAI.BinaryDecisionTree{Float64, Int64}(1, 0.0, -1, MathOptAI.BinaryDecisionTree{Float64, Int64}(1, 1.0, 0, 1))
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
@@ -62,6 +60,12 @@ struct BinaryDecisionTree{K,V}
     feat_value::K
     lhs::Union{V,BinaryDecisionTree{K,V}}
     rhs::Union{V,BinaryDecisionTree{K,V}}
+end
+
+function Base.show(io::IO, predictor::BinaryDecisionTree{K,V}) where {K,V}
+    paths = _tree_to_paths(predictor)
+    leaves, depth = length(paths), maximum(length.(paths))
+    return print(io, "BinaryDecisionTree{$K,$V} [leaves=$leaves, depth=$depth]")
 end
 
 function add_predictor(

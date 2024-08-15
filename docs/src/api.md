@@ -31,16 +31,9 @@ AbstractPredictor
 add_predictor
 ```
 
-```@autodocs
-Modules = [
-    Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt),
-    Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
-    Base.get_extension(MathOptAI, :MathOptAIFluxExt),
-    Base.get_extension(MathOptAI, :MathOptAIGLMExt),
-    Base.get_extension(MathOptAI, :MathOptAILuxExt),
-    Base.get_extension(MathOptAI, :MathOptAIPythonCallExt),
-    Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt),
-]
+## `build_predictor`
+```@docs
+build_predictor
 ```
 
 ## `Affine`
@@ -111,4 +104,18 @@ SoftPlus
 ## `Tanh`
 ```@docs
 Tanh
+```
+
+## Extensions
+
+```@autodocs
+Modules = [
+    Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt),
+    Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
+    Base.get_extension(MathOptAI, :MathOptAIFluxExt),
+    Base.get_extension(MathOptAI, :MathOptAIGLMExt),
+    Base.get_extension(MathOptAI, :MathOptAILuxExt),
+    Base.get_extension(MathOptAI, :MathOptAIPythonCallExt),
+    Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt),
+]
 ```

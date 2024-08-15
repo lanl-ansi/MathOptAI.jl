@@ -16,6 +16,7 @@ import MathOptAI
         predictor::MathOptAI.PytorchModel,
         x::Vector;
         config::Dict = Dict{Any,Any}(),
+        reduced_space::Bool = false,
     )
 
 Add a trained neural network from Pytorch via PythonCall.jl to `model`.
@@ -38,8 +39,15 @@ function MathOptAI.add_predictor(
     predictor::MathOptAI.PytorchModel,
     x::Vector;
     config::Dict = Dict{Any,Any}(),
+    reduced_space::Bool = false,
 )
     inner_predictor = MathOptAI.build_predictor(predictor; config)
+    if reduced_space
+        # If config maps to a ReducedSpace predictor, we'll get a MethodError
+        # when trying to add the nested redcued space predictors.
+        # TODO: raise a nicer error or try to handle this gracefully.
+        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
+    end
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 

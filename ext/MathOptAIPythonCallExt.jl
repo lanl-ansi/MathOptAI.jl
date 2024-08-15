@@ -16,6 +16,7 @@ import MathOptAI
         predictor::MathOptAI.PytorchModel,
         x::Vector;
         config::Dict = Dict{Any,Any}(),
+        reduced_space::Bool = false,
     )
 
 Add a trained neural network from Pytorch via PythonCall.jl to `model`.

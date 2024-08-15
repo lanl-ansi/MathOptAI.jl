@@ -39,12 +39,42 @@ function MathOptAI.add_predictor(
     x::Vector;
     config::Dict = Dict{Any,Any}(),
 )
+    inner_predictor = MathOptAI.build_predictor(predictor; config)
+    return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.build_predictor(
+        predictor::MathOptAI.PytorchModel;
+        config::Dict = Dict{Any,Any}(),
+    )
+
+Convert a trained neural network from Pytorch via PythonCall.jl to a
+[`Pipeline`](@ref).
+
+## Supported layers
+
+ * `nn.Linear`
+ * `nn.ReLU`
+ * `nn.Sequential`
+ * `nn.Sigmoid`
+ * `nn.Tanh`
+
+## Keyword arguments
+
+ * `config`: a dictionary that maps symbols to an [`AbstractPredictor`](@ref)
+   to control how the activation functions are reformulated.
+"""
+function MathOptAI.build_predictor(
+    predictor::MathOptAI.PytorchModel;
+    config::Dict = Dict{Any,Any}(),
+)
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
     torch_model = torch.load(predictor.filename)
-    inner_predictor = _predictor(nn, torch_model, config)
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return _predictor(nn, torch_model, config)
 end
+
 
 function _predictor(nn, layer, config)
     if Bool(PythonCall.pybuiltins.isinstance(layer, nn.Linear))

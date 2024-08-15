@@ -59,6 +59,8 @@ Subject to
 """
 function add_predictor end
 
+function build_predictor end
+
 """
     add_predictor(
         model::JuMP.Model,

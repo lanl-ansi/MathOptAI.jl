@@ -53,8 +53,42 @@ function MathOptAI.add_predictor(
     predictor::DecisionTree.Root,
     x::Vector,
 )
-    inner_predictor = _tree_or_leaf(predictor.node)
+    inner_predictor = MathOptAI.build_predictor(predictor.node)
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.build_predictor(predictor::DecisionTree.Root)
+
+Convert a binary decision tree from DecisionTree.jl to a
+[`BinaryDecisionTree`](@ref).
+
+## Example
+
+```jldoctest
+julia> using MathOptAI, DecisionTree
+
+julia> truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
+truth (generic function with 1 method)
+
+julia> features = abs.(sin.((1:10) .* (3:4)'));
+
+julia> size(features)
+(10, 2)
+
+julia> labels = truth.(Vector.(eachrow(features)));
+
+julia> ml_model = DecisionTree.build_tree(labels, features)
+Decision Tree
+Leaves: 3
+Depth:  2
+
+julia> MathOptAI.build_predictor(ml_model)
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+```
+"""
+function MathOptAI.build_predictor(predictor::DecisionTree.Root)
+    return _tree_or_leaf(predictor.node)
 end
 
 function _tree_or_leaf(node::DecisionTree.Node{K,V}) where {K,V}

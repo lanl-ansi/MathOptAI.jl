@@ -77,7 +77,7 @@ function MathOptAI.add_predictor(
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
 )
-    inner_predictor = MathOptAI.Pipeline(predictor; config)
+    inner_predictor = MathOptAI.build_predictor(predictor; config)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
@@ -85,7 +85,7 @@ function MathOptAI.add_predictor(
 end
 
 """
-    MathOptAI.Pipeline(
+    MathOptAI.build_predictor(
         predictor::Tuple{<:Lux.Chain,<:NamedTuple,<:NamedTuple};
         config::Dict = Dict{Any,Any}(),
     )
@@ -125,7 +125,7 @@ Chain(
 
 julia> parameters, state = Lux.setup(rng, chain);
 
-julia> predictor = MathOptAI.Pipeline(
+julia> predictor = MathOptAI.build_predictor(
            (chain, parameters, state);
            config = Dict(Lux.relu => MathOptAI.ReLU()),
        )
@@ -134,7 +134,7 @@ Pipeline with layers:
  * ReLU()
  * Affine(A, b) [input: 16, output: 1]
 
-julia> MathOptAI.Pipeline(
+julia> MathOptAI.build_predictor(
            (chain, parameters, state);
            config = Dict(Lux.relu => MathOptAI.ReLUQuadratic()),
        )
@@ -144,7 +144,7 @@ Pipeline with layers:
  * Affine(A, b) [input: 16, output: 1]
 ```
 """
-function MathOptAI.Pipeline(
+function MathOptAI.build_predictor(
     predictor::Tuple{<:Lux.Chain,<:NamedTuple,<:NamedTuple};
     config::Dict = Dict{Any,Any}(),
 )

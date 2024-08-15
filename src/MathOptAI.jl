@@ -59,8 +59,6 @@ Subject to
 """
 function add_predictor end
 
-function build_predictor end
-
 """
     add_predictor(
         model::JuMP.Model,
@@ -105,6 +103,16 @@ function add_predictor(
     y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
     return reduce(hcat, y)
 end
+
+"""
+    build_predictor(extension; kwargs...)::AbstractPredictor
+
+A uniform interface to convert various extension types to an
+[`AbstractPredictor`](@ref).
+
+See the various extension docstrings for details.
+"""
+function build_predictor end
 
 """
     ReducedSpace(predictor::AbstractPredictor)

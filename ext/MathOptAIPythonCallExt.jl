@@ -75,7 +75,6 @@ function MathOptAI.build_predictor(
     return _predictor(nn, torch_model, config)
 end
 
-
 function _predictor(nn, layer, config)
     if Bool(PythonCall.pybuiltins.isinstance(layer, nn.Linear))
         weight = mapreduce(vcat, layer.weight.tolist()) do w

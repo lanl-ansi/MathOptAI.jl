@@ -16,9 +16,7 @@ f(x) = (l_1 \\cdots l_N)(x)
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 

@@ -45,7 +45,7 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = MathOptAI.Affine([2.0, 3.0])
-MathOptAI.Affine([2.0 3.0], [0.0])
+Affine(A, b) [input: 2, output: 1]
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1-element Vector{VariableRef}:
@@ -81,7 +81,7 @@ julia> model = Model();
 julia> @variable(model, x[1:2, 1:3]);
 
 julia> f = MathOptAI.Affine([2.0, 3.0])
-MathOptAI.Affine([2.0 3.0], [0.0])
+Affine(A, b) [input: 2, output: 1]
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 1×3 Matrix{VariableRef}:

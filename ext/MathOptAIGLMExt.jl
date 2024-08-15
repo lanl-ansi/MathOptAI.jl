@@ -44,11 +44,33 @@ function MathOptAI.add_predictor(
     x::Vector;
     reduced_space::Bool = false,
 )
-    inner_predictor = MathOptAI.Affine(GLM.coef(predictor))
+    inner_predictor = MathOptAI.Affine(predictor)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.Affine(predictor::GLM.LinearModel)
+
+Convert a trained linear model from GLM.jl to an [`Affine`](@ref) layer.
+
+## Example
+
+```jldoctest
+julia> using GLM, MathOptAI
+
+julia> X, Y = rand(10, 2), rand(10);
+
+julia> model_glm = GLM.lm(X, Y);
+
+julia> MathOptAI.Affine(model_glm)
+Affine(A, b) [input: 2, output: 1]
+```
+"""
+function MathOptAI.Affine(predictor::GLM.LinearModel)
+    return MathOptAI.Affine(GLM.coef(predictor))
 end
 
 """
@@ -100,12 +122,50 @@ function MathOptAI.add_predictor(
     sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
     reduced_space::Bool = false,
 )
-    affine = MathOptAI.Affine(GLM.coef(predictor))
-    inner_predictor = MathOptAI.Pipeline(affine, sigmoid)
+    inner_predictor = MathOptAI.Pipeline(predictor; sigmoid)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.Pipeline(
+        predictor::GLM.GeneralizedLinearModel{
+            GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
+        };
+        sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
+    )
+
+Convert a trained logistic model from GLM.jl to a [`Pipeline`](@ref) layer.
+
+## Keyword arguments
+
+ * `sigmoid`: the predictor to use for the sigmoid layer.
+
+## Example
+
+```jldoctest
+julia> using GLM, MathOptAI
+
+julia> X, Y = rand(10, 2), rand(Bool, 10);
+
+julia> model_glm = GLM.glm(X, Y, GLM.Bernoulli());
+
+julia> MathOptAI.Pipeline(model_glm)
+Pipeline with layers:
+ * Affine(A, b) [input: 2, output: 1]
+ * Sigmoid()
+```
+"""
+function MathOptAI.Pipeline(
+    predictor::GLM.GeneralizedLinearModel{
+        GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
+    };
+    sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
+)
+    affine = MathOptAI.Affine(GLM.coef(predictor))
+    return MathOptAI.Pipeline(affine, sigmoid)
 end
 
 end  # module

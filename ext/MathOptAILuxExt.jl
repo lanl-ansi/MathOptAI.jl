@@ -77,15 +77,83 @@ function MathOptAI.add_predictor(
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
 )
+    inner_predictor = MathOptAI.Pipeline(predictor; config)
+    if reduced_space
+        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
+    end
+    return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+"""
+    MathOptAI.Pipeline(
+        predictor::Tuple{<:Lux.Chain,<:NamedTuple,<:NamedTuple};
+        config::Dict = Dict{Any,Any}(),
+    )
+
+Convert a trained neural network from Lux.jl to a [`Pipeline`](@ref).
+
+## Supported layers
+
+ * `Lux.Dense`
+
+## Supported activation functions
+
+ * `Lux.relu`
+ * `Lux.sigmoid`
+ * `Lux.softplus`
+ * `Lux.tanh`
+
+## Keyword arguments
+
+ * `config`: a dictionary that maps `Lux` activation functions to an
+   [`AbstractPredictor`](@ref) to control how the activation functions are
+   reformulated.
+
+## Example
+
+```jldoctest; filter=r"[┌|└].+"
+julia> using Lux, MathOptAI, Random
+
+julia> rng = Random.MersenneTwister();
+
+julia> chain = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
+Chain(
+    layer_1 = Dense(1 => 16, relu),     # 32 parameters
+    layer_2 = Dense(16 => 1),           # 17 parameters
+)         # Total: 49 parameters,
+          #        plus 0 states.
+
+julia> parameters, state = Lux.setup(rng, chain);
+
+julia> predictor = MathOptAI.Pipeline(
+           (chain, parameters, state);
+           config = Dict(Lux.relu => MathOptAI.ReLU()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLU()
+ * Affine(A, b) [input: 16, output: 1]
+
+julia> MathOptAI.Pipeline(
+           (chain, parameters, state);
+           config = Dict(Lux.relu => MathOptAI.ReLUQuadratic()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLUQuadratic()
+ * Affine(A, b) [input: 16, output: 1]
+```
+"""
+function MathOptAI.Pipeline(
+    predictor::Tuple{<:Lux.Chain,<:NamedTuple,<:NamedTuple};
+    config::Dict = Dict{Any,Any}(),
+)
     chain, parameters, _ = predictor
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for (layer, parameter) in zip(chain.layers, parameters)
         _add_predictor(inner_predictor, layer, parameter, config)
     end
-    if reduced_space
-        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
-    end
-    return MathOptAI.add_predictor(model, inner_predictor, x)
+    return inner_predictor
 end
 
 _default(::typeof(identity)) = nothing

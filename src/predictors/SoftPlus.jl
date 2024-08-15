@@ -19,7 +19,8 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.SoftPlus();
+julia> f = MathOptAI.SoftPlus()
+SoftPlus()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:

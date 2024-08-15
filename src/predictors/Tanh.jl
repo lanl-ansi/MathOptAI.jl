@@ -19,7 +19,8 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.Tanh();
+julia> f = MathOptAI.Tanh()
+Tanh()
 
 julia> y = MathOptAI.add_predictor(model, f, x)
 2-element Vector{VariableRef}:

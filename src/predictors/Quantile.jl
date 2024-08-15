@@ -20,7 +20,8 @@ julia> @variable(model, 1 <= x <= 2);
 
 julia> predictor = MathOptAI.Quantile([0.1, 0.9]) do x
            return Distributions.Normal(x, 3 - x)
-       end;
+       end
+Quantile(_, [0.1, 0.9])
 
 julia> y = MathOptAI.add_predictor(model, predictor, [x])
 2-element Vector{VariableRef}:
@@ -31,6 +32,10 @@ julia> y = MathOptAI.add_predictor(model, predictor, [x])
 struct Quantile{D} <: AbstractPredictor
     distribution::D
     quantiles::Vector{Float64}
+end
+
+function Base.show(io::IO, q::Quantile)
+    return print(io, "Quantile(_, $(q.quantiles))")
 end
 
 function add_predictor(model::JuMP.Model, predictor::Quantile, x::Vector)

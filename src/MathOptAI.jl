@@ -36,9 +36,7 @@ Return a `Vector{JuMP.VariableRef}` representing `y` such that
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
@@ -60,21 +58,15 @@ Subject to
 function add_predictor end
 
 """
-    add_predictor(
-        model::JuMP.Model,
-        predictor::AbstractPredictor,
-        x::Matrix,
-    )::Matrix{JuMP.VariableRef}
+    add_predictor(model::JuMP.Model, predictor, x::Matrix)
 
-Return a `Matrix{JuMP.VariableRef}`, representing `y` such that
-`y[:, i] = predictor(x[:, i])` for each columnn `i`.
+Return a `Matrix`, representing `y` such that `y[:, i] = predictor(x[:, i])` for
+each columnn `i`.
 
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
@@ -95,11 +87,7 @@ Subject to
  2 x[1,3] + 3 x[2,3] - moai_Affine[1] = 0
 ```
 """
-function add_predictor(
-    model::JuMP.Model,
-    predictor,
-    x::Matrix,
-)::Matrix{JuMP.VariableRef}
+function add_predictor(model::JuMP.Model, predictor, x::Matrix)
     y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
     return reduce(hcat, y)
 end
@@ -122,9 +110,7 @@ A wrapper type for other predictors that implement a reduced-space formulation.
 ## Example
 
 ```jldoctest
-julia> using JuMP
-
-julia> import MathOptAI
+julia> using JuMP, MathOptAI
 
 julia> model = Model();
 

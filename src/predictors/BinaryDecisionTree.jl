@@ -55,7 +55,7 @@ Subject to
  moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
 ```
 """
-struct BinaryDecisionTree{K,V}
+struct BinaryDecisionTree{K,V} <: AbstractPredictor
     feat_id::Int
     feat_value::K
     lhs::Union{V,BinaryDecisionTree{K,V}}

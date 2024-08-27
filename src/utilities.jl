@@ -23,8 +23,8 @@ end
 
 function _set_bounds_if_finite(
     x::JuMP.GenericVariableRef{T},
-    l::Union{Nothing,T},
-    u::Union{Nothing,T},
+    l::Union{Nothing,Real},
+    u::Union{Nothing,Real},
 ) where {T}
     if l !== nothing && l > typemin(T)
         JuMP.set_lower_bound(x, l)

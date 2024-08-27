@@ -47,7 +47,7 @@ struct Tanh <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, ::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
-    _set_bounds_if_finite.(y, -1.0, 1.0)
+    _set_bounds_if_finite.(y, -1, 1)
     JuMP.@constraint(model, y .== tanh.(x))
     return y
 end

@@ -59,7 +59,11 @@ function Base.show(io::IO, p::Pipeline)
     return
 end
 
-function add_predictor(model::JuMP.Model, predictor::Pipeline, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Pipeline,
+    x::Vector,
+)
     for layer in predictor.layers
         x = add_predictor(model, layer, x)
     end
@@ -67,7 +71,7 @@ function add_predictor(model::JuMP.Model, predictor::Pipeline, x::Vector)
 end
 
 function add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::ReducedSpace{Pipeline},
     x::Vector,
 )

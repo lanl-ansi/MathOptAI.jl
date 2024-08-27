@@ -6,9 +6,9 @@
 
 """
     Affine(
-        A::Matrix{Float64},
-        b::Vector{Float64} = zeros(size(A, 1)),
-    ) <: AbstractPredictor
+        A::Matrix{T},
+        b::Vector{T} = zeros(T, size(A, 1)),
+    ) where {T} <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that represents the affine relationship:
 ```math
@@ -41,17 +41,17 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
  2 x[1] + 3 x[2]
 ```
 """
-struct Affine <: AbstractPredictor
-    A::Matrix{Float64}
-    b::Vector{Float64}
+struct Affine{T} <: AbstractPredictor
+    A::Matrix{T}
+    b::Vector{T}
 end
 
-function Affine(A::Matrix{Float64})
-    return Affine(A, zeros(size(A, 1)))
+function Affine(A::Matrix{T}) where {T}
+    return Affine{T}(A, zeros(T, size(A, 1)))
 end
 
-function Affine(A::Vector{Float64})
-    return Affine(reshape(A, 1, length(A)), [0.0])
+function Affine(A::Vector{T}) where {T}
+    return Affine{T}(reshape(A, 1, length(A)), [zero(T)])
 end
 
 function Base.show(io::IO, p::Affine)
@@ -59,7 +59,7 @@ function Base.show(io::IO, p::Affine)
     return print(io, "Affine(A, b) [input: $n, output: $m]")
 end
 
-function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
+function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")
     bounds = _get_variable_bounds.(x)
@@ -78,8 +78,8 @@ function add_predictor(model::JuMP.Model, predictor::Affine, x::Vector)
 end
 
 function add_predictor(
-    model::JuMP.Model,
-    predictor::ReducedSpace{Affine},
+    model::JuMP.AbstractModel,
+    predictor::ReducedSpace{<:Affine},
     x::Vector,
 )
     A, b = predictor.predictor.A, predictor.predictor.b

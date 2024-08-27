@@ -12,7 +12,7 @@ import MathOptAI
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::Flux.Chain,
         x::Vector;
         config::Dict = Dict{Any,Any}(),
@@ -62,7 +62,7 @@ julia> y = MathOptAI.add_predictor(
 ```
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::Flux.Chain,
     x::Vector;
     config::Dict = Dict{Any,Any}(),

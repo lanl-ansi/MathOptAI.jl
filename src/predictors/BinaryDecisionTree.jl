@@ -69,7 +69,7 @@ function Base.show(io::IO, predictor::BinaryDecisionTree{K,V}) where {K,V}
 end
 
 function add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::BinaryDecisionTree,
     x::Vector;
     atol::Float64 = 0.0,

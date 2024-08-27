@@ -12,7 +12,7 @@ import MathOptAI
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::DecisionTree.Root,
         x::Vector,
     )
@@ -49,7 +49,7 @@ julia> y = MathOptAI.add_predictor(model, ml_model, x)
 ```
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::DecisionTree.Root,
     x::Vector,
 )

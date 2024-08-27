@@ -43,15 +43,17 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 """
 struct ReLU <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, ::ReLU, x::Vector)
+function add_predictor(model::JuMP.AbstractModel, ::ReLU, x::Vector)
     ub = last.(_get_variable_bounds.(x))
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0.0, ub)
+    _set_bounds_if_finite.(y, 0, ub)
     JuMP.@constraint(model, y .== max.(0, x))
     return y
 end
 
-add_predictor(::JuMP.Model, ::ReducedSpace{ReLU}, x::Vector) = max.(0, x)
+function add_predictor(::JuMP.AbstractModel, ::ReducedSpace{ReLU}, x::Vector)
+    return max.(0, x)
+end
 
 """
     ReLUBigM(M::Float64) <: AbstractPredictor
@@ -101,18 +103,22 @@ struct ReLUBigM <: AbstractPredictor
     M::Float64
 end
 
-function add_predictor(model::JuMP.Model, predictor::ReLUBigM, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::ReLUBigM,
+    x::Vector,
+)
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0.0, last.(bounds))
+    _set_bounds_if_finite.(y, 0, last.(bounds))
     for i in 1:m
         lb, ub = bounds[i]
         z = JuMP.@variable(model, binary = true)
         JuMP.@constraint(model, y[i] >= x[i])
         U = min(ub, predictor.M)
         JuMP.@constraint(model, y[i] <= U * z)
-        L = min(max(0.0, -lb), predictor.M)
+        L = min(max(0, -lb), predictor.M)
         JuMP.@constraint(model, y[i] <= x[i] + L * (1 - z))
     end
     return y
@@ -167,13 +173,17 @@ Subject to
 """
 struct ReLUSOS1 <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLUSOS1, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::ReLUSOS1,
+    x::Vector,
+)
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0.0, last.(bounds))
+    _set_bounds_if_finite.(y, 0, last.(bounds))
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "_z")
-    _set_bounds_if_finite.(z, -Inf, -first.(bounds))
+    _set_bounds_if_finite.(z, nothing, -first.(bounds))
     JuMP.@constraint(model, x .== y - z)
     for i in 1:m
         JuMP.@constraint(model, [y[i], z[i]] in MOI.SOS1([1.0, 2.0]))
@@ -230,13 +240,17 @@ Subject to
 """
 struct ReLUQuadratic <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, predictor::ReLUQuadratic, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::ReLUQuadratic,
+    x::Vector,
+)
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0.0, last.(bounds))
+    _set_bounds_if_finite.(y, 0, last.(bounds))
     z = JuMP.@variable(model, [1:m], base_name = "_z")
-    _set_bounds_if_finite.(z, 0.0, -first.(bounds))
+    _set_bounds_if_finite.(z, 0, -first.(bounds))
     JuMP.@constraint(model, x .== y - z)
     JuMP.@constraint(model, y .* z .== 0)
     return y

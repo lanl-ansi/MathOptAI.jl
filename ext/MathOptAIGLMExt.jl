@@ -12,7 +12,7 @@ import MathOptAI
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::GLM.LinearModel,
         x::Vector;
         reduced_space::Bool = false,
@@ -39,7 +39,7 @@ julia> y = MathOptAI.add_predictor(model, model_glm, x)
 ```
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::GLM.LinearModel,
     x::Vector;
     reduced_space::Bool = false,
@@ -75,7 +75,7 @@ end
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::GLM.GeneralizedLinearModel{
             GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
         },
@@ -114,7 +114,7 @@ julia> y = MathOptAI.add_predictor(
 ```
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::GLM.GeneralizedLinearModel{
         GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
     },

@@ -25,13 +25,12 @@ abstract type AbstractPredictor end
 
 """
     add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::AbstractPredictor,
         x::Vector,
-    )::Vector{JuMP.VariableRef}
+    )::Vector
 
-Return a `Vector{JuMP.VariableRef}` representing `y` such that
-`y = predictor(x)`.
+Return a `Vector` representing `y` such that `y = predictor(x)`.
 
 The element type of `x` is deliberately unspecified. The vector `x` may contain
 any mix of scalar constants, JuMP decision variables, and scalar JuMP functions
@@ -62,7 +61,7 @@ Subject to
 function add_predictor end
 
 """
-    add_predictor(model::JuMP.Model, predictor, x::Matrix)
+    add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
 
 Return a `Matrix`, representing `y` such that `y[:, i] = predictor(x[:, i])` for
 each columnn `i`.
@@ -91,7 +90,7 @@ Subject to
  2 x[1,3] + 3 x[2,3] - moai_Affine[1] = 0
 ```
 """
-function add_predictor(model::JuMP.Model, predictor, x::Matrix)
+function add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
     y = map(j -> add_predictor(model, predictor, x[:, j]), 1:size(x, 2))
     return reduce(hcat, y)
 end

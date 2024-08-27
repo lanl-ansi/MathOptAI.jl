@@ -33,6 +33,10 @@ abstract type AbstractPredictor end
 Return a `Vector{JuMP.VariableRef}` representing `y` such that
 `y = predictor(x)`.
 
+The element type of `x` is deliberately unspecified. The vector `x` may contain
+any mix of scalar constants, JuMP decision variables, and scalar JuMP functions
+like `AffExpr`, `QuadExpr`, or `NonlinearExpr`.
+
 ## Example
 
 ```jldoctest

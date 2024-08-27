@@ -9,6 +9,11 @@
 
 A wrapper struct for loading a Pytorch model.
 
+The only supported file extension is `.pt`, where the `.pt` file has been
+created using `torch.save(model, filename)`.
+
+## Example
+
 ```jldoctest
 julia> using PythonCall, MathOptAI
 

@@ -41,6 +41,9 @@ import PythonCall
 # and then use `torch.save(model, filename)` to save it to a `.pt` file for
 # later use in Julia.
 
+# The model is unimportant, but for this example, we are trying to fit noisy
+# observations of the function ``f(x) = x^2 - 2x``.
+
 filename = joinpath(@__DIR__, "model.pt")
 PythonCall.pyexec(
     """
@@ -56,7 +59,7 @@ PythonCall.pyexec(
     x = torch.arange(-2, 2 + 4 / (n - 1), 4 / (n - 1)).reshape(n, 1)
     for epoch in range(100):
         N = torch.normal(torch.zeros(n, 1), torch.ones(n, 1))
-        y = -2 * x + x ** 2 + 0.1 * N
+        y = x ** 2 -2 * x + 0.1 * N
         optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
         model.train()
         loss_fn = torch.nn.MSELoss()
@@ -83,6 +86,10 @@ set_silent(model)
 ml_model = MathOptAI.PytorchModel(filename)
 y = MathOptAI.add_predictor(model, ml_model, [x])
 @objective(model, Min, only(y))
+
+# Now, visualize the fitted function `y = ml_model(x)` by repeatedly solving the
+# optimization problem for different fixed values of `x`:
+
 X, Y = -2:0.1:2, Float64[]
 @constraint(model, c, x == 0.0)
 for xi in X
@@ -91,5 +98,5 @@ for xi in X
     @test is_solved_and_feasible(model)
     push!(Y, objective_value(model))
 end
-Plots.plot(x -> x * (x - 2), X; label = "Truth", linestype = :dot)
+Plots.plot(x -> x^2 - 2x, X; label = "Truth", linestype = :dot)
 Plots.plot!(X, Y; label = "Fitted")

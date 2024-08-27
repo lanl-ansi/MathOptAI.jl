@@ -35,9 +35,10 @@ Add a trained neural network from Flux.jl to `model`.
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps `Flux` activation functions to an
-   [`AbstractPredictor`](@ref) to control how the activation functions are
-   reformulated.
+ * `config`: a dictionary that maps supported `Flux` activation functions to
+   [`AbstractPredictor`](@ref)s that control how the activation functions are
+   reformulated. For example, `Flux.sigmoid => MathOptAI.Sigmoid()` or
+   `Flux.relu => MathOptAI.QuadraticReLU()`.
 
 ## Example
 
@@ -96,9 +97,10 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps `Flux` activation functions to an
-   [`AbstractPredictor`](@ref) to control how the activation functions are
-   reformulated.
+ * `config`: a dictionary that maps supported `Flux` activation functions to
+   [`AbstractPredictor`](@ref)s that control how the activation functions are
+   reformulated. For example, `Flux.sigmoid => MathOptAI.Sigmoid()` or
+   `Flux.relu => MathOptAI.QuadraticReLU()`.
 
 ## Example
 

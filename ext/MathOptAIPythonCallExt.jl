@@ -31,8 +31,10 @@ Add a trained neural network from Pytorch via PythonCall.jl to `model`.
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps symbols to an [`AbstractPredictor`](@ref)
-   to control how the activation functions are reformulated.
+ * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
+   that control how the activation functions are reformulated. For example,
+   `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
+   The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
 """
 function MathOptAI.add_predictor(
     model::JuMP.Model,
@@ -70,8 +72,10 @@ Convert a trained neural network from Pytorch via PythonCall.jl to a
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps symbols to an [`AbstractPredictor`](@ref)
-   to control how the activation functions are reformulated.
+ * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
+   that control how the activation functions are reformulated. For example,
+   `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
+   The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;

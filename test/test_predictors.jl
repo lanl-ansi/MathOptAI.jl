@@ -331,6 +331,12 @@ function test_ReducedSpace_Tanh()
     return
 end
 
+function test_ReducedSpace_ReducedSpace()
+    predictor = MathOptAI.ReducedSpace(MathOptAI.Tanh())
+    @test MathOptAI.ReducedSpace(predictor) === predictor
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

@@ -128,6 +128,8 @@ struct ReducedSpace{P<:AbstractPredictor} <: AbstractPredictor
     predictor::P
 end
 
+ReducedSpace(predictor::ReducedSpace) = predictor
+
 include("utilities.jl")
 
 for file in filter(

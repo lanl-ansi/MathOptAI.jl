@@ -79,7 +79,7 @@ end
 
 function add_predictor(
     model::JuMP.AbstractModel,
-    predictor::ReducedSpace{Affine},
+    predictor::ReducedSpace{<:Affine},
     x::Vector,
 )
     A, b = predictor.predictor.A, predictor.predictor.b

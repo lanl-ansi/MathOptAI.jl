@@ -4,8 +4,8 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
-function _get_variable_bounds(x::JuMP.VariableRef)
-    lb, ub = -Inf, Inf
+function _get_variable_bounds(x::JuMP.GenericVariableRef{T}) where {T}
+    lb, ub = typemin(T), typemax(T)
     if JuMP.has_upper_bound(x)
         ub = JuMP.upper_bound(x)
     end
@@ -16,16 +16,20 @@ function _get_variable_bounds(x::JuMP.VariableRef)
         lb = ub = JuMP.fix_value(x)
     end
     if JuMP.is_binary(x)
-        lb, ub = max(0.0, lb), min(1.0, ub)
+        lb, ub = max(zero(T), lb), min(one(T), ub)
     end
     return lb, ub
 end
 
-function _set_bounds_if_finite(x::JuMP.VariableRef, l::Float64, u::Float64)
-    if isfinite(l)
+function _set_bounds_if_finite(
+    x::JuMP.GenericVariableRef{T},
+    l::T,
+    u::T,
+) where {T}
+    if l > typemin(T)
         JuMP.set_lower_bound(x, l)
     end
-    if isfinite(u)
+    if u < typemax(T)
         JuMP.set_upper_bound(x, u)
     end
     return
@@ -35,4 +39,4 @@ end
 _get_variable_bounds(::Any) = -Inf, Inf
 
 # Default fallback: skip setting variable bound
-_set_bounds_if_finite(::Any, ::Float64, ::Float64) = nothing
+_set_bounds_if_finite(::Any, ::Any, ::Any) = nothing

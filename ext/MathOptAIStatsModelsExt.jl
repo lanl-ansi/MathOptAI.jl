@@ -13,7 +13,7 @@ import StatsModels
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::StatsModels.TableRegressionModel,
         x::DataFrames.DataFrame;
         kwargs...,
@@ -62,7 +62,7 @@ julia> test_df.y = MathOptAI.add_predictor(model, predictor, test_df)
 ```
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::StatsModels.TableRegressionModel,
     df::DataFrames.DataFrame;
     kwargs...,

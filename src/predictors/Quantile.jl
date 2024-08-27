@@ -38,7 +38,11 @@ function Base.show(io::IO, q::Quantile)
     return print(io, "Quantile(_, $(q.quantiles))")
 end
 
-function add_predictor(model::JuMP.Model, predictor::Quantile, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Quantile,
+    x::Vector,
+)
     M, N = length(x), length(predictor.quantiles)
     y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     quantile(q, x...) = Distributions.quantile(predictor.distribution(x...), q)

@@ -47,7 +47,7 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 """
 struct SoftMax <: AbstractPredictor end
 
-function add_predictor(model::JuMP.Model, ::SoftMax, x::Vector)
+function add_predictor(model::JuMP.AbstractModel, ::SoftMax, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftMax")
     _set_bounds_if_finite.(y, 0.0, 1.0)
     denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
@@ -57,7 +57,11 @@ function add_predictor(model::JuMP.Model, ::SoftMax, x::Vector)
     return y
 end
 
-function add_predictor(model::JuMP.Model, ::ReducedSpace{SoftMax}, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    ::ReducedSpace{SoftMax},
+    x::Vector,
+)
     denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
     JuMP.set_lower_bound(denom, 0.0)
     JuMP.@constraint(model, denom == sum(exp.(x)))

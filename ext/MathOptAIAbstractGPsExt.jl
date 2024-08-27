@@ -13,7 +13,7 @@ import MathOptAI
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::MathOptAI.Quantile{<:AbstractGPs.PosteriorGP},
         x::Vector,
     )
@@ -49,7 +49,7 @@ moai_quantile[2] - moai_quantile[1]
 ```
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::MathOptAI.Quantile{<:AbstractGPs.PosteriorGP},
     x::Vector,
 )

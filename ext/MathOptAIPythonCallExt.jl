@@ -12,7 +12,7 @@ import MathOptAI
 
 """
     MathOptAI.add_predictor(
-        model::JuMP.Model,
+        model::JuMP.AbstractModel,
         predictor::MathOptAI.PytorchModel,
         x::Vector;
         config::Dict = Dict{Any,Any}(),
@@ -35,7 +35,7 @@ Add a trained neural network from Pytorch via PythonCall.jl to `model`.
    to control how the activation functions are reformulated.
 """
 function MathOptAI.add_predictor(
-    model::JuMP.Model,
+    model::JuMP.AbstractModel,
     predictor::MathOptAI.PytorchModel,
     x::Vector;
     config::Dict = Dict{Any,Any}(),

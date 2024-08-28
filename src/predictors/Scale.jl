@@ -28,15 +28,15 @@ julia> f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
 Scale(scale, bias)
 
 julia> y = MathOptAI.add_predictor(model, f, x)
-1-element Vector{VariableRef}:
+2-element Vector{VariableRef}:
  moai_Scale[1]
  moai_Scale[2]
 
 julia> print(model)
 Feasibility
 Subject to
- 2 x[1] + moai_Scale[1] = -4
- 3 x[2] + moai_Scale[2] = -5
+ 2 x[1] - moai_Scale[1] = -4
+ 3 x[2] - moai_Scale[2] = -5
 
 julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 2-element Vector{AffExpr}:

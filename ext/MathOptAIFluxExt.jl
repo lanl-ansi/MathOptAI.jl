@@ -24,6 +24,7 @@ Add a trained neural network from Flux.jl to `model`.
 ## Supported layers
 
  * `Flux.Dense`
+ * `Flux.Scale`
  * `Flux.softmax`
 
 ## Supported activation functions
@@ -86,6 +87,7 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
 ## Supported layers
 
  * `Flux.Dense`
+ * `Flux.Scale`
  * `Flux.softmax`
 
 ## Supported activation functions
@@ -169,6 +171,16 @@ function _add_predictor(
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Affine(layer.weight, layer.bias))
+    _add_predictor(predictor, layer.σ, config)
+    return
+end
+
+function _add_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Flux.Scale,
+    config::Dict,
+)
+    push!(predictor.layers, MathOptAI.Scale(layer.scale, layer.bias))
     _add_predictor(predictor, layer.σ, config)
     return
 end

@@ -46,11 +46,6 @@ Affine
 BinaryDecisionTree
 ```
 
-## `OffsetScaling`
-```@docs
-OffsetScaling
-```
-
 ## `Pipeline`
 ```@docs
 Pipeline
@@ -89,6 +84,11 @@ ReLUQuadratic
 ## `ReLUSOS1`
 ```@docs
 ReLUSOS1
+```
+
+## `Scale`
+```@docs
+Scale
 ```
 
 ## `Sigmoid`

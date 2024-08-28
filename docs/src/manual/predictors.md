@@ -14,13 +14,13 @@ The following predictors are supported. See their docstrings for details:
 | :----------------- | :------------------------------------- | :--------- |
 | [`Affine`](@ref)   |  $f(x) = Ax + b$                       | $M \rightarrow N$   |
 | [`BinaryDecisionTree`](@ref) | A binary decision tree       | $M \rightarrow 1$   |
-| [`OffsetScaling`](@ref) |  $f(x) = \frac{x - offset}{factor}$ | $M \rightarrow M$ |
 | [`Pipeline`](@ref) |  $f(x) = (l_1 \circ \ldots \circ l_N)(x)$ | $M \rightarrow N$ |
 | [`Quantile`](@ref) |  The quantiles of a distribution       | $M \rightarrow N$   |
 | [`ReLU`](@ref)     |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |
 | [`ReLUBigM`](@ref) |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |
 | [`ReLUQuadratic`](@ref) |  $f(x) = \max.(0, x)$             | $M \rightarrow M$   |
 | [`ReLUSOS1`](@ref) |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |
+| [`Scale`](@ref)    |  $f(x) = scale .* x .+ bias$           | $M \rightarrow M$   |
 | [`Sigmoid`](@ref)  |  $f(x) = \frac{1}{1 + e^{-x}}$         | $M \rightarrow M$   |
 | [`SoftMax`](@ref)  |  $f(x) = \frac{e^{x_i}}{\sum e^{x_i}}$ | $M \rightarrow 1$   |
 | [`SoftPlus`](@ref) |  $f(x) = \log(1 + e^x)$                | $M \rightarrow M$   |

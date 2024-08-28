@@ -216,11 +216,3 @@ We do not use "machine learning model" because we have support for the linear
 and logistic regression models of classical statistical fitting. We could have
 used "regression model", but we find that models like neural networks and
 binary decision trees are not commonly thought of as regression models.
-
-## Scaling
-
-OMLT and gurobi-machinelearning both supports scaling the inputs and outputs of
-a layer.
-
-MathOptAI does not. But it seems like there is demand, so we should probably add
-this.

@@ -201,6 +201,19 @@ function test_unsupported_layer()
     return
 end
 
+function test_gray_box()
+    chain = Flux.Chain(Flux.Dense(2 => 16, Flux.relu), Flux.Dense(16 => 1))
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, 0 <= x[1:2] <= 1)
+    y = MathOptAI.add_predictor(model, chain, x; gray_box = true)
+    @objective(model, Max, only(y))
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

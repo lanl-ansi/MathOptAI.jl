@@ -68,12 +68,50 @@ function MathOptAI.add_predictor(
     x::Vector;
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
+    gray_box::Bool = false,
 )
+    if gray_box
+        return _add_gray_box_predictor(model, predictor, x)
+    end
     inner_predictor = MathOptAI.build_predictor(predictor; config)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
+end
+
+function _add_gray_box_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Flux.Chain,
+    x::Vector,
+)
+    input_size = length(x)
+    output_size = only(Flux.outputsize(predictor, (input_size,)))
+    if output_size != 1
+        error("Unable to add vector-valued gray-box")
+    end
+    last_x, last_f, last_∇f = nothing, nothing, nothing
+    function update(x)
+        if x != last_x
+            ret = Flux.withgradient(collect(x)) do x
+                return only(predictor(Float32.(x)))
+            end
+            last_x = x
+            last_f, last_∇f = Float64(ret.val), Float64.(only(ret.grad))
+        end
+        return
+    end
+    function f(x...)
+        update(x)
+        return last_f
+    end
+    function ∇f(g, x...)
+        update(x)
+        g .= last_∇f
+        return
+    end
+    op = JuMP.add_nonlinear_operator(model, input_size, f, ∇f; name = :op_flux)
+    return [op(x...)]
 end
 
 """

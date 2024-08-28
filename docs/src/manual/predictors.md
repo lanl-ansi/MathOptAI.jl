@@ -14,6 +14,7 @@ The following predictors are supported. See their docstrings for details:
 | :----------------- | :------------------------------------- | :--------- |
 | [`Affine`](@ref)   |  $f(x) = Ax + b$                       | $M \rightarrow N$   |
 | [`BinaryDecisionTree`](@ref) | A binary decision tree       | $M \rightarrow 1$   |
+| [`OffsetScaling`](@ref) |  $f(x) = \frac{x - offset}{factor}$ | $M \rightarrow M$ |
 | [`Pipeline`](@ref) |  $f(x) = (l_1 \circ \ldots \circ l_N)(x)$ | $M \rightarrow N$ |
 | [`Quantile`](@ref) |  The quantiles of a distribution       | $M \rightarrow N$   |
 | [`ReLU`](@ref)     |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |

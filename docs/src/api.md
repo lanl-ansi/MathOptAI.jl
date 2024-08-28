@@ -46,6 +46,11 @@ Affine
 BinaryDecisionTree
 ```
 
+## `OffsetScaling`
+```@docs
+OffsetScaling
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

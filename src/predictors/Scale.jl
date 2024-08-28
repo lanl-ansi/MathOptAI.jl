@@ -53,11 +53,7 @@ function Base.show(io::IO, ::Scale)
     return print(io, "Scale(scale, bias)")
 end
 
-function add_predictor(
-    model::JuMP.AbstractModel,
-    predictor::Scale,
-    x::Vector,
-)
+function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
     m = length(predictor.scale)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Scale")
     bounds = _get_variable_bounds.(x)

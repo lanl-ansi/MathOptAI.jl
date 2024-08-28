@@ -216,3 +216,46 @@ We do not use "machine learning model" because we have support for the linear
 and logistic regression models of classical statistical fitting. We could have
 used "regression model", but we find that models like neural networks and
 binary decision trees are not commonly thought of as regression models.
+
+## Inputs are vectors
+
+MathOptAI assumes that all inputs ``x`` and outputs ``y`` to ``y = predictor(x)``
+are `Base.Vector`s.
+
+We make this choice for simplicity.
+
+In our opinion, Julia libraries often take a laissez-faire approach to the types
+that they support. In the optimistic case, this can lead to novel behavior by
+combining two packages that the package author had previously not considered or
+tested. In the pessimistic case, this can lead to incorrect results or cryptic
+error messagges.
+
+Exceptions to the `Vector` rule will be carefully considered and tested.
+
+Currently, there are two exceptions:
+
+ 1. If `x` is a `Matrix`, then the columns of `x` are interpreted as independent
+    observations, and the output `y` will be a `Matrix` with the same number of
+    columns
+ 2. The `StatsModels` extension allows `x` to be a `DataFrames.DataFrame`, if
+    the predictor is a `StatsModels.TableRegressionModel`.
+
+Exceptions 1 and 2 are combined in the `StatsModels` exception, so that the
+predictor is mapped over the rows of the `DataFrames.DataFrame` (which we assume
+will be a common use-case).
+
+We choose to interpret the rows as input variables and columns as independent
+observations (rather than the more traditional table-based approach where
+columns are the input variables and rows are observations) because Julia uses
+column-major ordering in `Matrix`. Another justification follows from the
+[`Affine`](@ref) predictor, ``f(x) = Ax + b``, where passing in a `Matrix` as
+`x` with column observations naturally leads to a `Matrix` output for `y` of the
+appropriate dimensions.
+
+We choose to make `y` a `Vector`, even for scalar outputs, to simplify code that
+works generically for many different predictors. Without this principle, there
+will inevitably be cases where a scalar and length-1 vector are confused.
+
+If you want to use a predictor that does not take `Vector` input (for example,
+it is an image as input to a neural network), the first preprocessing step
+should be to `vec` the input into a single `Vector`.

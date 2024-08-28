@@ -198,6 +198,20 @@ function test_end_to_end_Tanh()
     return
 end
 
+function test_unsupported_layer()
+    layer = Lux.Conv((5, 5), 3 => 7)
+    rng = Random.MersenneTwister()
+    ml_model = Lux.Chain(layer, layer)
+    parameters, state = Lux.setup(rng, ml_model)
+    model = Model()
+    @variable(model, x[1:2])
+    @test_throws(
+        ErrorException("Unsupported layer: $layer"),
+        MathOptAI.add_predictor(model, (ml_model, parameters, state), x),
+    )
+    return
+end
+
 end  # module
 
 TestLuxExt.runtests()

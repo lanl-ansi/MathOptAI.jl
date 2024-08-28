@@ -160,6 +160,10 @@ function MathOptAI.build_predictor(
     return inner_predictor
 end
 
+function _add_predictor(::MathOptAI.Pipeline, layer::Any, ::Any, ::Dict)
+    return error("Unsupported layer: $layer")
+end
+
 _default(::typeof(identity)) = nothing
 _default(::Any) = missing
 _default(::typeof(Lux.relu)) = MathOptAI.ReLU()
@@ -182,7 +186,7 @@ end
 function _add_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Lux.Dense,
-    p,
+    p::Any,
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Affine(p.weight, vec(p.bias)))
@@ -193,7 +197,7 @@ end
 function _add_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Lux.Scale,
-    p,
+    p::Any,
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Scale(p.weight, p.bias))

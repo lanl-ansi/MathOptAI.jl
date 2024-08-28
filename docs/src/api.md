@@ -86,6 +86,11 @@ ReLUQuadratic
 ReLUSOS1
 ```
 
+## `Scale`
+```@docs
+Scale
+```
+
 ## `Sigmoid`
 ```@docs
 Sigmoid

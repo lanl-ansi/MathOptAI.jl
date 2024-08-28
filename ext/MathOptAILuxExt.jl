@@ -24,6 +24,7 @@ Add a trained neural network from Lux.jl to `model`.
 ## Supported layers
 
  * `Lux.Dense`
+ * `Lux.Scale`
 
 ## Supported activation functions
 
@@ -96,6 +97,7 @@ Convert a trained neural network from Lux.jl to a [`Pipeline`](@ref).
 ## Supported layers
 
  * `Lux.Dense`
+ * `Lux.Scale`
 
 ## Supported activation functions
 
@@ -184,6 +186,17 @@ function _add_predictor(
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Affine(p.weight, vec(p.bias)))
+    _add_predictor(predictor, layer.activation, config)
+    return
+end
+
+function _add_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Lux.Scale,
+    p,
+    config::Dict,
+)
+    push!(predictor.layers, MathOptAI.Scale(p.weight, p.bias))
     _add_predictor(predictor, layer.activation, config)
     return
 end

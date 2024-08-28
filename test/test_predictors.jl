@@ -337,6 +337,26 @@ function test_ReducedSpace_ReducedSpace()
     return
 end
 
+function test_Scale()
+    model = Model()
+    @variable(model, x[1:2])
+    f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
+    @test sprint(show, f) == "Scale(scale, bias)"
+    y = MathOptAI.add_predictor(model, f, x)
+    cons = all_constraints(model; include_variable_in_set_constraints = false)
+    @test length(cons) == 2
+    objs = constraint_object.(cons)
+    @test objs[1].set == MOI.EqualTo(-4.0)
+    @test objs[2].set == MOI.EqualTo(-5.0)
+    @test isequal_canonical(objs[1].func, 2.0 * x[1] - y[1])
+    @test isequal_canonical(objs[2].func, 3.0 * x[2] - y[2])
+    y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+    cons = all_constraints(model; include_variable_in_set_constraints = false)
+    @test length(cons) == 2
+    @test isequal_canonical(y, [2.0 * x[1] + 4.0, 3.0 * x[2] + 5.0])
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

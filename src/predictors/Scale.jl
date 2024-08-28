@@ -68,7 +68,7 @@ function add_predictor(
         y_lb += scale * ifelse(scale >= 0, lb, ub)
         _set_bounds_if_finite(y[i], y_lb, y_ub)
     end
-    JuMP.@constraint(model, predictor .* x .+ predictor.bias .== y)
+    JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y)
     return y
 end
 

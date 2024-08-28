@@ -196,7 +196,7 @@ function _add_predictor(
     p,
     config::Dict,
 )
-    push!(predictor.layers, MathOptAI.Scale(p.scale, p.bias))
+    push!(predictor.layers, MathOptAI.Scale(p.weight, p.bias))
     _add_predictor(predictor, layer.activation, config)
     return
 end

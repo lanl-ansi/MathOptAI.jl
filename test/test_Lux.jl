@@ -49,6 +49,31 @@ function _train_lux_model(model)
     return (model, parameters, state)
 end
 
+function test_end_to_end_with_scale()
+    state = _train_lux_model(
+        Lux.Chain(
+            Lux.Scale(1),
+            Lux.Dense(1 => 16, Lux.relu),
+            Lux.Dense(16 => 1),
+        ),
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y = MathOptAI.add_predictor(
+        model,
+        state,
+        [x];
+        config = Dict(Lux.relu => MathOptAI.ReLUBigM(100.0)),
+    )
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value(x), -1.24; atol = 1e-2)
+    return
+end
+
 function test_end_to_end_ReLUBigM()
     state = _train_lux_model(
         Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1)),

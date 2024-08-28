@@ -77,6 +77,7 @@ Documenter.makedocs(;
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",
+            "manual/PyTorch.md",
         ],
         "Tutorials" => [
             "tutorials/student_enrollment.md",

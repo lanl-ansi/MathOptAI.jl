@@ -112,6 +112,10 @@ that it cannot do the following:
 # Not possible because dimension not given
 model.pred_constr.build_formulation(ReLU())
 ```
+In the context of MathOptAI, something like `ReLU()` is useful so that we can
+map generic layers like `Flux.relu => MathOptAI.ReLU()`, and so that we do not
+duplicate required dimension information in input and predictor (see the
+MathOptAI section below).
 
 ### MathOptAI
 
@@ -125,8 +129,9 @@ The main benefit of this approach is simplicity.
 
 First, the user probably already has the input `x` as decision variables or an
 expression in the model, so we do not need the `connect_input` constraint, and
-because we use a full-space formulation, the output `y` will always be a vector
-of decision variables, which avoids the need for a `connect_output` constraint.
+because we use a full-space formulation by default, the output `y` will always
+be a vector of decision variables, which avoids the need for a `connect_output`
+constraint.
 
 Second, predictors do not need to store dimension information, so we can have:
 ```julia
@@ -134,7 +139,7 @@ y = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
 ```
 for any size of `x`.
 
-The main downsides are that we do not return a `pred_constr` equivalent
+The main downsides are that we do not return a `pred_constr` equivalent that
 contains statistics on the reformulation, and that the user cannot delete a
 predictor from a model once added.
 
@@ -160,3 +165,62 @@ function LogisticRegression(A)
     return MathOptAI.Pipeline(MathOptAI.Affine(A), MathOptAI.Sigmoid())
 end
 ```
+
+## Controlling transformations
+
+Many predictors have multiple ways that they can be formulated in an
+optimization model. For example, [`ReLU`](@ref) implements the non-smooth
+nonlinear formulation ``y = \max\{x, 0\}``, while [`ReLUQuadratic`](@ref)
+implements a the complementarity formulation
+``x = y - slack; y, slack \\ge 0; y * slack == 0``.
+
+Choosing the appropriate formulation for the combination of model and solver can
+have a large impact on the performance.
+
+Because gurobi-machinelearning is specific to the Gurobi solver, they have a
+limited ability for the user to choose and implement different formulations.
+
+OMLT is more general, in that it has multiple ways of formulating layers such
+as ReLU. However, these are hard-coded into complete formulations such as
+`omlt.neuralnet.nn_formulation.ReluBigMFormulation` or
+`omlt.neuralnet.nn_formulation.ReluComplementarityFormulation`.
+
+In contrast, MathOptAI tries to take a maximally modular approach, where the
+user can control how the layers are formulated at runtime, including using a
+custom formulation that is not defined in MathOptAI.jl.
+
+Currently, we achive this with a `config` dictionary, which maps the various
+neural network layers to an [`AbstractPredictor`](@ref). For example:
+```julia
+chain = Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1));
+config = Dict(Flux.relu => MathOptAI.ReLU())
+predictor = MathOptAI.build_predictor(chain; config)
+```
+Please open a GitHub issue if you have a suggestion for a better API.
+
+## Terminology
+
+Because the field is relatively new, there is no settled choice of terminology.
+
+MathOptAI chooses to use "predictor" as the synonym for the machine learning
+model. Hence, we have `AbstractPredictor`, `add_predictor`, and
+`build_predictor`.
+
+In contrast, gurob-machinelearning tennds to use "regression model" and OMLT
+does not have a single unified API.
+
+We choose "predictor" because all models we implement are of the form
+``y = f(x)``.
+
+We do not use "machine learning model" because we have support for the linear
+and logistic regression models of classical statistical fitting. We could have
+used "regression model", but we find that models like neural networks and
+binary decision trees are not commonly thought of as regression models.
+
+## Scaling
+
+OMLT and gurobi-machinelearning both supports scaling the inputs and outputs of
+a layer.
+
+MathOptAI does not. But it seems like there is demand, so we should probably add
+this.

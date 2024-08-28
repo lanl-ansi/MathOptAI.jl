@@ -28,3 +28,19 @@ The following predictors are supported. See their docstrings for details:
 Note that some predictors, such as the ReLU ones, offer multiple formulations of
 the same mathematical relationship. The ''right'' choice is solver- and
 problem-dependent.
+
+## ReLU
+
+There are a number of different mathematical formulations for the rectified
+linear unit (ReLU).
+
+ * [`ReLU`](@ref): requires the solver to support the `max` nonlinear operator.
+ * [`ReLUBigM`](@ref): requires the solver to support mixed-integer linear
+   programs, and requires the user to have a priori knowledge of a suitable
+   value for the "big-M" parameter.
+ * [`ReLUQuadratic`](@ref): requires the solver to support quadratic equality
+   constraints
+ * [`ReLUSOS1`](@ref): requires the solver to support SOS-I constraints.
+
+The correct choice for which ReLU formulation to use is problem- and
+solver-dependent.

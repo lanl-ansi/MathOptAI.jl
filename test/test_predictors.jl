@@ -86,7 +86,7 @@ function test_Quantile()
     @test is_solved_and_feasible(model)
     @test ≈(value(x), 2; atol = 1e-4)
     d = Distributions.Normal(value(x), 3 - value(x))
-    y_target = Distributions.quantile(d, [0.1, 0.9])
+    y_target = map(q -> Distributions.quantile(d, q), [0.1, 0.9])
     @test ≈(value.(y), y_target; atol = 1e-4)
     return
 end

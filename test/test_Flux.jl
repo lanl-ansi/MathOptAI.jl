@@ -190,6 +190,17 @@ function test_end_to_end_Tanh()
     return
 end
 
+function test_unsupported_layer()
+    layer = Flux.Conv((5, 5), 3 => 7)
+    model = Model()
+    @variable(model, x[1:2])
+    @test_throws(
+        ErrorException("Unsupported layer: $layer"),
+        MathOptAI.add_predictor(model, Flux.Chain(layer), x),
+    )
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

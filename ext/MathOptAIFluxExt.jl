@@ -141,6 +141,10 @@ function MathOptAI.build_predictor(
     return inner_predictor
 end
 
+function _add_predictor(::MathOptAI.Pipeline, layer::Any, ::Dict)
+    return error("Unsupported layer: $layer")
+end
+
 _default(::typeof(identity)) = nothing
 _default(::Any) = missing
 _default(::typeof(Flux.relu)) = MathOptAI.ReLU()

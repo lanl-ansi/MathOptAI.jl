@@ -124,9 +124,9 @@ function MathOptAI.GrayBox(predictor::MathOptAI.PytorchModel)
     J = torch.func.jacrev(torch_model)
     # TODO(odow): I'm not sure if there is a better way to get the output
     # dimension of a torch model object?
-    output_size(::Any) = torch_model[-1].out_features
+    output_size(::Any) = PythonCall.pyconvert(Int, torch_model[-1].out_features)
     function with_jacobian(x)
-        py_x = torch.tensor(x)
+        py_x = torch.tensor(collect(x))
         py_value = torch_model(py_x).detach().numpy()
         py_jacobian = J(py_x).detach().numpy()
         return (;

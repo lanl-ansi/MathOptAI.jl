@@ -17,6 +17,7 @@ import MathOptAI
         x::Vector;
         config::Dict = Dict{Any,Any}(),
         reduced_space::Bool = false,
+        gray_box::Bool = false,
     )
 
 Add a trained neural network from Flux.jl to `model`.
@@ -40,6 +41,8 @@ Add a trained neural network from Flux.jl to `model`.
    [`AbstractPredictor`](@ref)s that control how the activation functions are
    reformulated. For example, `Flux.sigmoid => MathOptAI.Sigmoid()` or
    `Flux.relu => MathOptAI.QuadraticReLU()`.
+ * `gray_box`: if `true`, the neural network is added as a user-defined
+   nonlinear operator, with gradients provided by `Flux.withjacobian`.
 
 ## Example
 
@@ -70,54 +73,18 @@ function MathOptAI.add_predictor(
     reduced_space::Bool = false,
     gray_box::Bool = false,
 )
-    if gray_box
-        return _add_gray_box_predictor(model, predictor, x)
-    end
-    inner_predictor = MathOptAI.build_predictor(predictor; config)
+    inner_predictor = MathOptAI.build_predictor(predictor; config, gray_box)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 
-function _add_gray_box_predictor(
-    model::JuMP.AbstractModel,
-    predictor::Flux.Chain,
-    x::Vector,
-)
-    input_size = length(x)
-    output_size = only(Flux.outputsize(predictor, (input_size,)))
-    if output_size != 1
-        error("Unable to add vector-valued gray-box")
-    end
-    last_x, last_f, last_∇f = nothing, nothing, nothing
-    function update(x)
-        if x != last_x
-            ret = Flux.withgradient(collect(x)) do x
-                return only(predictor(Float32.(x)))
-            end
-            last_x = x
-            last_f, last_∇f = Float64(ret.val), Float64.(only(ret.grad))
-        end
-        return
-    end
-    function f(x...)
-        update(x)
-        return last_f
-    end
-    function ∇f(g, x...)
-        update(x)
-        g .= last_∇f
-        return
-    end
-    op = JuMP.add_nonlinear_operator(model, input_size, f, ∇f; name = :op_flux)
-    return [op(x...)]
-end
-
 """
     MathOptAI.build_predictor(
         predictor::Flux.Chain;
         config::Dict = Dict{Any,Any}(),
+        gray_box::Bool = false,
     )
 
 Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
@@ -141,6 +108,8 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
    [`AbstractPredictor`](@ref)s that control how the activation functions are
    reformulated. For example, `Flux.sigmoid => MathOptAI.Sigmoid()` or
    `Flux.relu => MathOptAI.QuadraticReLU()`.
+ * `gray_box`: if `true`, the neural network is added as a user-defined
+   nonlinear operator, with gradients provided by `Flux.withjacobian`.
 
 ## Example
 
@@ -171,12 +140,27 @@ Pipeline with layers:
 function MathOptAI.build_predictor(
     predictor::Flux.Chain;
     config::Dict = Dict{Any,Any}(),
+    gray_box::Bool = false,
 )
+    if gray_box
+        return _build_gray_box(predictor)
+    end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
         _add_predictor(inner_predictor, layer, config)
     end
     return inner_predictor
+end
+
+function _build_gray_box(predictor::Flux.Chain)
+    function output_size(x)
+        return only(Flux.outputsize(predictor, (length(x),)))
+    end
+    function with_jacobian(x)
+        ret = Flux.withjacobian(x -> predictor(Float32.(x)), collect(x))
+        return (value = ret.val, jacobian = only(ret.rad))
+    end
+    return MathOptAI.GrayBox(output_size, with_jacobian)
 end
 
 function _add_predictor(::MathOptAI.Pipeline, layer::Any, ::Dict)

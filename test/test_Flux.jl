@@ -207,11 +207,26 @@ function test_gray_box_scalar_output()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:2] <= 1)
-    y = MathOptAI.add_predictor(model, chain, x; gray_box = true)
+    y = MathOptAI.add_predictor(
+        model,
+        chain,
+        x;
+        gray_box = true,
+        reduced_space = true,
+    )
     @objective(model, Max, only(y))
     optimize!(model)
     @test termination_status(model) == ITERATION_LIMIT
     @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
+    y = MathOptAI.add_predictor(model, chain, x; gray_box = true)
+    @test y isa Vector{VariableRef}
+    config = Dict(Flux.relu => MathOptAI.ReLU())
+    @test_throws(
+        ErrorException(
+            "cannot specify the `config` kwarg if `gray_box = true`",
+        ),
+        MathOptAI.add_predictor(model, chain, x; gray_box = true, config),
+    )
     return
 end
 
@@ -221,7 +236,13 @@ function test_gray_box_vector_output()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:3] <= 1)
-    y = MathOptAI.add_predictor(model, chain, x; gray_box = true)
+    y = MathOptAI.add_predictor(
+        model,
+        chain,
+        x;
+        gray_box = true,
+        reduced_space = true,
+    )
     @test length(y) == 2
     @objective(model, Max, sum(y))
     optimize!(model)

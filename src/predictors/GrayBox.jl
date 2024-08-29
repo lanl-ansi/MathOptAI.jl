@@ -37,7 +37,7 @@ julia> f = MathOptAI.GrayBox(
        );
 
 julia> y = MathOptAI.add_predictor(model, f, x)
-1-element Vector{VariableRef}:
+2-element Vector{VariableRef}:
  moai_GrayBox[1]
  moai_GrayBox[2]
 

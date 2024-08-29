@@ -143,6 +143,9 @@ function MathOptAI.build_predictor(
     gray_box::Bool = false,
 )
     if gray_box
+        if !isempty(config)
+            error("cannot specify the `config` kwarg if `gray_box = true`")
+        end
         return _build_gray_box(predictor)
     end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])

@@ -146,7 +146,7 @@ function MathOptAI.build_predictor(
         if !isempty(config)
             error("cannot specify the `config` kwarg if `gray_box = true`")
         end
-        return _build_gray_box(predictor)
+        return MathOptAI.GrayBox(predictor)
     end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
@@ -155,7 +155,7 @@ function MathOptAI.build_predictor(
     return inner_predictor
 end
 
-function _build_gray_box(predictor::Flux.Chain)
+function MathOptAI.GrayBox(predictor::Flux.Chain)
     function output_size(x)
         return only(Flux.outputsize(predictor, (length(x),)))
     end

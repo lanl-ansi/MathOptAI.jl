@@ -17,6 +17,7 @@ import MathOptAI
         x::Vector;
         config::Dict = Dict{Any,Any}(),
         reduced_space::Bool = false,
+        gray_box::Bool = false,
     )
 
 Add a trained neural network from Pytorch via PythonCall.jl to `model`.
@@ -35,6 +36,8 @@ Add a trained neural network from Pytorch via PythonCall.jl to `model`.
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
    The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
+ * `gray_box`: if `true`, the neural network is added as a user-defined
+   nonlinear operator, with gradients provided by `torch.func.jacrev`.
 """
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
@@ -42,8 +45,9 @@ function MathOptAI.add_predictor(
     x::Vector;
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
+    gray_box::Bool = false,
 )
-    inner_predictor = MathOptAI.build_predictor(predictor; config)
+    inner_predictor = MathOptAI.build_predictor(predictor; config, gray_box)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
@@ -54,6 +58,7 @@ end
     MathOptAI.build_predictor(
         predictor::MathOptAI.PytorchModel;
         config::Dict = Dict{Any,Any}(),
+        gray_box::Bool = false,
     )
 
 Convert a trained neural network from Pytorch via PythonCall.jl to a
@@ -73,11 +78,20 @@ Convert a trained neural network from Pytorch via PythonCall.jl to a
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
    The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
+ * `gray_box`: if `true`, the neural network is added as a user-defined
+   nonlinear operator, with gradients provided by `torch.func.jacrev`.
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;
     config::Dict = Dict{Any,Any}(),
+    gray_box::Bool = false,
 )
+    if gray_box
+        if !isempty(config)
+            error("cannot specify the `config` kwarg if `gray_box = true`")
+        end
+        return MathOptAI.GrayBox(predictor)
+    end
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
     torch_model = torch.load(predictor.filename)
@@ -102,6 +116,25 @@ function _predictor(nn, layer, config)
         return get(config, :Tanh, MathOptAI.Tanh())
     end
     return error("unsupported layer: $layer")
+end
+
+function MathOptAI.GrayBox(predictor::MathOptAI.PytorchModel)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(predictor.filename)
+    J = torch.func.jacrev(torch_model)
+    # TODO(odow): I'm not sure if there is a better way to get the output
+    # dimension of a torch model object?
+    output_size(::Any) = torch_model[-1].out_features
+    function with_jacobian(x)
+        py_x = torch.tensor(x)
+        py_value = torch_model(py_x).detach().numpy()
+        py_jacobian = J(py_x).detach().numpy()
+        return (;
+            value = PythonCall.pyconvert(Vector, py_value),
+            jacobian = PythonCall.pyconvert(Matrix, py_jacobian),
+        )
+    end
+    return MathOptAI.GrayBox(output_size, with_jacobian)
 end
 
 end  # module

@@ -51,7 +51,7 @@ julia> y
  tanh(x[2])
 
 julia> formulation
-ReducedSpace{Tanh}(Tanh())
+ReducedSpace(Tanh())
 ├ variables [0]
 └ constraints [0]
 ```

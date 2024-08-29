@@ -49,7 +49,7 @@ julia> y
  max(0.0, x[2])
 
 julia> formulation
-ReducedSpace{ReLU}(ReLU())
+ReducedSpace(ReLU())
 ├ variables [0]
 └ constraints [0]
 ```

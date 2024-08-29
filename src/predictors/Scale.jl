@@ -52,7 +52,7 @@ julia> y
  3 x[2] + 5
 
 julia> formulation
-ReducedSpace{Scale{Float64}}(Scale(scale, bias))
+ReducedSpace(Scale(scale, bias))
 ├ variables [0]
 └ constraints [0]
 ```

@@ -49,7 +49,7 @@ julia> y
  log(1.0 + exp(x[2]))
 
 julia> formulation
-ReducedSpace{SoftPlus}(SoftPlus())
+ReducedSpace(SoftPlus())
 ├ variables [0]
 └ constraints [0]
 ```

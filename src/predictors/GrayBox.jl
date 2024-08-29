@@ -64,7 +64,7 @@ julia> y
  op_##333(x[1], x[2])
 
 julia> formulation
-ReducedSpace{GrayBox{var"#31#33", var"#32#34"}}(GrayBox(output_size, with_jacobian))
+ReducedSpace(GrayBox(output_size, with_jacobian))
 ├ variables [0]
 └ constraints [0]
 ```

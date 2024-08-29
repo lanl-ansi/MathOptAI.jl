@@ -51,7 +51,7 @@ julia> y
  1.0 / (1.0 + exp(-x[2]))
 
 julia> formulation
-ReducedSpace{Sigmoid}(Sigmoid())
+ReducedSpace(Sigmoid())
 ├ variables [0]
 └ constraints [0]
 ```

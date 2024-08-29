@@ -242,6 +242,10 @@ end
 
 ReducedSpace(predictor::ReducedSpace) = predictor
 
+function Base.show(io::IO, predictor::ReducedSpace)
+    return print(io, "ReducedSpace(", predictor.predictor, ")")
+end
+
 include("utilities.jl")
 
 for file in filter(

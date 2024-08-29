@@ -48,7 +48,7 @@ julia> y
  2 x[1] + 3 x[2]
 
 julia> formulation
-ReducedSpace{Affine{Float64}}(Affine(A, b) [input: 2, output: 1])
+ReducedSpace(Affine(A, b) [input: 2, output: 1])
 ├ variables [0]
 └ constraints [0]
 ```

@@ -54,7 +54,7 @@ julia> y
  exp(x[2]) / moai_SoftMax_denom
 
 julia> formulation
-ReducedSpace{SoftMax}(SoftMax())
+ReducedSpace(SoftMax())
 ├ variables [1]
 │ └ moai_SoftMax_denom
 └ constraints [2]

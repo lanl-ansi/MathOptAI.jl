@@ -68,6 +68,21 @@ function SimpleFormulation(predictor::AbstractPredictor)
     return SimpleFormulation(predictor, Any[], Any[])
 end
 
+function Base.show(io::IO, formulation::SimpleFormulation)
+    println(io, formulation.predictor)
+    println(io, "├ variables [$(length(formulation.variables))]")
+    for (i, v) in enumerate(formulation.variables)
+        s = i == length(formulation.variables) ? "└" : "├"
+        println(io, "│ $s ", v)
+    end
+    print(io, "└ constraints [$(length(formulation.constraints))]")
+    for (i, c) in enumerate(formulation.constraints)
+        s = i == length(formulation.constraints) ? "└" : "├"
+        print(io, "\n  $s ", c)
+    end
+    return
+end
+
 """
     struct PipelineFormulation{P<:AbstractPredictor} <: AbstractFormulation
         predictor::P
@@ -86,6 +101,14 @@ end
 
 function PipelineFormulation(predictor::P, layers) where {P<:AbstractPredictor}
     return PipelineFormulation(predictor, convert(Vector{Any}, layers))
+end
+
+function Base.show(io::IO, formulation::PipelineFormulation)
+    println(io, formulation.predictor)
+    for (i, c) in enumerate(formulation.layers)
+        println(io, c)
+    end
+    return
 end
 
 """
@@ -119,10 +142,12 @@ julia> y
 1-element Vector{VariableRef}:
  moai_Affine[1]
 
-julia> print(model)
-Feasibility
-Subject to
- 2 x[1] + 3 x[2] - moai_Affine[1] = 0
+julia> formulation
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
 ```
 """
 function add_predictor end
@@ -151,12 +176,23 @@ julia> y
 1×3 Matrix{VariableRef}:
  moai_Affine[1]  moai_Affine[1]  moai_Affine[1]
 
-julia> print(model)
-Feasibility
-Subject to
- 2 x[1,1] + 3 x[2,1] - moai_Affine[1] = 0
- 2 x[1,2] + 3 x[2,2] - moai_Affine[1] = 0
- 2 x[1,3] + 3 x[2,3] - moai_Affine[1] = 0
+julia> formulation
+Affine(A, b) [input: 2, output: 1]
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 2 x[1,1] + 3 x[2,1] - moai_Affine[1] = 0
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 2 x[1,2] + 3 x[2,2] - moai_Affine[1] = 0
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 2 x[1,3] + 3 x[2,3] - moai_Affine[1] = 0
 ```
 """
 function add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)

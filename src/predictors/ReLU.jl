@@ -29,20 +29,27 @@ julia> y
  moai_ReLU[1]
  moai_ReLU[2]
 
-julia> print(model)
-Feasibility
-Subject to
- moai_ReLU[1] - max(0.0, x[1]) = 0
- moai_ReLU[2] - max(0.0, x[2]) = 0
- moai_ReLU[1] ≥ 0
- moai_ReLU[2] ≥ 0
+julia> formulation
+ReLU()
+├ variables [2]
+│ ├ moai_ReLU[1]
+│ └ moai_ReLU[2]
+└ constraints [2]
+  ├ moai_ReLU[1] - max(0.0, x[1]) = 0
+  └ moai_ReLU[2] - max(0.0, x[2]) = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
  max(0.0, x[1])
  max(0.0, x[2])
+
+julia> formulation
+ReducedSpace{ReLU}(ReLU())
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct ReLU <: AbstractPredictor end
@@ -88,25 +95,22 @@ julia> y
  moai_ReLU[1]
  moai_ReLU[2]
 
-julia> print(model)
-Feasibility
-Subject to
- -x[1] + moai_ReLU[1] ≥ 0
- -x[2] + moai_ReLU[2] ≥ 0
- moai_ReLU[1] - _[5] ≤ 0
- -x[1] + moai_ReLU[1] + 3 _[5] ≤ 3
- moai_ReLU[2] - 2 _[6] ≤ 0
- -x[2] + moai_ReLU[2] + 3 _[6] ≤ 3
- x[1] ≥ -3
- x[2] ≥ -3
- moai_ReLU[1] ≥ 0
- moai_ReLU[2] ≥ 0
- x[1] ≤ 1
- x[2] ≤ 2
- moai_ReLU[1] ≤ 1
- moai_ReLU[2] ≤ 2
- _[5] binary
- _[6] binary
+julia> formulation
+ReLUBigM(100.0)
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ _[5]
+│ └ _[6]
+└ constraints [8]
+  ├ _[5] binary
+  ├ -x[1] + moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] - _[5] ≤ 0
+  ├ -x[1] + moai_ReLU[1] + 3 _[5] ≤ 3
+  ├ _[6] binary
+  ├ -x[2] + moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] - 2 _[6] ≤ 0
+  └ -x[2] + moai_ReLU[2] + 3 _[6] ≤ 3
 ```
 """
 struct ReLUBigM <: AbstractPredictor
@@ -128,6 +132,7 @@ function add_predictor(
         lb, ub = bounds[i]
         z = JuMP.@variable(model, binary = true)
         push!(formulation.variables, z)
+        push!(formulation.constraints, JuMP.BinaryRef(z))
         c = JuMP.@constraint(model, y[i] >= x[i])
         push!(formulation.constraints, c)
         c = JuMP.@constraint(model, y[i] <= min(ub, predictor.M) * z)
@@ -171,21 +176,18 @@ julia> y
  moai_ReLU[1]
  moai_ReLU[2]
 
-julia> print(model)
-Feasibility
-Subject to
- x[1] - moai_ReLU[1] + _z[1] = 0
- x[2] - moai_ReLU[2] + _z[2] = 0
- [moai_ReLU[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
- [moai_ReLU[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
- x[1] ≥ -1
- x[2] ≥ -1
- moai_ReLU[1] ≥ 0
- moai_ReLU[2] ≥ 0
- _z[1] ≥ 0
- _z[2] ≥ 0
- _z[1] ≤ 1
- _z[2] ≤ 1
+julia> formulation
+ReLUSOS1()
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ _z[1]
+│ └ _z[2]
+└ constraints [4]
+  ├ x[1] - moai_ReLU[1] + _z[1] = 0
+  ├ x[2] - moai_ReLU[2] + _z[2] = 0
+  ├ [moai_ReLU[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+  └ [moai_ReLU[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
 ```
 """
 struct ReLUSOS1 <: AbstractPredictor end
@@ -242,21 +244,18 @@ julia> y
  moai_ReLU[1]
  moai_ReLU[2]
 
-julia> print(model)
-Feasibility
-Subject to
- x[1] - moai_ReLU[1] + _z[1] = 0
- x[2] - moai_ReLU[2] + _z[2] = 0
- moai_ReLU[1]*_z[1] = 0
- moai_ReLU[2]*_z[2] = 0
- x[1] ≥ -1
- x[2] ≥ -1
- moai_ReLU[1] ≥ 0
- moai_ReLU[2] ≥ 0
- _z[1] ≥ 0
- _z[2] ≥ 0
- _z[1] ≤ 1
- _z[2] ≤ 1
+julia> formulation
+ReLUQuadratic()
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ _z[1]
+│ └ _z[2]
+└ constraints [4]
+  ├ x[1] - moai_ReLU[1] + _z[1] = 0
+  ├ x[2] - moai_ReLU[2] + _z[2] = 0
+  ├ moai_ReLU[1]*_z[1] = 0
+  └ moai_ReLU[2]*_z[2] = 0
 ```
 """
 struct ReLUQuadratic <: AbstractPredictor end
@@ -270,7 +269,7 @@ function add_predictor(
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0, last.(bounds))
-    z = JuMP.@variable(model, [1:m], base_name = "_z")
+    z = JuMP.@variable(model, [1:m], base_name = "moai_z")
     _set_bounds_if_finite.(z, 0, -first.(bounds))
     c1 = JuMP.@constraint(model, x .== y - z)
     c2 = JuMP.@constraint(model, y .* z .== 0)

@@ -33,16 +33,24 @@ julia> y
 1-element Vector{VariableRef}:
  moai_Affine[1]
 
-julia> print(model)
-Feasibility
-Subject to
- 2 x[1] + 3 x[2] - moai_Affine[1] = 0
+julia> formulation
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 1-element Vector{AffExpr}:
  2 x[1] + 3 x[2]
+
+julia> formulation
+ReducedSpace{Affine{Float64}}(Affine(A, b) [input: 2, output: 1])
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct Affine{T} <: AbstractPredictor

@@ -27,25 +27,34 @@ julia> @variable(model, x[1:2]);
 julia> f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
 Scale(scale, bias)
 
-julia> y, _ = MathOptAI.add_predictor(model, f, x);
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
 julia> y
 2-element Vector{VariableRef}:
  moai_Scale[1]
  moai_Scale[2]
 
-julia> print(model)
-Feasibility
-Subject to
- 2 x[1] - moai_Scale[1] = -4
- 3 x[2] - moai_Scale[2] = -5
+julia> formulation
+Scale(scale, bias)
+├ variables [2]
+│ ├ moai_Scale[1]
+│ └ moai_Scale[2]
+└ constraints [2]
+  ├ 2 x[1] - moai_Scale[1] = -4
+  └ 3 x[2] - moai_Scale[2] = -5
 
-julia> y, _ = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{AffExpr}:
  2 x[1] + 4
  3 x[2] + 5
+
+julia> formulation
+ReducedSpace{Scale{Float64}}(Scale(scale, bias))
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct Scale{T} <: AbstractPredictor

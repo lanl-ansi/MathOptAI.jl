@@ -29,22 +29,27 @@ julia> y
  moai_Tanh[1]
  moai_Tanh[2]
 
-julia> print(model)
-Feasibility
-Subject to
- moai_Tanh[1] - tanh(x[1]) = 0
- moai_Tanh[2] - tanh(x[2]) = 0
- moai_Tanh[1] ≥ -1
- moai_Tanh[2] ≥ -1
- moai_Tanh[1] ≤ 1
- moai_Tanh[2] ≤ 1
+julia> formulation
+Tanh()
+├ variables [2]
+│ ├ moai_Tanh[1]
+│ └ moai_Tanh[2]
+└ constraints [2]
+  ├ moai_Tanh[1] - tanh(x[1]) = 0
+  └ moai_Tanh[2] - tanh(x[2]) = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
  tanh(x[1])
  tanh(x[2])
+
+julia> formulation
+ReducedSpace{Tanh}(Tanh())
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct Tanh <: AbstractPredictor end

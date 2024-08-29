@@ -29,20 +29,27 @@ julia> y
  moai_SoftPlus[1]
  moai_SoftPlus[2]
 
-julia> print(model)
-Feasibility
-Subject to
- moai_SoftPlus[1] - log(1.0 + exp(x[1])) = 0
- moai_SoftPlus[2] - log(1.0 + exp(x[2])) = 0
- moai_SoftPlus[1] ≥ 0
- moai_SoftPlus[2] ≥ 0
+julia> formulation
+SoftPlus()
+├ variables [2]
+│ ├ moai_SoftPlus[1]
+│ └ moai_SoftPlus[2]
+└ constraints [2]
+  ├ moai_SoftPlus[1] - log(1.0 + exp(x[1])) = 0
+  └ moai_SoftPlus[2] - log(1.0 + exp(x[2])) = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
  log(1.0 + exp(x[1]))
  log(1.0 + exp(x[2]))
+
+julia> formulation
+ReducedSpace{SoftPlus}(SoftPlus())
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct SoftPlus <: AbstractPredictor end

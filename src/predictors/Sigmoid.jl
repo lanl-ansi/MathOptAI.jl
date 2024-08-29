@@ -29,22 +29,27 @@ julia> y
  moai_Sigmoid[1]
  moai_Sigmoid[2]
 
-julia> print(model)
-Feasibility
-Subject to
- moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
- moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
- moai_Sigmoid[1] ≥ 0
- moai_Sigmoid[2] ≥ 0
- moai_Sigmoid[1] ≤ 1
- moai_Sigmoid[2] ≤ 1
+julia> formulation
+Sigmoid()
+├ variables [2]
+│ ├ moai_Sigmoid[1]
+│ └ moai_Sigmoid[2]
+└ constraints [2]
+  ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
+  └ moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
  1.0 / (1.0 + exp(-x[1]))
  1.0 / (1.0 + exp(-x[2]))
+
+julia> formulation
+ReducedSpace{Sigmoid}(Sigmoid())
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct Sigmoid <: AbstractPredictor end

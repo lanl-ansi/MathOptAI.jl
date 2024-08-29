@@ -36,14 +36,22 @@ julia> y
 1-element Vector{VariableRef}:
  moai_ReLU[1]
 
-julia> print(model)
-Feasibility
-Subject to
- x[1] + 2 x[2] - moai_Affine[1] = 0
- moai_Affine[1] - moai_ReLU[1] + _z[1] = 0
- moai_ReLU[1]*_z[1] = 0
- moai_ReLU[1] ≥ 0
- _z[1] ≥ 0
+julia> formulation
+Pipeline with layers:
+ * Affine(A, b) [input: 2, output: 1]
+ * ReLUQuadratic()
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ x[1] + 2 x[2] - moai_Affine[1] = 0
+ReLUQuadratic()
+├ variables [2]
+│ ├ moai_ReLU[1]
+│ └ _z[1]
+└ constraints [2]
+  ├ moai_Affine[1] - moai_ReLU[1] + _z[1] = 0
+  └ moai_ReLU[1]*_z[1] = 0
 ```
 """
 struct Pipeline <: AbstractPredictor

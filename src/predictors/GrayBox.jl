@@ -40,25 +40,33 @@ julia> f = MathOptAI.GrayBox(
            x -> (value = x.^2, jacobian = [2 * x[1] 0.0; 0.0 2 * x[2]]),
        );
 
-julia> y, _ = MathOptAI.add_predictor(model, f, x);
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
 julia> y
 2-element Vector{VariableRef}:
  moai_GrayBox[1]
  moai_GrayBox[2]
 
-julia> print(model)
-Feasibility
-Subject to
- op_##238(x[1], x[2]) - moai_GrayBox[1] = 0
- op_##239(x[1], x[2]) - moai_GrayBox[2] = 0
+julia> formulation
+GrayBox(output_size, with_jacobian)
+├ variables [2]
+│ ├ moai_GrayBox[1]
+│ └ moai_GrayBox[2]
+└ constraints [2]
+  ├ op_##330(x[1], x[2]) - moai_GrayBox[1] = 0
+  └ op_##331(x[1], x[2]) - moai_GrayBox[2] = 0
 
-julia> y, _ = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
- op_##240(x[1], x[2])
- op_##241(x[1], x[2])
+ op_##332(x[1], x[2])
+ op_##333(x[1], x[2])
+
+julia> formulation
+ReducedSpace{GrayBox{var"#31#33", var"#32#34"}}(GrayBox(output_size, with_jacobian))
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct GrayBox{F<:Function,G<:Function} <: AbstractPredictor
@@ -74,6 +82,8 @@ struct GrayBox{F<:Function,G<:Function} <: AbstractPredictor
         return new{F,G}(output_size, callback, has_hessian)
     end
 end
+
+Base.show(io::IO, ::GrayBox) = print(io, "GrayBox(output_size, with_jacobian)")
 
 function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
     op, _ = add_predictor(model, ReducedSpace(predictor), x)

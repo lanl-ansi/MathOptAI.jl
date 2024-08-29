@@ -90,7 +90,7 @@ function _predictor(nn, layer, config)
             return PythonCall.pyconvert(Vector{Float64}, w)'
         end
         bias = PythonCall.pyconvert(Vector{Float64}, layer.bias.tolist())
-        return MathOptAI.Affine(weight, bias)
+        return MathOptAI.Affine(Matrix(weight), bias)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.ReLU))
         return get(config, :ReLU, MathOptAI.ReLU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))

@@ -34,7 +34,11 @@ Sigmoid()
 ├ variables [2]
 │ ├ moai_Sigmoid[1]
 │ └ moai_Sigmoid[2]
-└ constraints [2]
+└ constraints [6]
+  ├ moai_Sigmoid[1] ≥ 0
+  ├ moai_Sigmoid[2] ≥ 0
+  ├ moai_Sigmoid[1] ≤ 1
+  ├ moai_Sigmoid[2] ≤ 1
   ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
   └ moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
 
@@ -58,7 +62,8 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Sigmoid")
     _set_bounds_if_finite.(y, 0, 1)
     cons = JuMP.@constraint(model, y .== 1 ./ (1 .+ exp.(-x)))
-    return y, SimpleFormulation(predictor, y, cons)
+    constraints = Any[JuMP.LowerBoundRef.(y); JuMP.UpperBoundRef.(y); cons]
+    return y, SimpleFormulation(predictor, y, constraints)
 end
 
 function add_predictor(

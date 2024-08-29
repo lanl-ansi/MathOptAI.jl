@@ -34,7 +34,9 @@ SoftPlus()
 ├ variables [2]
 │ ├ moai_SoftPlus[1]
 │ └ moai_SoftPlus[2]
-└ constraints [2]
+└ constraints [4]
+  ├ moai_SoftPlus[1] ≥ 0
+  ├ moai_SoftPlus[2] ≥ 0
   ├ moai_SoftPlus[1] - log(1.0 + exp(x[1])) = 0
   └ moai_SoftPlus[2] - log(1.0 + exp(x[2])) = 0
 
@@ -62,7 +64,7 @@ function add_predictor(
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     _set_bounds_if_finite.(y, 0, nothing)
     cons = JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
-    return y, SimpleFormulation(predictor, y, cons)
+    return y, SimpleFormulation(predictor, y, Any[JuMP.LowerBoundRef.(y); cons])
 end
 
 function add_predictor(

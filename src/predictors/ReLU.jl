@@ -34,7 +34,9 @@ ReLU()
 ├ variables [2]
 │ ├ moai_ReLU[1]
 │ └ moai_ReLU[2]
-└ constraints [2]
+└ constraints [4]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[2] ≥ 0
   ├ moai_ReLU[1] - max(0.0, x[1]) = 0
   └ moai_ReLU[2] - max(0.0, x[2]) = 0
 
@@ -59,7 +61,8 @@ function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0, ub)
     cons = JuMP.@constraint(model, y .== max.(0, x))
-    return y, SimpleFormulation(predictor, y, cons)
+    constraints = Any[JuMP.LowerBoundRef.(y); cons]
+    return y, SimpleFormulation(predictor, y, constraints)
 end
 
 function add_predictor(

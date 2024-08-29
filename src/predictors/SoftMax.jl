@@ -35,12 +35,18 @@ SoftMax()
 │ ├ moai_SoftMax_denom
 │ ├ moai_SoftMax[1]
 │ └ moai_SoftMax[2]
-└ constraints [3]
+└ constraints [8]
+  ├ moai_SoftMax[1] ≥ 0
+  ├ moai_SoftMax[2] ≥ 0
+  ├ moai_SoftMax[1] ≤ 1
+  ├ moai_SoftMax[2] ≤ 1
+  ├ moai_SoftMax_denom ≥ 0
   ├ moai_SoftMax_denom - (0.0 + exp(x[2]) + exp(x[1])) = 0
   ├ moai_SoftMax[1] - (exp(x[1]) / moai_SoftMax_denom) = 0
   └ moai_SoftMax[2] - (exp(x[2]) / moai_SoftMax_denom) = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
@@ -51,7 +57,8 @@ julia> formulation
 ReducedSpace{SoftMax}(SoftMax())
 ├ variables [1]
 │ └ moai_SoftMax_denom
-└ constraints [1]
+└ constraints [2]
+  ├ moai_SoftMax_denom ≥ 0
   └ moai_SoftMax_denom - (0.0 + exp(x[2]) + exp(x[1])) = 0
 ```
 """
@@ -64,7 +71,14 @@ function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
     JuMP.set_lower_bound(denom, 0)
     d_con = JuMP.@constraint(model, denom == sum(exp.(x)))
     cons = JuMP.@constraint(model, y .== exp.(x) ./ denom)
-    return y, SimpleFormulation(predictor, [denom; y], [d_con; cons])
+    constraints = [
+        JuMP.LowerBoundRef.(y);
+        JuMP.UpperBoundRef.(y);
+        JuMP.LowerBoundRef(denom);
+        d_con;
+        cons;
+    ]
+    return y, SimpleFormulation(predictor, [denom; y], constraints)
 end
 
 function add_predictor(
@@ -75,5 +89,6 @@ function add_predictor(
     denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
     JuMP.set_lower_bound(denom, 0)
     d_con = JuMP.@constraint(model, denom == sum(exp.(x)))
-    return exp.(x) ./ denom, SimpleFormulation(predictor, [denom], [d_con])
+    constraints = Any[JuMP.LowerBoundRef(denom); d_con]
+    return exp.(x) ./ denom, SimpleFormulation(predictor, [denom], constraints)
 end

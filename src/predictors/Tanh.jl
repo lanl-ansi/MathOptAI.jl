@@ -34,7 +34,11 @@ Tanh()
 ├ variables [2]
 │ ├ moai_Tanh[1]
 │ └ moai_Tanh[2]
-└ constraints [2]
+└ constraints [6]
+  ├ moai_Tanh[1] ≥ -1
+  ├ moai_Tanh[2] ≥ -1
+  ├ moai_Tanh[1] ≤ 1
+  ├ moai_Tanh[2] ≤ 1
   ├ moai_Tanh[1] - tanh(x[1]) = 0
   └ moai_Tanh[2] - tanh(x[2]) = 0
 
@@ -58,7 +62,8 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
     _set_bounds_if_finite.(y, -1, 1)
     cons = JuMP.@constraint(model, y .== tanh.(x))
-    return y, SimpleFormulation(predictor, y, cons)
+    constraints = Any[JuMP.LowerBoundRef.(y); JuMP.UpperBoundRef.(y); cons]
+    return y, SimpleFormulation(predictor, y, constraints)
 end
 
 function add_predictor(

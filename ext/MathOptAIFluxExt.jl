@@ -158,7 +158,7 @@ function _build_gray_box(predictor::Flux.Chain)
     end
     function with_jacobian(x)
         ret = Flux.withjacobian(x -> predictor(Float32.(x)), collect(x))
-        return (value = ret.val, jacobian = only(ret.rad))
+        return (value = ret.val, jacobian = only(ret.grad))
     end
     return MathOptAI.GrayBox(output_size, with_jacobian)
 end

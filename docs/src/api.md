@@ -46,6 +46,11 @@ Affine
 BinaryDecisionTree
 ```
 
+## `GrayBox`
+```@docs
+GrayBox
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

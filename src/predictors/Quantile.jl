@@ -58,5 +58,5 @@ function add_predictor(
         )
         push!(cons, JuMP.@constraint(model, yi == op_i(x...)))
     end
-    return y, SimpleFormulation(predictor, y, cons)
+    return y, Formulation(predictor, y, cons)
 end

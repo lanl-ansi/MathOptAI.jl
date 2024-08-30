@@ -63,7 +63,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     _set_bounds_if_finite.(y, 0, 1)
     cons = JuMP.@constraint(model, y .== 1 ./ (1 .+ exp.(-x)))
     constraints = Any[JuMP.LowerBoundRef.(y); JuMP.UpperBoundRef.(y); cons]
-    return y, SimpleFormulation(predictor, y, constraints)
+    return y, Formulation(predictor, y, constraints)
 end
 
 function add_predictor(
@@ -71,5 +71,5 @@ function add_predictor(
     predictor::ReducedSpace{Sigmoid},
     x::Vector,
 )
-    return 1 ./ (1 .+ exp.(-x)), SimpleFormulation(predictor)
+    return 1 ./ (1 .+ exp.(-x)), Formulation(predictor)
 end

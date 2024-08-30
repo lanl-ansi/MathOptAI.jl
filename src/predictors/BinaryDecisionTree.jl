@@ -88,7 +88,7 @@ function add_predictor(
     c = JuMP.@constraint(model, sum(z) == 1)
     y = JuMP.@variable(model, base_name = "moai_BinaryDecisionTree_value")
     y_expr = JuMP.AffExpr(0.0)
-    formulation = SimpleFormulation(predictor, Any[y; z], Any[c])
+    formulation = Formulation(predictor, Any[y; z], Any[c])
     for (zi, (leaf, path)) in zip(z, paths)
         JuMP.add_to_expression!(y_expr, leaf, zi)
         for (id, value, branch) in path

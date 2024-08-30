@@ -86,7 +86,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
         _set_bounds_if_finite(y[i], y_lb, y_ub)
     end
     cons = JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
-    return y, SimpleFormulation(predictor, y, cons)
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(
@@ -96,5 +96,5 @@ function add_predictor(
 )
     A, b = predictor.predictor.A, predictor.predictor.b
     y = JuMP.@expression(model, A * x .+ b)
-    return y, SimpleFormulation(predictor)
+    return y, Formulation(predictor)
 end

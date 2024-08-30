@@ -79,7 +79,7 @@ function MathOptAI.add_predictor(
     y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     JuMP.set_start_value.(y, λ)
     JuMP.@constraint(model, y .== μ .+ λ .* sqrt(σ²))
-    return y, MathOptAI.SimpleFormulation(predictor)
+    return y, MathOptAI.Formulation(predictor)
 end
 
 end  # module

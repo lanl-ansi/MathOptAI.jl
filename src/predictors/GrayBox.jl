@@ -89,7 +89,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
     op, _ = add_predictor(model, ReducedSpace(predictor), x)
     y = JuMP.@variable(model, [1:length(op)], base_name = "moai_GrayBox")
     cons = JuMP.@constraint(model, op .== y)
-    return y, SimpleFormulation(predictor, y, cons)
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(
@@ -132,5 +132,5 @@ function add_predictor(
         op_i = JuMP.add_nonlinear_operator(model, length(x), callbacks...; name)
         return op_i(x...)
     end
-    return y, SimpleFormulation(predictor)
+    return y, Formulation(predictor)
 end

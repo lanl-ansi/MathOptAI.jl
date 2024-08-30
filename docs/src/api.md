@@ -126,9 +126,9 @@ AbstractFormulation
 PipelineFormulation
 ```
 
-## `SimpleFormulation`
+## `Formulation`
 ```@docs
-SimpleFormulation
+Formulation
 ```
 
 ## Extensions

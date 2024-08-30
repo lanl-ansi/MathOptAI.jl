@@ -62,7 +62,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     _set_bounds_if_finite.(y, 0, ub)
     cons = JuMP.@constraint(model, y .== max.(0, x))
     constraints = Any[JuMP.LowerBoundRef.(y); cons]
-    return y, SimpleFormulation(predictor, y, constraints)
+    return y, Formulation(predictor, y, constraints)
 end
 
 function add_predictor(
@@ -70,7 +70,7 @@ function add_predictor(
     predictor::ReducedSpace{ReLU},
     x::Vector,
 )
-    return max.(0, x), SimpleFormulation(predictor)
+    return max.(0, x), Formulation(predictor)
 end
 
 """
@@ -129,7 +129,7 @@ function add_predictor(
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0, last.(bounds))
-    formulation = SimpleFormulation(predictor)
+    formulation = Formulation(predictor)
     append!(formulation.variables, y)
     for i in 1:m
         lb, ub = bounds[i]
@@ -207,7 +207,7 @@ function add_predictor(
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "_z")
     _set_bounds_if_finite.(z, nothing, -first.(bounds))
     cons = JuMP.@constraint(model, x .== y - z)
-    formulation = SimpleFormulation(predictor, Any[y; z], Any[cons;])
+    formulation = Formulation(predictor, Any[y; z], Any[cons;])
     for i in 1:m
         c = JuMP.@constraint(model, [y[i], z[i]] in MOI.SOS1([1.0, 2.0]))
         push!(formulation.constraints, c)
@@ -276,5 +276,5 @@ function add_predictor(
     _set_bounds_if_finite.(z, 0, -first.(bounds))
     c1 = JuMP.@constraint(model, x .== y - z)
     c2 = JuMP.@constraint(model, y .* z .== 0)
-    return y, SimpleFormulation(predictor, Any[y; z], Any[c1; c2])
+    return y, Formulation(predictor, Any[y; z], Any[c1; c2])
 end

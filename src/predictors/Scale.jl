@@ -78,7 +78,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
         _set_bounds_if_finite(y[i], y_lb, y_ub)
     end
     cons = JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y)
-    return y, SimpleFormulation(predictor, y, cons)
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(
@@ -88,5 +88,5 @@ function add_predictor(
 )
     scale, bias = predictor.predictor.scale, predictor.predictor.bias
     y = JuMP.@expression(model, scale .* x .+ bias)
-    return y, SimpleFormulation(predictor)
+    return y, Formulation(predictor)
 end

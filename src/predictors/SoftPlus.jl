@@ -64,7 +64,7 @@ function add_predictor(
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     _set_bounds_if_finite.(y, 0, nothing)
     cons = JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
-    return y, SimpleFormulation(predictor, y, Any[JuMP.LowerBoundRef.(y); cons])
+    return y, Formulation(predictor, y, Any[JuMP.LowerBoundRef.(y); cons])
 end
 
 function add_predictor(
@@ -72,5 +72,5 @@ function add_predictor(
     predictor::ReducedSpace{SoftPlus},
     x::Vector,
 )
-    return log.(1 .+ exp.(x)), SimpleFormulation(predictor)
+    return log.(1 .+ exp.(x)), Formulation(predictor)
 end

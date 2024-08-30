@@ -63,7 +63,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     _set_bounds_if_finite.(y, -1, 1)
     cons = JuMP.@constraint(model, y .== tanh.(x))
     constraints = Any[JuMP.LowerBoundRef.(y); JuMP.UpperBoundRef.(y); cons]
-    return y, SimpleFormulation(predictor, y, constraints)
+    return y, Formulation(predictor, y, constraints)
 end
 
 function add_predictor(
@@ -71,5 +71,5 @@ function add_predictor(
     predictor::ReducedSpace{Tanh},
     x::Vector,
 )
-    return tanh.(x), SimpleFormulation(predictor)
+    return tanh.(x), Formulation(predictor)
 end

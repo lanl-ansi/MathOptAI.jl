@@ -31,7 +31,7 @@ An abstract type representing different formulations.
 abstract type AbstractFormulation end
 
 """
-    struct SimpleFormulation{P<:AbstractPredictor} <: AbstractFormulation
+    struct Formulation{P<:AbstractPredictor} <: AbstractFormulation
         predictor::P
         variables::Vector{Any}
         constraints::Vector{Any}
@@ -46,29 +46,29 @@ abstract type AbstractFormulation end
 Check the docstring of the predictor for an explanation of the formulation and
 the order of the elements in `.variables` and `.constraints`.
 """
-struct SimpleFormulation{P<:AbstractPredictor} <: AbstractFormulation
+struct Formulation{P<:AbstractPredictor} <: AbstractFormulation
     predictor::P
     variables::Vector{Any}
     constraints::Vector{Any}
 end
 
-function SimpleFormulation(
+function Formulation(
     predictor::P,
     variables,
     constraints,
 ) where {P<:AbstractPredictor}
-    return SimpleFormulation(
+    return Formulation(
         predictor,
         convert(Vector{Any}, variables),
         convert(Vector{Any}, constraints),
     )
 end
 
-function SimpleFormulation(predictor::AbstractPredictor)
-    return SimpleFormulation(predictor, Any[], Any[])
+function Formulation(predictor::AbstractPredictor)
+    return Formulation(predictor, Any[], Any[])
 end
 
-function Base.show(io::IO, formulation::SimpleFormulation)
+function Base.show(io::IO, formulation::Formulation)
     println(io, formulation.predictor)
     println(io, "├ variables [$(length(formulation.variables))]")
     for (i, v) in enumerate(formulation.variables)

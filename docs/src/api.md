@@ -121,14 +121,14 @@ Tanh
 AbstractFormulation
 ```
 
-## `PipelineFormulation`
-```@docs
-PipelineFormulation
-```
-
 ## `Formulation`
 ```@docs
 Formulation
+```
+
+## `PipelineFormulation`
+```@docs
+PipelineFormulation
 ```
 
 ## Extensions

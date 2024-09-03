@@ -38,6 +38,8 @@ Add a trained neural network from Pytorch via PythonCall.jl to `model`.
    The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `torch.func.jacrev`.
+ * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
+   of the output using `torch.func.hessian`.
 """
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
@@ -45,9 +47,9 @@ function MathOptAI.add_predictor(
     x::Vector;
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
-    gray_box::Bool = false,
+    kwargs...,
 )
-    inner_predictor = MathOptAI.build_predictor(predictor; config, gray_box)
+    inner_predictor = MathOptAI.build_predictor(predictor; config, kwargs...)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
@@ -59,6 +61,7 @@ end
         predictor::MathOptAI.PytorchModel;
         config::Dict = Dict{Any,Any}(),
         gray_box::Bool = false,
+        gray_box_hessian::Bool = false,
     )
 
 Convert a trained neural network from Pytorch via PythonCall.jl to a
@@ -80,17 +83,20 @@ Convert a trained neural network from Pytorch via PythonCall.jl to a
    The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `torch.func.jacrev`.
+ * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
+   of the output using `torch.func.hessian`.
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;
     config::Dict = Dict{Any,Any}(),
     gray_box::Bool = false,
+    gray_box_hessian::Bool = false,
 )
     if gray_box
         if !isempty(config)
             error("cannot specify the `config` kwarg if `gray_box = true`")
         end
-        return MathOptAI.GrayBox(predictor)
+        return MathOptAI.GrayBox(predictor; hessian = gray_box_hessian)
     end
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
@@ -118,23 +124,30 @@ function _predictor(nn, layer, config)
     return error("unsupported layer: $layer")
 end
 
-function MathOptAI.GrayBox(predictor::MathOptAI.PytorchModel)
+function MathOptAI.GrayBox(
+    predictor::MathOptAI.PytorchModel;
+    hessian::Bool = false,
+)
     torch = PythonCall.pyimport("torch")
     torch_model = torch.load(predictor.filename)
     J = torch.func.jacrev(torch_model)
+    H = torch.func.hessian(torch_model)
     # TODO(odow): I'm not sure if there is a better way to get the output
     # dimension of a torch model object?
     output_size(::Any) = PythonCall.pyconvert(Int, torch_model[-1].out_features)
-    function with_jacobian(x)
+    function callback(x)
         py_x = torch.tensor(collect(x))
         py_value = torch_model(py_x).detach().numpy()
+        value = PythonCall.pyconvert(Vector, py_value)
         py_jacobian = J(py_x).detach().numpy()
-        return (;
-            value = PythonCall.pyconvert(Vector, py_value),
-            jacobian = PythonCall.pyconvert(Matrix, py_jacobian),
-        )
+        jacobian = PythonCall.pyconvert(Matrix, py_jacobian)
+        if !hessian
+            return (; value, jacobian)
+        end
+        hessians = PythonCall.pyconvert(Array, H(py_x).detach().numpy())
+        return (; value, jacobian, hessian = permutedims(hessians, (2, 3, 1)))
     end
-    return MathOptAI.GrayBox(output_size, with_jacobian)
+    return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
 end  # module

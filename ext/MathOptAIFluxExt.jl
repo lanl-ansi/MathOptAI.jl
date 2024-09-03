@@ -71,9 +71,9 @@ function MathOptAI.add_predictor(
     x::Vector;
     config::Dict = Dict{Any,Any}(),
     reduced_space::Bool = false,
-    gray_box::Bool = false,
+    kwargs...,
 )
-    inner_predictor = MathOptAI.build_predictor(predictor; config, gray_box)
+    inner_predictor = MathOptAI.build_predictor(predictor; config, kwargs...)
     if reduced_space
         inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
     end
@@ -85,6 +85,7 @@ end
         predictor::Flux.Chain;
         config::Dict = Dict{Any,Any}(),
         gray_box::Bool = false,
+        gray_box_hessian::Bool = false,
     )
 
 Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
@@ -110,6 +111,8 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
    `Flux.relu => MathOptAI.QuadraticReLU()`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `Flux.withjacobian`.
+ * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
+   of the output using `Flux.hessian`.
 
 ## Example
 
@@ -141,12 +144,13 @@ function MathOptAI.build_predictor(
     predictor::Flux.Chain;
     config::Dict = Dict{Any,Any}(),
     gray_box::Bool = false,
+    gray_box_hessian::Bool = false,
 )
     if gray_box
         if !isempty(config)
             error("cannot specify the `config` kwarg if `gray_box = true`")
         end
-        return MathOptAI.GrayBox(predictor)
+        return MathOptAI.GrayBox(predictor; hessian = gray_box_hessian)
     end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
@@ -155,15 +159,23 @@ function MathOptAI.build_predictor(
     return inner_predictor
 end
 
-function MathOptAI.GrayBox(predictor::Flux.Chain)
+function MathOptAI.GrayBox(predictor::Flux.Chain; hessian::Bool = false)
     function output_size(x)
         return only(Flux.outputsize(predictor, (length(x),)))
     end
-    function with_jacobian(x)
-        ret = Flux.withjacobian(x -> predictor(Float32.(x)), collect(x))
-        return (value = ret.val, jacobian = only(ret.grad))
+    function callback(x)
+        x32 = collect(Float32.(x))
+        ret = Flux.withjacobian(predictor, x32)
+        if !hessian
+            return (value = ret.val, jacobian = only(ret.grad))
+        end
+        Hs = map(1:length(ret.val)) do i
+            return Flux.hessian(x -> predictor(x)[i], x32)
+        end
+        H = cat(Hs...; dims = 3)
+        return (value = ret.val, jacobian = only(ret.grad), hessian = H)
     end
-    return MathOptAI.GrayBox(output_size, with_jacobian)
+    return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
 function _add_predictor(::MathOptAI.Pipeline, layer::Any, ::Dict)

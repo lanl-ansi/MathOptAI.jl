@@ -7,7 +7,8 @@
 """
     GrayBox(
         output_size::Function,
-        with_jacobian::Function,
+        callback::Function;
+        has_hessian::Bool = false,
     ) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that represents the function ``f(x)`` as a
@@ -17,10 +18,13 @@ user-defined nonlinear operator.
 
  * `output_size(x::Vector):Int`: given an input vector `x`, return the dimension
    of the output vector
- * `with_jacobian(x::Vector)::NamedTuple -> (;value, jacobian)`: given an input
-   vector `x`, return a `NamedTuple` that computes the primal value and Jacobian
-   of the output value with respect to the input. `jacobian[j, i]` is the
-   partial derivative of `value[j]` with respect to `x[i]`.
+ * `callback(x::Vector)::NamedTuple -> (;value, jacobian[, hessian])`: given an
+   input vector `x`, return a `NamedTuple` that computes the primal value and
+   Jacobian of the output value with respect to the input. `jacobian[j, i]` is
+   the partial derivative of `value[j]` with respect to `x[i]`.
+ * `has_hessian`: if `true`, the `callback` additionally contains a field
+   `hessian`, which is an `N × N × M` matrix, where `hessian[i, j, k]` is the
+   partial derivative of `value[k]` with respect to `x[i]` and `x[j]`.
 
 ## Example
 
@@ -55,7 +59,16 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 """
 struct GrayBox{F<:Function,G<:Function} <: AbstractPredictor
     output_size::F
-    with_jacobian::G
+    callback::G
+    has_hessian::Bool
+
+    function GrayBox(
+        output_size::F,
+        callback::G;
+        has_hessian::Bool = false,
+    ) where {F<:Function,G<:Function}
+        return new{F,G}(output_size, callback, has_hessian)
+    end
 end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
@@ -73,7 +86,7 @@ function add_predictor(
     last_x, cache = nothing, nothing
     function update(x)
         if x != last_x
-            cache = predictor.predictor.with_jacobian(x)
+            cache = predictor.predictor.callback(x)
             last_x = x
         end
         return
@@ -87,14 +100,22 @@ function add_predictor(
         g .= cache.jacobian[i, :]
         return
     end
+    function ∇²f(H::AbstractMatrix{Float64}, k::Int, x...)
+        update(x)
+        for j in 1:length(x), i in j:length(x)
+            H[i, j] = cache.hessian[i, j, k]
+        end
+        return
+    end
     return map(1:predictor.predictor.output_size(x)) do i
-        op_i = JuMP.add_nonlinear_operator(
-            model,
-            length(x),
-            (x...) -> f(i, x...),
-            (g, x...) -> ∇f(g, i, x...);
-            name = Symbol("op_$(gensym())"),
-        )
+        callbacks = if predictor.predictor.has_hessian
+            ∇²fi = (H, x...) -> ∇²f(H, i, x...)
+            ((x...) -> f(i, x...), (g, x...) -> ∇f(g, i, x...), ∇²fi)
+        else
+            ((x...) -> f(i, x...), (g, x...) -> ∇f(g, i, x...))
+        end
+        name = Symbol("op_$(gensym())")
+        op_i = JuMP.add_nonlinear_operator(model, length(x), callbacks...; name)
         return op_i(x...)
     end
 end

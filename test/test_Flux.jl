@@ -230,6 +230,27 @@ function test_gray_box_scalar_output()
     return
 end
 
+function test_gray_box_scalar_output_hessian()
+    chain = Flux.Chain(Flux.Dense(2 => 16, Flux.relu), Flux.Dense(16 => 1))
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    set_attribute(model, "max_iter", 5)
+    @variable(model, 0 <= x[1:2] <= 1)
+    y = MathOptAI.add_predictor(
+        model,
+        chain,
+        x;
+        gray_box = true,
+        gray_box_hessian = true,
+        reduced_space = true,
+    )
+    @objective(model, Max, only(y))
+    optimize!(model)
+    @test termination_status(model) == ITERATION_LIMIT
+    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
+    return
+end
+
 function test_gray_box_vector_output()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.relu), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
@@ -241,6 +262,28 @@ function test_gray_box_vector_output()
         chain,
         x;
         gray_box = true,
+        reduced_space = true,
+    )
+    @test length(y) == 2
+    @objective(model, Max, sum(y))
+    optimize!(model)
+    @test termination_status(model) == ITERATION_LIMIT
+    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
+    return
+end
+
+function test_gray_box_vector_output_hessian()
+    chain = Flux.Chain(Flux.Dense(3 => 16, Flux.relu), Flux.Dense(16 => 2))
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    set_attribute(model, "max_iter", 5)
+    @variable(model, 0 <= x[1:3] <= 1)
+    y = MathOptAI.add_predictor(
+        model,
+        chain,
+        x;
+        gray_box = true,
+        gray_box_hessian = true,
         reduced_space = true,
     )
     @test length(y) == 2

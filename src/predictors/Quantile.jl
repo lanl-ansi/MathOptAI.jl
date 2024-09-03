@@ -44,7 +44,7 @@ function add_predictor(
     x::Vector,
 )
     M, N = length(x), length(predictor.quantiles)
-    y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
+    y = add_variables(model, predictor, x, N; base_name = "moai_quantile")
     quantile(q, x...) = Distributions.quantile(predictor.distribution(x...), q)
     for (qi, yi) in zip(predictor.quantiles, y)
         op_i = JuMP.add_nonlinear_operator(

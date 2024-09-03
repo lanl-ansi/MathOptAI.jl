@@ -75,14 +75,17 @@ function add_predictor(
     atol::Float64 = 0.0,
 )
     paths = _tree_to_paths(predictor)
-    z = JuMP.@variable(
+    vars = add_variables(
         model,
-        [1:length(paths)],
-        binary = true,
+        predictor,
+        x,
+        1 + length(paths);
         base_name = "moai_BinaryDecisionTree_z",
     )
+    y, z = vars[1], vars[2:end]
+    JuMP.set_name(y, "moai_BinaryDecisionTree_value")
+    JuMP.set_binary.(z)
     JuMP.@constraint(model, sum(z) == 1)
-    y = JuMP.@variable(model, base_name = "moai_BinaryDecisionTree_value")
     y_expr = JuMP.AffExpr(0.0)
     for (zi, (leaf, path)) in zip(z, paths)
         JuMP.add_to_expression!(y_expr, leaf, zi)

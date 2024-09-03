@@ -43,9 +43,19 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 """
 struct SoftPlus <: AbstractPredictor end
 
-function add_predictor(model::JuMP.AbstractModel, ::SoftPlus, x::Vector)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
-    _set_bounds_if_finite.(y, 0, nothing)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::SoftPlus,
+    x::Vector,
+)
+    y = add_variables(
+        model,
+        predictor,
+        x,
+        length(x);
+        base_name = "moai_SoftPlus",
+    )
+    set_bounds.(y, 0, nothing)
     JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
     return y
 end

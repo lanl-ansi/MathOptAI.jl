@@ -45,9 +45,9 @@ julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
 """
 struct Tanh <: AbstractPredictor end
 
-function add_predictor(model::JuMP.AbstractModel, ::Tanh, x::Vector)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
-    _set_bounds_if_finite.(y, -1, 1)
+function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
+    y = add_variables(model, predictor, x, length(x); base_name = "moai_Tanh")
+    set_bounds.(y, -1, 1)
     JuMP.@constraint(model, y .== tanh.(x))
     return y
 end

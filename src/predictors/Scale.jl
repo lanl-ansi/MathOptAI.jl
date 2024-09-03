@@ -54,15 +54,14 @@ function Base.show(io::IO, ::Scale)
 end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
-    m = length(predictor.scale)
-    y = JuMP.@variable(model, [1:m], base_name = "moai_Scale")
-    bounds = _get_variable_bounds.(x)
+    y = add_variables(model, predictor, x, length(x); base_name = "moai_Scale")
+    bounds = get_bounds.(x)
     for (i, scale) in enumerate(predictor.scale)
         y_lb = y_ub = predictor.bias[i]
         lb, ub = bounds[i]
         y_ub += scale * ifelse(scale >= 0, ub, lb)
         y_lb += scale * ifelse(scale >= 0, lb, ub)
-        _set_bounds_if_finite(y[i], y_lb, y_ub)
+        set_bounds(y[i], y_lb, y_ub)
     end
     JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y)
     return y

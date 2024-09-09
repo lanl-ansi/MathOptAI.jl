@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = MathOptAI
+```
+
 # Design principles
 
 This project is inspired by two existing projects:

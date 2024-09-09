@@ -11,7 +11,7 @@
 
 # ## Python integration
 
-# This tutorial uses [PythonCall.jl](https://github.com/JuliaPy/PythonCall.jl)
+# MathOptAI uses [PythonCall.jl](https://github.com/JuliaPy/PythonCall.jl)
 # to call from Julia into Python.
 #
 # See [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl) for more control
@@ -31,7 +31,6 @@ using Test
 import Ipopt
 import MathOptAI
 import Plots
-import PythonCall
 
 # ## Training a model
 
@@ -44,46 +43,47 @@ import PythonCall
 # The model is unimportant, but for this example, we are trying to fit noisy
 # observations of the function ``f(x) = x^2 - 2x``.
 
-filename = joinpath(@__DIR__, "model.pt")
-PythonCall.pyexec(
-    """
-    import torch
-
-    model = torch.nn.Sequential(
-        torch.nn.Linear(1, 16),
-        torch.nn.ReLU(),
-        torch.nn.Linear(16, 1),
-    )
-
-    n = 1024
-    x = torch.arange(-2, 2 + 4 / (n - 1), 4 / (n - 1)).reshape(n, 1)
-    for epoch in range(100):
-        N = torch.normal(torch.zeros(n, 1), torch.ones(n, 1))
-        y = x ** 2 -2 * x + 0.1 * N
-        optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-        model.train()
-        loss_fn = torch.nn.MSELoss()
-        loss = loss_fn(model(x), y)
-        loss.backward()
-        optimizer.step()
-        optimizer.zero_grad()
-        if epoch % 10 == 0:
-            print(f"Epoch {epoch}: train={(loss.item()):>8f}")
-
-    torch.save(model, filename)
-    """,
-    @__MODULE__,
-    (; filename = filename),
-)
+# In Python, I ran:
+# ```python
+# #!/usr/bin/python3
+# import torch
+# model = torch.nn.Sequential(
+#     torch.nn.Linear(1, 16),
+#     torch.nn.ReLU(),
+#     torch.nn.Linear(16, 1),
+# )
+#
+# n = 1024
+# x = torch.arange(-2, 2 + 4 / (n - 1), 4 / (n - 1)).reshape(n, 1)
+# loss_fn = torch.nn.MSELoss()
+# optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+# for epoch in range(100):
+#     optimizer.zero_grad()
+#     N = torch.normal(torch.zeros(n, 1), torch.ones(n, 1))
+#     y = x ** 2 -2 * x + 0.1 * N
+#     loss = loss_fn(model(x), y)
+#     loss.backward()
+#     optimizer.step()
+#
+# torch.save(model, "model.pt")
+# ```
 
 # ## JuMP model
 
-# Load a model from Pytorch using [`MathOptAI.PytorchModel`](@ref).
+# Our goal for this JuMP model is to load the Neural Network from PyTorch into
+# the objective function, and then minimize the objective for different fixed
+# values of `x` to recreate the function that the Neural Network has learned to
+# approximate.
+
+# First, create a JuMP model:
 
 model = Model(Ipopt.Optimizer)
 set_silent(model)
 @variable(model, x)
-ml_model = MathOptAI.PytorchModel(filename)
+
+# Then, load the model from Pytorch using [`MathOptAI.PytorchModel`](@ref):
+
+ml_model = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
 y = MathOptAI.add_predictor(model, ml_model, [x])
 @objective(model, Min, only(y))
 

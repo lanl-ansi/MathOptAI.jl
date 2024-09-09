@@ -1,3 +1,7 @@
+```@meta
+CurrentModule = MathOptAI
+```
+
 # Predictors
 
 The main entry point for embedding prediction models into JuMP is

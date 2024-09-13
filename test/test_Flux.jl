@@ -237,7 +237,7 @@ function test_gray_box_scalar_output_hessian()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:2] <= 1)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         x;
@@ -279,7 +279,7 @@ function test_gray_box_vector_output_hessian()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:3] <= 1)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         x;

@@ -177,7 +177,6 @@ julia> y
 
 julia> formulation
 Affine(A, b) [input: 2, output: 1]
-Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
 └ constraints [1]

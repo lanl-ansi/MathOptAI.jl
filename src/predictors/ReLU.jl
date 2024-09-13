@@ -184,13 +184,13 @@ ReLUSOS1()
 ├ variables [4]
 │ ├ moai_ReLU[1]
 │ ├ moai_ReLU[2]
-│ ├ _z[1]
-│ └ _z[2]
+│ ├ moai_z[1]
+│ └ moai_z[2]
 └ constraints [4]
-  ├ x[1] - moai_ReLU[1] + _z[1] = 0
-  ├ x[2] - moai_ReLU[2] + _z[2] = 0
-  ├ [moai_ReLU[1], _z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
-  └ [moai_ReLU[2], _z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
+  ├ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+  └ [moai_ReLU[2], moai_z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
 ```
 """
 struct ReLUSOS1 <: AbstractPredictor end
@@ -204,7 +204,7 @@ function add_predictor(
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
     _set_bounds_if_finite.(y, 0, last.(bounds))
-    z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "_z")
+    z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "moai_z")
     _set_bounds_if_finite.(z, nothing, -first.(bounds))
     cons = JuMP.@constraint(model, x .== y - z)
     formulation = Formulation(predictor, Any[y; z], Any[cons;])
@@ -252,13 +252,13 @@ ReLUQuadratic()
 ├ variables [4]
 │ ├ moai_ReLU[1]
 │ ├ moai_ReLU[2]
-│ ├ _z[1]
-│ └ _z[2]
+│ ├ moai_z[1]
+│ └ moai_z[2]
 └ constraints [4]
-  ├ x[1] - moai_ReLU[1] + _z[1] = 0
-  ├ x[2] - moai_ReLU[2] + _z[2] = 0
-  ├ moai_ReLU[1]*_z[1] = 0
-  └ moai_ReLU[2]*_z[2] = 0
+  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
+  ├ moai_ReLU[1]*moai_z[1] = 0
+  └ moai_ReLU[2]*moai_z[2] = 0
 ```
 """
 struct ReLUQuadratic <: AbstractPredictor end

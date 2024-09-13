@@ -116,6 +116,21 @@ SoftPlus
 Tanh
 ```
 
+## `AbstractFormulation`
+```@docs
+AbstractFormulation
+```
+
+## `Formulation`
+```@docs
+Formulation
+```
+
+## `PipelineFormulation`
+```@docs
+PipelineFormulation
+```
+
 ## Extensions
 
 ```@autodocs

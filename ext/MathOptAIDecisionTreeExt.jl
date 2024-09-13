@@ -43,7 +43,9 @@ julia> model = Model();
 
 julia> @variable(model, 0 <= x[1:2] <= 1);
 
-julia> y = MathOptAI.add_predictor(model, ml_model, x)
+julia> y, _ = MathOptAI.add_predictor(model, ml_model, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_BinaryDecisionTree_value
 ```

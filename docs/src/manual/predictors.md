@@ -7,8 +7,8 @@ CurrentModule = MathOptAI
 The main entry point for embedding prediction models into JuMP is
 [`add_predictor`](@ref).
 
-All methods use the form `y = MathOptAI.add_predictor(model, predictor, x)` to
-add the relationship `y = predictor(x)` to `model`.
+All methods use the form `y, formulation = MathOptAI.add_predictor(model, predictor, x)`
+to add the relationship `y = predictor(x)` to `model`.
 
 ## Supported predictors
 

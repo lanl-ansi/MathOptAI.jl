@@ -84,7 +84,7 @@ set_silent(model)
 # Then, load the model from Pytorch using [`MathOptAI.PytorchModel`](@ref):
 
 ml_model = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
-y = MathOptAI.add_predictor(model, ml_model, [x])
+y, _ = MathOptAI.add_predictor(model, ml_model, [x])
 @objective(model, Min, only(y))
 
 # Now, visualize the fitted function `y = ml_model(x)` by repeatedly solving the

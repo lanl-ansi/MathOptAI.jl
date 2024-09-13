@@ -22,38 +22,55 @@ julia> @variable(model, x[1:2]);
 julia> f = MathOptAI.SoftPlus()
 SoftPlus()
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_SoftPlus[1]
  moai_SoftPlus[2]
 
-julia> print(model)
-Feasibility
-Subject to
- moai_SoftPlus[1] - log(1.0 + exp(x[1])) = 0
- moai_SoftPlus[2] - log(1.0 + exp(x[2])) = 0
- moai_SoftPlus[1] ≥ 0
- moai_SoftPlus[2] ≥ 0
+julia> formulation
+SoftPlus()
+├ variables [2]
+│ ├ moai_SoftPlus[1]
+│ └ moai_SoftPlus[2]
+└ constraints [4]
+  ├ moai_SoftPlus[1] ≥ 0
+  ├ moai_SoftPlus[2] ≥ 0
+  ├ moai_SoftPlus[1] - log(1.0 + exp(x[1])) = 0
+  └ moai_SoftPlus[2] - log(1.0 + exp(x[2])) = 0
 
-julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia> y
 2-element Vector{NonlinearExpr}:
  log(1.0 + exp(x[1]))
  log(1.0 + exp(x[2]))
+
+julia> formulation
+ReducedSpace(SoftPlus())
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct SoftPlus <: AbstractPredictor end
 
-function add_predictor(model::JuMP.AbstractModel, ::SoftPlus, x::Vector)
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::SoftPlus,
+    x::Vector,
+)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     _set_bounds_if_finite.(y, 0, nothing)
-    JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
-    return y
+    cons = JuMP.@constraint(model, y .== log.(1 .+ exp.(x)))
+    return y, Formulation(predictor, y, Any[JuMP.LowerBoundRef.(y); cons])
 end
 
 function add_predictor(
     ::JuMP.AbstractModel,
-    ::ReducedSpace{SoftPlus},
+    predictor::ReducedSpace{SoftPlus},
     x::Vector,
 )
-    return log.(1 .+ exp.(x))
+    return log.(1 .+ exp.(x)), Formulation(predictor)
 end

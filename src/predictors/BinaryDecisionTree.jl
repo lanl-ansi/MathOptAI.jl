@@ -36,23 +36,27 @@ julia> f = MathOptAI.BinaryDecisionTree{Float64,Int}(
        )
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_BinaryDecisionTree_value
 
-julia> print(model)
-Feasibility
-Subject to
- moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
- moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
- moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0}
- moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 1}
- moai_BinaryDecisionTree_z[1] binary
- moai_BinaryDecisionTree_z[2] binary
- moai_BinaryDecisionTree_z[3] binary
- moai_BinaryDecisionTree_z[2] --> {x[1] ≥ 0}
- moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
- moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
+julia> formulation
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+├ variables [4]
+│ ├ moai_BinaryDecisionTree_value
+│ ├ moai_BinaryDecisionTree_z[1]
+│ ├ moai_BinaryDecisionTree_z[2]
+│ └ moai_BinaryDecisionTree_z[3]
+└ constraints [7]
+  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
+  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0}
+  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≥ 0}
+  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 1}
+  ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
+  ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
+  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
 ```
 """
 struct BinaryDecisionTree{K,V} <: AbstractPredictor
@@ -81,21 +85,23 @@ function add_predictor(
         binary = true,
         base_name = "moai_BinaryDecisionTree_z",
     )
-    JuMP.@constraint(model, sum(z) == 1)
+    c = JuMP.@constraint(model, sum(z) == 1)
     y = JuMP.@variable(model, base_name = "moai_BinaryDecisionTree_value")
     y_expr = JuMP.AffExpr(0.0)
+    formulation = Formulation(predictor, Any[y; z], Any[c])
     for (zi, (leaf, path)) in zip(z, paths)
         JuMP.add_to_expression!(y_expr, leaf, zi)
         for (id, value, branch) in path
-            if branch
+            c = if branch
                 JuMP.@constraint(model, zi --> {x[id] <= value})
             else
                 JuMP.@constraint(model, zi --> {x[id] >= value + atol})
             end
+            push!(formulation.constraints, c)
         end
     end
-    JuMP.@constraint(model, y == y_expr)
-    return [y]
+    push!(formulation.constraints, JuMP.@constraint(model, y == y_expr))
+    return [y], formulation
 end
 
 function _tree_to_paths(predictor::BinaryDecisionTree{K,V}) where {K,V}

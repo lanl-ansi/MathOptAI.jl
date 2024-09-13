@@ -51,7 +51,9 @@ julia> test_df = DataFrames.DataFrame(
            x2 = @variable(model, [1:6]),
        );
 
-julia> test_df.y = MathOptAI.add_predictor(model, predictor, test_df)
+julia> test_df.y, _ = MathOptAI.add_predictor(model, predictor, test_df);
+
+julia> test_df.y
 6-element Vector{VariableRef}:
  moai_Affine[1]
  moai_Affine[1]
@@ -69,9 +71,10 @@ function MathOptAI.add_predictor(
 )
     resp = StatsModels.modelcols(StatsModels.MatrixTerm(predictor.mf.f.rhs), df)
     x = Matrix(resp')
-    y = MathOptAI.add_predictor(model, predictor.model, x; kwargs...)
+    y, formulation =
+        MathOptAI.add_predictor(model, predictor.model, x; kwargs...)
     @assert size(y, 1) == 1
-    return reshape(y, length(y))
+    return reshape(y, length(y)), formulation
 end
 
 end  # module

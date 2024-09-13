@@ -125,7 +125,7 @@ MathOptAI section below).
 
 The main entry-point to MathOptAI is [`add_predictor`](@ref):
 ```julia
-y = MathOptAI.add_predictor(model, predictor, x)
+y, formulation = MathOptAI.add_predictor(model, predictor, x)
 ```
 The user provides the input `x`, and the output `y` is returned.
 
@@ -139,13 +139,9 @@ constraint.
 
 Second, predictors do not need to store dimension information, so we can have:
 ```julia
-y = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
+y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
 ```
 for any size of `x`.
-
-The main downsides are that we do not return a `pred_constr` equivalent that
-contains statistics on the reformulation, and that the user cannot delete a
-predictor from a model once added.
 
 We choose this decision to simplify the implementation, and because we think
 deleting a predictor is an uncommon operation.
@@ -161,7 +157,7 @@ leading to issues such as [OMLT#125](https://github.com/cog-imperial/OMLT/issues
 In constrast, MathOptAI treats activation functions as a vector-valued predictor
 like any other:
 ```julia
-y = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
+y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
 ```
 This means that we can pipeline them to create predictors such as:
 ```julia

@@ -25,7 +25,9 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(model, model_glm, x)
+julia> y, formulation = MathOptAI.add_predictor(model, model_glm, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_Affine[1]
 ```
@@ -47,7 +49,9 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y = MathOptAI.add_predictor(model, model_glm, x)
+julia> y, formulation = MathOptAI.add_predictor(model, model_glm, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_Sigmoid[1]
 ```
@@ -77,7 +81,9 @@ julia> test_df = DataFrames.DataFrame(
            x2 = @variable(model, [1:6]),
        );
 
-julia> test_df.y = MathOptAI.add_predictor(model, predictor, test_df)
+julia> test_df.y, _ = MathOptAI.add_predictor(model, predictor, test_df);
+
+julia> test_df.y
 6-element Vector{VariableRef}:
  moai_Affine[1]
  moai_Affine[1]

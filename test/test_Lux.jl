@@ -60,7 +60,7 @@ function test_end_to_end_with_scale()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(
+    y, _ = MathOptAI.add_predictor(
         model,
         state,
         [x];
@@ -81,7 +81,7 @@ function test_end_to_end_ReLUBigM()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         state,
         [x];
@@ -102,7 +102,7 @@ function test_end_to_end_ReLUQuadratic()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         state,
         [x];
@@ -125,7 +125,7 @@ function test_end_to_end_ReLU()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, state, [x])
+    y, formulation = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -141,7 +141,8 @@ function test_end_to_end_ReLU_reduced_space()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, state, [x]; reduced_space = true)
+    y, formulation =
+        MathOptAI.add_predictor(model, state, [x]; reduced_space = true)
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -157,7 +158,7 @@ function test_end_to_end_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, state, [x])
+    y, formulation = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -173,7 +174,7 @@ function test_end_to_end_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, state, [x])
+    y, formulation = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -189,7 +190,7 @@ function test_end_to_end_Tanh()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, state, [x])
+    y, formulation = MathOptAI.add_predictor(model, state, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)

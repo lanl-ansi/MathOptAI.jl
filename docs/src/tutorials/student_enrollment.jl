@@ -82,7 +82,7 @@ evaluate_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5);
 # one for each row inn `evaluate_df`, corresponding to the output `enroll` of
 # our logistic regression.
 
-evaluate_df.enroll = MathOptAI.add_predictor(model, model_glm, evaluate_df);
+evaluate_df.enroll, _ = MathOptAI.add_predictor(model, model_glm, evaluate_df);
 
 # The `.enroll` column name in `evaluate_df` is just a name. It doesn't have to
 # match the name in `train_df`.

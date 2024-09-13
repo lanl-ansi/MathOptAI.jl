@@ -30,18 +30,25 @@ Pipeline with layers:
  * Affine(A, b) [input: 2, output: 1]
  * ReLUQuadratic()
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 1-element Vector{VariableRef}:
  moai_ReLU[1]
 
-julia> print(model)
-Feasibility
-Subject to
- x[1] + 2 x[2] - moai_Affine[1] = 0
- moai_Affine[1] - moai_ReLU[1] + _z[1] = 0
- moai_ReLU[1]*_z[1] = 0
- moai_ReLU[1] ≥ 0
- _z[1] ≥ 0
+julia> formulation
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ x[1] + 2 x[2] - moai_Affine[1] = 0
+ReLUQuadratic()
+├ variables [2]
+│ ├ moai_ReLU[1]
+│ └ moai_z[1]
+└ constraints [2]
+  ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
+  └ moai_ReLU[1]*moai_z[1] = 0
 ```
 """
 struct Pipeline <: AbstractPredictor
@@ -64,10 +71,12 @@ function add_predictor(
     predictor::Pipeline,
     x::Vector,
 )
+    formulation = PipelineFormulation(predictor, Any[])
     for layer in predictor.layers
-        x = add_predictor(model, layer, x)
+        x, inner_formulation = add_predictor(model, layer, x)
+        push!(formulation.layers, inner_formulation)
     end
-    return x
+    return x, formulation
 end
 
 function add_predictor(
@@ -75,8 +84,10 @@ function add_predictor(
     predictor::ReducedSpace{Pipeline},
     x::Vector,
 )
+    formulation = PipelineFormulation(predictor, Any[])
     for layer in predictor.predictor.layers
-        x = add_predictor(model, ReducedSpace(layer), x)
+        x, inner_formulation = add_predictor(model, ReducedSpace(layer), x)
+        push!(formulation.layers, inner_formulation)
     end
-    return x
+    return x, formulation
 end

@@ -21,5 +21,5 @@ julia> @variable(model, x[1:2]);
 
 julia> predictor = MathOptAI.PytorchModel('saved_pytorch_model.pt');
 
-julia> y = MathOptAI.add_predictor(model, predictor, x);
+julia> y, _ = MathOptAI.add_predictor(model, predictor, x);
 ```

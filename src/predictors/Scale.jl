@@ -27,21 +27,34 @@ julia> @variable(model, x[1:2]);
 julia> f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
 Scale(scale, bias)
 
-julia> y = MathOptAI.add_predictor(model, f, x)
+julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia> y
 2-element Vector{VariableRef}:
  moai_Scale[1]
  moai_Scale[2]
 
-julia> print(model)
-Feasibility
-Subject to
- 2 x[1] - moai_Scale[1] = -4
- 3 x[2] - moai_Scale[2] = -5
+julia> formulation
+Scale(scale, bias)
+├ variables [2]
+│ ├ moai_Scale[1]
+│ └ moai_Scale[2]
+└ constraints [2]
+  ├ 2 x[1] - moai_Scale[1] = -4
+  └ 3 x[2] - moai_Scale[2] = -5
 
-julia> y = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x)
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia> y
 2-element Vector{AffExpr}:
  2 x[1] + 4
  3 x[2] + 5
+
+julia> formulation
+ReducedSpace(Scale(scale, bias))
+├ variables [0]
+└ constraints [0]
 ```
 """
 struct Scale{T} <: AbstractPredictor
@@ -64,8 +77,8 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
         y_lb += scale * ifelse(scale >= 0, lb, ub)
         _set_bounds_if_finite(y[i], y_lb, y_ub)
     end
-    JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y)
-    return y
+    cons = JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y)
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(
@@ -74,5 +87,6 @@ function add_predictor(
     x::Vector,
 )
     scale, bias = predictor.predictor.scale, predictor.predictor.bias
-    return JuMP.@expression(model, scale .* x .+ bias)
+    y = JuMP.@expression(model, scale .* x .+ bias)
+    return y, Formulation(predictor)
 end

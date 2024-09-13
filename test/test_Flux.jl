@@ -52,7 +52,7 @@ function test_end_to_end_with_scale()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(
+    y, _ = MathOptAI.add_predictor(
         model,
         chain,
         [x];
@@ -73,7 +73,7 @@ function test_end_to_end_ReLUBigM()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         [x];
@@ -94,7 +94,7 @@ function test_end_to_end_ReLUQuadratic()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         [x];
@@ -117,7 +117,7 @@ function test_end_to_end_ReLU()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, chain, [x])
+    y, formulation = MathOptAI.add_predictor(model, chain, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -133,7 +133,8 @@ function test_end_to_end_ReLU_reduced_space()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, chain, [x]; reduced_space = true)
+    y, formulation =
+        MathOptAI.add_predictor(model, chain, [x]; reduced_space = true)
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -149,7 +150,7 @@ function test_end_to_end_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, chain, [x])
+    y, formulation = MathOptAI.add_predictor(model, chain, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -165,7 +166,7 @@ function test_end_to_end_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, chain, [x])
+    y, formulation = MathOptAI.add_predictor(model, chain, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -181,7 +182,7 @@ function test_end_to_end_Tanh()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x)
-    y = MathOptAI.add_predictor(model, chain, [x])
+    y, formulation = MathOptAI.add_predictor(model, chain, [x])
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
     optimize!(model)
@@ -207,7 +208,7 @@ function test_gray_box_scalar_output()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:2] <= 1)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         x;
@@ -218,7 +219,7 @@ function test_gray_box_scalar_output()
     optimize!(model)
     @test termination_status(model) == ITERATION_LIMIT
     @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
-    y = MathOptAI.add_predictor(model, chain, x; gray_box = true)
+    y, formulation = MathOptAI.add_predictor(model, chain, x; gray_box = true)
     @test y isa Vector{VariableRef}
     config = Dict(Flux.relu => MathOptAI.ReLU())
     @test_throws(
@@ -236,7 +237,7 @@ function test_gray_box_scalar_output_hessian()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:2] <= 1)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         x;
@@ -257,7 +258,7 @@ function test_gray_box_vector_output()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:3] <= 1)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         x;
@@ -278,7 +279,7 @@ function test_gray_box_vector_output_hessian()
     set_silent(model)
     set_attribute(model, "max_iter", 5)
     @variable(model, 0 <= x[1:3] <= 1)
-    y = MathOptAI.add_predictor(
+    y, formulation = MathOptAI.add_predictor(
         model,
         chain,
         x;

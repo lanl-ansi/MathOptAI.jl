@@ -37,9 +37,6 @@ julia> y
  moai_ReLU[1]
 
 julia> formulation
-Pipeline with layers:
- * Affine(A, b) [input: 2, output: 1]
- * ReLUQuadratic()
 Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]

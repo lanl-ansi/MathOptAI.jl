@@ -104,7 +104,6 @@ function PipelineFormulation(predictor::P, layers) where {P<:AbstractPredictor}
 end
 
 function Base.show(io::IO, formulation::PipelineFormulation)
-    println(io, formulation.predictor)
     for (i, c) in enumerate(formulation.layers)
         println(io, c)
     end

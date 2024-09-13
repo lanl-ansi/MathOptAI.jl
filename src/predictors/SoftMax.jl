@@ -72,11 +72,11 @@ function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
     d_con = JuMP.@constraint(model, denom == sum(exp.(x)))
     cons = JuMP.@constraint(model, y .== exp.(x) ./ denom)
     constraints = [
-        JuMP.LowerBoundRef.(y);
-        JuMP.UpperBoundRef.(y);
-        JuMP.LowerBoundRef(denom);
-        d_con;
-        cons;
+        JuMP.LowerBoundRef.(y)
+        JuMP.UpperBoundRef.(y)
+        JuMP.LowerBoundRef(denom)
+        d_con
+        cons
     ]
     return y, Formulation(predictor, [denom; y], constraints)
 end

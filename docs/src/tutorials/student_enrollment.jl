@@ -53,7 +53,7 @@ evaluate_df = read_df("college_applications6000.csv")
 
 n_students = size(evaluate_df, 1)
 
-# ## Training
+# ## Prediction model
 
 # The first step is to train a logistic regression model to predict the Boolean
 # `enroll` column based on the `SAT`, `GPA`, and `merit` columns.
@@ -64,10 +64,14 @@ model_glm = GLM.glm(
     GLM.Bernoulli(),
 )
 
-# ## JuMP
+# ## Decision model
 
-# Now that we have a trained logistic regression model, we can embed it in a
-# JuMP model. Here's an empty model to start:
+# Now that we have a trained logistic regression model, we want a decision model
+# that chooses the optimal merit scholarship for each student in
+
+evaluate_df
+
+# Here's an empty JuMP model to start:
 
 model = Model()
 
@@ -76,6 +80,7 @@ model = Model()
 # matches the name in `train_df`.
 
 evaluate_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5);
+evaluate_df
 
 # Then, we use [`MathOptAI.add_predictor`](@ref) to embed `model_glm` into the
 # JuMP `model`. [`MathOptAI.add_predictor`](@ref) returns a vector of variables,
@@ -83,14 +88,10 @@ evaluate_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5);
 # our logistic regression.
 
 evaluate_df.enroll, _ = MathOptAI.add_predictor(model, model_glm, evaluate_df);
+evaluate_df
 
 # The `.enroll` column name in `evaluate_df` is just a name. It doesn't have to
 # match the name in `train_df`.
-
-# Our `evaluate_df` dataframe now has a column of JuMP variables for `merit` and
-# `enroll`:
-
-evaluate_df
 
 # The objective of our problem is to maximize the expected number of students
 # who enroll:
@@ -116,6 +117,7 @@ solution_summary(model)
 
 evaluate_df.merit_sol = value.(evaluate_df.merit);
 evaluate_df.enroll_sol = value.(evaluate_df.enroll);
+evaluate_df
 
 # ## Solution analysis
 

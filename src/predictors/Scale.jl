@@ -12,7 +12,7 @@
 
 An [`AbstractPredictor`](@ref) that represents the affine relationship:
 ```math
-f(x) = scale .* x .+ bias
+f(x) = Diag(scale)x + bias
 ```
 
 ## Example

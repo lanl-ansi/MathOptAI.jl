@@ -20,7 +20,7 @@ import MathOptAI
         gray_box::Bool = false,
     )
 
-Add a trained neural network from Pytorch via PythonCall.jl to `model`.
+Add a trained neural network from PyTorch via PythonCall.jl to `model`.
 
 ## Supported layers
 
@@ -64,7 +64,7 @@ end
         gray_box_hessian::Bool = false,
     )
 
-Convert a trained neural network from Pytorch via PythonCall.jl to a
+Convert a trained neural network from PyTorch via PythonCall.jl to a
 [`Pipeline`](@ref).
 
 ## Supported layers

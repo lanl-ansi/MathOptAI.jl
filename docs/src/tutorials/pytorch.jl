@@ -4,10 +4,10 @@
 # Use of this source code is governed by a BSD-style license that can be    #src
 # found in the LICENSE.md file.                                             #src
 
-# # Pytorch
+# # Function fitting with PyTorch
 
 # The purpose of this tutorial is to explain how to embed a neural network model
-# from [Pytorch](https://pytorch.org) into JuMP.
+# from [PyTorch](https://pytorch.org) into JuMP.
 
 # ## Python integration
 
@@ -16,7 +16,7 @@
 #
 # See [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl) for more control
 # over how to link Julia to an existing Python environment. For example, if you
-# have an existing Python installation (with Pytorch installed), and it is
+# have an existing Python installation (with PyTorch installed), and it is
 # available in the current conda environment, set:
 # ```julia
 # julia> ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
@@ -34,7 +34,7 @@ import Plots
 
 # ## Training a model
 
-# The following script builds and trains a simple neural network in Pytorch.
+# The following script builds and trains a simple neural network in PyTorch.
 # For simplicity, we do not evaluate out-of-sample test performance, or use
 # a batched data loader. In general, you should train your model in Python,
 # and then use `torch.save(model, filename)` to save it to a `.pt` file for
@@ -81,7 +81,7 @@ model = Model(Ipopt.Optimizer)
 set_silent(model)
 @variable(model, x)
 
-# Then, load the model from Pytorch using [`MathOptAI.PytorchModel`](@ref):
+# Then, load the model from PyTorch using [`MathOptAI.PytorchModel`](@ref):
 
 ml_model = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
 y, _ = MathOptAI.add_predictor(model, ml_model, [x])

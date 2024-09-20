@@ -7,7 +7,7 @@
 """
     PytorchModel(filename::String)
 
-A wrapper struct for loading a Pytorch model.
+A wrapper struct for loading a PyTorch model.
 
 The only supported file extension is `.pt`, where the `.pt` file has been
 created using `torch.save(model, filename)`.

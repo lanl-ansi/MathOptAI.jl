@@ -14,7 +14,7 @@
 An [`AbstractPredictor`](@ref) that represents the function ``f(x)`` as a
 user-defined nonlinear operator.
 
-## arguments
+## Arguments
 
  * `output_size(x::Vector):Int`: given an input vector `x`, return the dimension
    of the output vector
@@ -48,7 +48,7 @@ julia> y
  moai_GrayBox[2]
 
 julia> formulation
-GrayBox(output_size, with_jacobian)
+GrayBox
 ├ variables [2]
 │ ├ moai_GrayBox[1]
 │ └ moai_GrayBox[2]
@@ -64,7 +64,7 @@ julia> y
  op_##333(x[1], x[2])
 
 julia> formulation
-ReducedSpace(GrayBox(output_size, with_jacobian))
+ReducedSpace(GrayBox)
 ├ variables [0]
 └ constraints [0]
 ```
@@ -83,7 +83,7 @@ struct GrayBox{F<:Function,G<:Function} <: AbstractPredictor
     end
 end
 
-Base.show(io::IO, ::GrayBox) = print(io, "GrayBox(output_size, with_jacobian)")
+Base.show(io::IO, ::GrayBox) = print(io, "GrayBox")
 
 function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
     op, _ = add_predictor(model, ReducedSpace(predictor), x)

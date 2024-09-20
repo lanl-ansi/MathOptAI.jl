@@ -24,7 +24,7 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.Affine([2.0, 3.0])
+julia> f = MathOptAI.Affine([2.0 3.0], [4.0])
 Affine(A, b) [input: 2, output: 1]
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
@@ -38,14 +38,14 @@ Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
 └ constraints [1]
-  └ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
+  └ 2 x[1] + 3 x[2] - moai_Affine[1] = -4
 
 julia> y, formulation =
            MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 1-element Vector{AffExpr}:
- 2 x[1] + 3 x[2]
+ 2 x[1] + 3 x[2] + 4
 
 julia> formulation
 ReducedSpace(Affine(A, b) [input: 2, output: 1])

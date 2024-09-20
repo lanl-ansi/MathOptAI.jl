@@ -207,4 +207,14 @@ function _add_predictor(
     return
 end
 
+function _add_predictor(
+    predictor::MathOptAI.Pipeline,
+    ::Lux.WrappedFunction{:direct_call,typeof(Lux.softmax)},
+    ::Any,
+    config::Dict,
+)
+    push!(predictor.layers, get(config, Lux.softmax, MathOptAI.SoftMax()))
+    return
+end
+
 end  # module

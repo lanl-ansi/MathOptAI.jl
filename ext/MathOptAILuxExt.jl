@@ -31,6 +31,7 @@ Add a trained neural network from Lux.jl to `model`.
  * `Lux.relu`
  * `Lux.sigmoid`
  * `Lux.softplus`
+ * `Lux.softmax`
  * `Lux.tanh`
 
 ## Keyword arguments
@@ -106,6 +107,7 @@ Convert a trained neural network from Lux.jl to a [`Pipeline`](@ref).
  * `Lux.relu`
  * `Lux.sigmoid`
  * `Lux.softplus`
+ * `Lux.softmax`
  * `Lux.tanh`
 
 ## Keyword arguments

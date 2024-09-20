@@ -31,6 +31,7 @@ Add a trained neural network from Lux.jl to `model`.
  * `Lux.relu`
  * `Lux.sigmoid`
  * `Lux.softplus`
+ * `Lux.softmax`
  * `Lux.tanh`
 
 ## Keyword arguments
@@ -106,6 +107,7 @@ Convert a trained neural network from Lux.jl to a [`Pipeline`](@ref).
  * `Lux.relu`
  * `Lux.sigmoid`
  * `Lux.softplus`
+ * `Lux.softmax`
  * `Lux.tanh`
 
 ## Keyword arguments
@@ -204,6 +206,16 @@ function _add_predictor(
 )
     push!(predictor.layers, MathOptAI.Scale(p.weight, p.bias))
     _add_predictor(predictor, layer.activation, config)
+    return
+end
+
+function _add_predictor(
+    predictor::MathOptAI.Pipeline,
+    ::Lux.WrappedFunction{:direct_call,typeof(Lux.softmax)},
+    ::Any,
+    config::Dict,
+)
+    push!(predictor.layers, get(config, Lux.softmax, MathOptAI.SoftMax()))
     return
 end
 

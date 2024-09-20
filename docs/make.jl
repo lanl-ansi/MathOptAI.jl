@@ -83,6 +83,7 @@ Documenter.makedocs(;
             "tutorials/student_enrollment.md",
             "tutorials/decision_trees.md",
             "tutorials/mnist.md",
+            "tutorials/mnist_lux.md",
             "tutorials/pytorch.md",
         ],
         "Developers" => ["developers/design_principles.md"],

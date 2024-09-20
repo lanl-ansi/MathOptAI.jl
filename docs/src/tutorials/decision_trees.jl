@@ -4,10 +4,11 @@
 # Use of this source code is governed by a BSD-style license that can be    #src
 # found in the LICENSE.md file.                                             #src
 
-# # Logistic regression with GLM.jl
+# # Classification problems with DecisionTree.jl
 
-# The purpose of this tutorial is to explain how to embed a logistic regression
-# model from [GLM.jl](https://github.com/JuliaStats/GLM.jl) into JuMP.
+# The purpose of this tutorial is to explain how to embed a decision tree
+# model from [DecisionTree.jl](https://github.com/JuliaAI/DecisionTree.jl) into
+# JuMP.
 
 # The data and example in this tutorial comes from the paper: David Bergman,
 # Teng Huang, Philip Brooks, Andrea Lodi, Arvind U. Raghunathan (2021) JANOS: An
@@ -23,8 +24,8 @@ using JuMP
 import CSV
 import DataFrames
 import Downloads
-import GLM
-import Ipopt
+import DecisionTree
+import HiGHS
 import MathOptAI
 import Statistics
 
@@ -58,16 +59,16 @@ n_students = size(evaluate_df, 1)
 # The first step is to train a logistic regression model to predict the Boolean
 # `enroll` column based on the `SAT`, `GPA`, and `merit` columns.
 
-model_glm = GLM.glm(
-    GLM.@formula(enroll ~ 0 + SAT + GPA + merit),
-    train_df,
-    GLM.Bernoulli(),
-)
+train_features = Matrix(train_df[:, [:SAT, :GPA, :merit]])
+train_labels = train_df[:, :enroll]
+ml_model = DecisionTree.DecisionTreeClassifier(; max_depth = 3)
+DecisionTree.fit!(ml_model, train_features, train_labels)
+DecisionTree.print_tree(ml_model)
 
 # ## Decision model
 
-# Now that we have a trained logistic regression model, we want a decision model
-# that chooses the optimal merit scholarship for each student in
+# Now that we have a trained decision tree, we want a decision model that
+# chooses the optimal merit scholarship for each student in:
 
 evaluate_df
 
@@ -82,12 +83,16 @@ model = Model()
 evaluate_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5);
 evaluate_df
 
-# Then, we use [`MathOptAI.add_predictor`](@ref) to embed `model_glm` into the
+# Then, we use [`MathOptAI.add_predictor`](@ref) to embed `model_ml` into the
 # JuMP `model`. [`MathOptAI.add_predictor`](@ref) returns a vector of variables,
-# one for each row inn `evaluate_df`, corresponding to the output `enroll` of
+# one for each row in `evaluate_df`, corresponding to the output `enroll` of
 # our logistic regression.
 
-evaluate_df.enroll, _ = MathOptAI.add_predictor(model, model_glm, evaluate_df);
+evaluate_features = Matrix(evaluate_df[:, [:SAT, :GPA, :merit]])
+evaluate_df.enroll = mapreduce(vcat, 1:size(evaluate_features, 1)) do i
+    y, _ = MathOptAI.add_predictor(model, ml_model, evaluate_features[i, :])
+    return y
+end
 evaluate_df
 
 # The `.enroll` column name in `evaluate_df` is just a name. It doesn't have to
@@ -107,11 +112,10 @@ evaluate_df
 # a smooth nonlinear optimizer. A common choice is Ipopt. Solve and check the
 # optimizer found a feasible solution:
 
-set_optimizer(model, Ipopt.Optimizer)
+set_optimizer(model, HiGHS.Optimizer)
 set_silent(model)
 optimize!(model)
 @assert is_solved_and_feasible(model)
-solution_summary(model)
 
 # Let's store the solution in `evaluate_df` for analysis:
 
@@ -129,6 +133,6 @@ sum(evaluate_df.enroll_sol)
 
 count(evaluate_df.merit_sol .> 1e-5)
 
-# The average merit scholarship was worth just over \$1,000:
+# The average merit scholarship was worth just under \$1,000:
 
 1_000 * Statistics.mean(evaluate_df.merit_sol[evaluate_df.merit_sol.>1e-5])

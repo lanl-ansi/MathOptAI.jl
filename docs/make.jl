@@ -45,7 +45,7 @@ function _literate_directory(dir)
         Literate.markdown(filename, dir; documenter = true)
     end
     # Convert `@example` blocks into `@repl` blocks in the following files:
-    for file in ["student_enrollment.md"]
+    for file in ["student_enrollment.md", "decision_trees.md"]
         filename = joinpath(@__DIR__, "src", "tutorials", file)
         content = read(filename, String)
         content = replace(content, "@example" => "@repl")
@@ -81,6 +81,7 @@ Documenter.makedocs(;
         ],
         "Tutorials" => [
             "tutorials/student_enrollment.md",
+            "tutorials/decision_trees.md",
             "tutorials/mnist.md",
             "tutorials/pytorch.md",
         ],

@@ -102,9 +102,10 @@ score_model(ml_model, test_data)
 # Let's improve that by training our model.
 
 # !!! note
-#     It is not the purpose of this tutorial to explain how Flux works; see the
-#     documentation at [https://fluxml.ai](https://fluxml.ai) for more details.
-#     Changing the number of epochs or the learning rate can improve the loss.
+#     It is not the purpose of this tutorial to explain how Lux works; see the
+#     documentation at [https://lux.csail.mit.edu](https://lux.csail.mit.edu/stable/)
+#     for more details. Changing the number of epochs or the learning rate can
+#     improve the loss.
 
 begin
     train_loader = data_loader(train_data; batchsize = 256, shuffle = true)

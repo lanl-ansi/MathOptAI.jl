@@ -13,7 +13,7 @@ import MathOptAI
 """
     MathOptAI.add_predictor(
         model::JuMP.AbstractModel,
-        predictor::DecisionTree.Root,
+        predictor::Union{DecisionTree.Root,DecisionTree.DecisionTreeClassifier},
         x::Vector,
     )
 
@@ -52,10 +52,10 @@ julia> y
 """
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
-    predictor::DecisionTree.Root,
+    predictor::Union{DecisionTree.Root,DecisionTree.DecisionTreeClassifier},
     x::Vector,
 )
-    inner_predictor = MathOptAI.build_predictor(predictor.node)
+    inner_predictor = MathOptAI.build_predictor(predictor)
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
 
@@ -90,6 +90,10 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ```
 """
 MathOptAI.build_predictor(p::DecisionTree.Root) = _tree_or_leaf(p.node)
+
+function MathOptAI.build_predictor(p::DecisionTree.DecisionTreeClassifier)
+    return MathOptAI.build_predictor(p.root)
+end
 
 MathOptAI.build_predictor(p::DecisionTree.Node) = _tree_or_leaf(p)
 

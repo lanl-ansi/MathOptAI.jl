@@ -78,7 +78,7 @@ function MathOptAI.add_predictor(
     λ = Distributions.invlogcdf.(dist, log.(predictor.quantiles))
     y = JuMP.@variable(model, [1:N], base_name = "moai_quantile")
     JuMP.set_start_value.(y, λ)
-    JuMP.@constraint(model, y .== μ .+ λ .* sqrt(σ²))
+    JuMP.@constraint(model, y .== μ .+ λ .* sqrt(1e-6 + σ²))
     return y, MathOptAI.Formulation(predictor)
 end
 

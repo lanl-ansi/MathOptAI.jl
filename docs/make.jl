@@ -85,6 +85,7 @@ Documenter.makedocs(;
             "tutorials/mnist.md",
             "tutorials/mnist_lux.md",
             "tutorials/pytorch.md",
+            "tutorials/gaussian.md",
         ],
         "Developers" => ["developers/design_principles.md"],
         "api.md",

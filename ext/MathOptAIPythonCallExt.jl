@@ -28,6 +28,7 @@ Add a trained neural network from PyTorch via PythonCall.jl to `model`.
  * `nn.ReLU`
  * `nn.Sequential`
  * `nn.Sigmoid`
+ * `nn.Softplus`
  * `nn.Tanh`
 
 ## Keyword arguments
@@ -35,7 +36,7 @@ Add a trained neural network from PyTorch via PythonCall.jl to `model`.
  * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
+   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftPlus`, and `:Tanh`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `torch.func.jacrev`.
  * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
@@ -73,6 +74,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `nn.ReLU`
  * `nn.Sequential`
  * `nn.Sigmoid`
+ * `nn.Softplus`
  * `nn.Tanh`
 
 ## Keyword arguments
@@ -80,7 +82,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are `:ReLU`, `:Sigmoid`, and `:Tanh`.
+   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftPlus`, and `:Tanh`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `torch.func.jacrev`.
  * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
@@ -118,6 +120,8 @@ function _predictor(nn, layer, config)
         return MathOptAI.Pipeline(layers)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sigmoid))
         return get(config, :Sigmoid, MathOptAI.Sigmoid())
+    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softplus))
+        return get(config, :SoftPlus, MathOptAI.SoftPlus())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Tanh))
         return get(config, :Tanh, MathOptAI.Tanh())
     end

@@ -160,6 +160,32 @@ function test_model_SoftPlus()
     return
 end
 
+function test_model_SoftPlus_beta()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_SoftPlus_beta.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(1, 16),
+            torch.nn.Softplus(beta=0.2),
+            torch.nn.Linear(16, 1),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:1])
+    ml_model = MathOptAI.PytorchModel(filename)
+    @test_throws ErrorException y, formulation = MathOptAI.add_predictor(model, ml_model, x)
+    return
+end
+
 function test_model_Tanh()
     dir = mktempdir()
     filename = joinpath(dir, "model_Tanh.pt")

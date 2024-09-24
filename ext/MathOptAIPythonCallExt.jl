@@ -121,6 +121,9 @@ function _predictor(nn, layer, config)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sigmoid))
         return get(config, :Sigmoid, MathOptAI.Sigmoid())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softplus))
+        if PythonCall.pyconvert(Float64, layer.beta) != 1.0
+            error("torch.nn.Softplus with beta != 1.0 is not supported")
+        end
         return get(config, :SoftPlus, MathOptAI.SoftPlus())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Tanh))
         return get(config, :Tanh, MathOptAI.Tanh())

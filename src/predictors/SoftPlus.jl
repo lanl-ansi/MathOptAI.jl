@@ -5,7 +5,7 @@
 # in the LICENSE.md file.
 
 """
-    SoftPlus(beta::T = 1.0) where {T} <: AbstractPredictor
+    SoftPlus(beta = 1.0) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that implements the SoftPlus constraint
 \$y = \\frac{1}{\\beta} \\log(1 + e^{\\beta x})\$ as a smooth nonlinear constraint.
@@ -20,7 +20,7 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = MathOptAI.SoftPlus(2.0)
-SoftPlus{Float64}(2.0)
+SoftPlus(2.0)
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
@@ -30,7 +30,7 @@ julia> y
  moai_SoftPlus[2]
 
 julia> formulation
-SoftPlus{Float64}(2.0)
+SoftPlus(2.0)
 ├ variables [2]
 │ ├ moai_SoftPlus[1]
 │ └ moai_SoftPlus[2]
@@ -49,22 +49,22 @@ julia> y
  log(1.0 + exp(2 x[2])) / 2.0
 
 julia> formulation
-ReducedSpace(SoftPlus{Float64}(2.0))
+ReducedSpace(SoftPlus(2.0))
 ├ variables [0]
 └ constraints [0]
 ```
 """
-struct SoftPlus{T} <: AbstractPredictor
-    beta::T
+struct SoftPlus <: AbstractPredictor
+    beta::Float64
 end
 
 SoftPlus() = SoftPlus(1.0)
 
 function add_predictor(
     model::JuMP.AbstractModel,
-    predictor::SoftPlus{T},
+    predictor::SoftPlus,
     x::Vector,
-) where T
+)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     _set_bounds_if_finite.(y, 0, nothing)
     beta = predictor.beta
@@ -74,9 +74,9 @@ end
 
 function add_predictor(
     ::JuMP.AbstractModel,
-    predictor::ReducedSpace{SoftPlus{T}},
+    predictor::ReducedSpace{SoftPlus},
     x::Vector,
-) where T
+)
     beta = predictor.predictor.beta
     return log.(1 .+ exp.(beta .* x)) ./ beta, Formulation(predictor)
 end

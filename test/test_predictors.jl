@@ -282,7 +282,7 @@ function test_ReducedSpace_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    predictor = MathOptAI.ReducedSpace(MathOptAI.SoftPlus(1.1))
+    predictor = MathOptAI.ReducedSpace(MathOptAI.SoftPlus(beta = 1.1))
     y, formulation = MathOptAI.add_predictor(model, predictor, x)
     @test length(y) == 2
     @test num_variables(model) == 2

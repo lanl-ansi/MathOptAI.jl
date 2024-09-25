@@ -5,7 +5,7 @@
 # in the LICENSE.md file.
 
 """
-    SoftPlus(beta = 1.0) <: AbstractPredictor
+    SoftPlus(; beta = 1.0) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that implements the SoftPlus constraint
 \$y = \\frac{1}{\\beta} \\log(1 + e^{\\beta x})\$ as a smooth nonlinear constraint.
@@ -19,7 +19,7 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.SoftPlus(2.0)
+julia> f = MathOptAI.SoftPlus(beta = 2.0)
 SoftPlus(2.0)
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
@@ -56,9 +56,8 @@ ReducedSpace(SoftPlus(2.0))
 """
 struct SoftPlus <: AbstractPredictor
     beta::Float64
+    SoftPlus(; beta::Float64 = 1.0) = new(beta)
 end
-
-SoftPlus() = SoftPlus(1.0)
 
 function add_predictor(
     model::JuMP.AbstractModel,

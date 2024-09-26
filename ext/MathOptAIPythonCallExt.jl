@@ -122,7 +122,7 @@ function _predictor(nn, layer, config)
         return get(config, :Sigmoid, MathOptAI.Sigmoid())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softplus))
         beta = PythonCall.pyconvert(Float64, layer.beta)
-        return get(config, :SoftPlus, MathOptAI.SoftPlus(beta = beta))
+        return get(config, :SoftPlus, MathOptAI.SoftPlus(; beta = beta))
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Tanh))
         return get(config, :Tanh, MathOptAI.Tanh())
     end

@@ -19,7 +19,7 @@ julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> f = MathOptAI.SoftPlus(beta = 2.0)
+julia> f = MathOptAI.SoftPlus(; beta = 2.0)
 SoftPlus(2.0)
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);

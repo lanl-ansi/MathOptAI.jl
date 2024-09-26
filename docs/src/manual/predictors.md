@@ -27,8 +27,8 @@ The following predictors are supported. See their docstrings for details:
 | [`ReLUSOS1`](@ref) |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |
 | [`Scale`](@ref)    |  $f(x) = scale .* x .+ bias$           | $M \rightarrow M$   |
 | [`Sigmoid`](@ref)  |  $f(x) = \frac{1}{1 + e^{-x}}$         | $M \rightarrow M$   |
-| [`SoftPlus`](@ref) |  $f(x) = \frac{1}{\beta} \log(1 + e^{\beta x})$ | $M \rightarrow M$ |
 | [`SoftMax`](@ref)  |  $f(x) = \frac{e^x}{\sum e^{x_i}}$     | $M \rightarrow M$   |
+| [`SoftPlus`](@ref) |  $f(x) = \frac{1}{\beta} \log(1 + e^{\beta x})$ | $M \rightarrow M$ |
 | [`Tanh`](@ref)     |  $f(x) = \tanh.(x)$                    | $M \rightarrow M$   |
 
 Note that some predictors, such as the ReLU ones, offer multiple formulations of

@@ -17,8 +17,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Since MathOptAI doesn't have binary dependencies, only test on a subset of
-        # possible platforms.
+        # Since MathOptAI doesn't have binary dependencies, only test on a
+        # subset of possible platforms.
         include:
           - version: '1'  # The latest point-release (Linux)
             os: ubuntu-latest

@@ -34,6 +34,7 @@ function test_DecisionTree()
     @variable(model, 0 <= x[1:2] <= 1)
     y, formulation = MathOptAI.add_predictor(model, ml_model, x)
     @constraint(model, c_rhs, x .== 0.0)
+    @objective(model, Min, sum(y))
     for _ in 1:10
         xi = rand(rng, 2)
         if minimum(abs.(xi .- [0.5, 0.3])) < 1e-2

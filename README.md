@@ -8,7 +8,8 @@ optimization model.
 
 ## License
 
-MathOptAI.jl is provided under the BSD-3 license.
+MathOptAI.jl is provided under a BSD-3 license as part of the Optimization and
+Machine Learning Toolbox project, O4806.
 
 See [LICENSE.md](LICENSE.md) for details.
 

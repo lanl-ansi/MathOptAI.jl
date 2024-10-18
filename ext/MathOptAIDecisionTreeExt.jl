@@ -89,23 +89,23 @@ julia> MathOptAI.build_predictor(ml_model)
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ```
 """
-MathOptAI.build_predictor(p::DecisionTree.Root) = _tree_or_leaf(p.node)
+function MathOptAI.build_predictor(p::DecisionTree.Root)
+    return MathOptAI.build_predictor(p.node)
+end
 
 function MathOptAI.build_predictor(p::DecisionTree.DecisionTreeClassifier)
     return MathOptAI.build_predictor(p.root)
 end
 
-MathOptAI.build_predictor(p::DecisionTree.Node) = _tree_or_leaf(p)
-
-function _tree_or_leaf(node::DecisionTree.Node{K,V}) where {K,V}
+function MathOptAI.build_predictor(node::DecisionTree.Node{K,V}) where {K,V}
     return MathOptAI.BinaryDecisionTree{K,V}(
         node.featid,
         node.featval,
-        _tree_or_leaf(node.left),
-        _tree_or_leaf(node.right),
+        MathOptAI.build_predictor(node.left),
+        MathOptAI.build_predictor(node.right),
     )
 end
 
-_tree_or_leaf(node::DecisionTree.Leaf) = node.majority
+MathOptAI.build_predictor(node::DecisionTree.Leaf) = node.majority
 
 end  # module

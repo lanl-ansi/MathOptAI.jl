@@ -295,6 +295,33 @@ function test_gray_box_vector_output_hessian()
     return
 end
 
+function test_end_to_end_Softmax()
+    chain = Flux.Chain(Flux.Dense(2 => 3), Flux.softmax)
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y, _ = MathOptAI.add_predictor(model, chain, x)
+    @constraint(model, x[1] == 1.0)
+    @constraint(model, x[2] == 2.0)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    y_val = chain(Float32.(value.(x)))
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    @test isapprox(sum(value.(y)), 1.0; atol = 1e-2)
+    return
+end
+
+function test_unsupported_activation()
+    chain = Flux.Chain(Flux.Dense(2 => 3, Flux.celu), Flux.softmax)
+    model = Model()
+    @variable(model, x[1:2])
+    @test_throws(
+        ErrorException("Unsupported activation function: celu"),
+        MathOptAI.add_predictor(model, chain, x),
+    )
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

@@ -47,10 +47,10 @@ function test_DecisionTree()
     return
 end
 
-function test_DecisionTree()
+function test_DecisionTreeClassifier()
     truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
     rng = Random.MersenneTwister(1234)
-    features = rand(rng, 10, 2)
+    features = rand(rng, 100, 2)
     labels = truth.(Vector.(eachrow(features)))
     ml_model = DecisionTree.DecisionTreeClassifier(; max_depth = 3)
     DecisionTree.fit!(ml_model, features, labels)

@@ -77,14 +77,14 @@ Documenter.makedocs(;
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",
-            "manual/PyTorch.md",
+            # "manual/PyTorch.md",
         ],
         "Tutorials" => [
             "tutorials/student_enrollment.md",
             "tutorials/decision_trees.md",
             "tutorials/mnist.md",
             "tutorials/mnist_lux.md",
-            "tutorials/pytorch.md",
+            # "tutorials/pytorch.md",
             "tutorials/gaussian.md",
         ],
         "Developers" => ["developers/design_principles.md"],
@@ -102,4 +102,13 @@ Documenter.makedocs(;
     ],
     checkdocs = :exports,
     doctest = true,
+)
+
+# ==============================================================================
+#  Deploy everything in `build`
+# ==============================================================================
+
+Documenter.deploydocs(;
+    repo = "github.com/lanl-ansi/MathOptAI.jl.git",
+    push_preview = true,
 )

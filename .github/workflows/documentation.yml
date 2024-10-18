@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GKSwstype: nul
+      DATADEPS_ALWAYS_ACCEPT: true
     steps:
       - uses: actions/checkout@v4
       - uses: julia-actions/setup-julia@latest

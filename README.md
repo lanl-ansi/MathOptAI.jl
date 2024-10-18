@@ -21,6 +21,14 @@ _Despite the name similarity, this project is not affiliated with
 [OMLT](https://github.com/cog-imperial/OMLT), the Optimization and Machine
 Learning Toolkit._
 
+## Installation
+
+Install `MathOptAI.jl` using the Julia package manager:
+```julia
+import Pkg
+Pkg.add(; url = "https://github.com/lanl-ansi/MathOptAI.jl")
+```
+
 ## Documentation
 
 Documentation is available at

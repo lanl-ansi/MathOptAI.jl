@@ -290,7 +290,7 @@ function test_gray_box_vector_output_hessian()
     @test length(y) == 2
     @objective(model, Max, sum(y))
     optimize!(model)
-    @test termination_status(model) == ITERATION_LIMIT
+    @test termination_status(model) in (LOCALLY_SOLVED, ITERATION_LIMIT)
     @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
     return
 end

@@ -70,7 +70,7 @@ function test_end_to_end_with_scale()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -91,7 +91,7 @@ function test_end_to_end_ReLUBigM()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -114,7 +114,7 @@ function test_end_to_end_ReLUQuadratic()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -130,7 +130,7 @@ function test_end_to_end_ReLU()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -147,7 +147,7 @@ function test_end_to_end_ReLU_reduced_space()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -163,7 +163,7 @@ function test_end_to_end_SoftPlus()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -179,7 +179,7 @@ function test_end_to_end_Sigmoid()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -195,7 +195,7 @@ function test_end_to_end_Tanh()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 

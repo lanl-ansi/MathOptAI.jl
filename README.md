@@ -13,6 +13,9 @@ Machine Learning Toolbox project, O4806.
 
 See [LICENSE.md](LICENSE.md) for details.
 
+_Despite the name similarity, this project is not affiliated with [OMLT](https://github.com/cog-imperial/OMLT),
+the Optimization and Machine Learning Toolkit._
+
 ## Getting help
 
 For help, questions, comments, and suggestions, please [open a GitHub issue](https://github.com/lanl-ansi/MathOptAI.jl/issues/new).

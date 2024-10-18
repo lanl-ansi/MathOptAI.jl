@@ -5,6 +5,10 @@ on:
     tags: '*'
   pull_request:
     types: [opened, synchronize, reopened]
+permissions:
+  contents: write
+  pull-requests: read
+  statuses: write
 jobs:
   build:
     runs-on: ubuntu-latest

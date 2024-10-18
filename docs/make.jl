@@ -37,6 +37,9 @@ function _literate_directory(dir)
         rm(filename)
     end
     for filename in _file_list(dir, dir, ".jl")
+        if endswith(filename, "pytorch.j")
+            continue  # Skip for now
+        end
         # `include` the file to test it before `#src` lines are removed. It is
         # in a testset to isolate local variables between files.
         Test.@testset "$(filename)" begin

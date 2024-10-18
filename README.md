@@ -1,13 +1,13 @@
 ![](https://upload.wikimedia.org/wikipedia/commons/2/22/Standing_Moai_at_Ahu_Tongariki%2C_Easter_Island%2C_Pacific_Ocean.jpg)
 
-# MathOptAI (Mo'ai)
+# MathOptAI.jl
 
 [![Build Status](https://github.com/lanl-ansi/MathOptAI.jl/workflows/CI/badge.svg)](https://github.com/lanl-ansi/MathOptAI.jl/actions?query=workflow%3ACI)
 [![codecov](https://codecov.io/gh/lanl-ansi/MathOptAI.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/lanl-ansi/MathOptAI.jl)
 
-MathOptAI.jl (Mo'ai) is a [JuMP](https://jump.dev) extension for embedding
-trained AI, machine learning, and statistical learning models into a JuMP
-optimization model.
+MathOptAI.jl is a [JuMP](https://jump.dev) extension for embedding trained AI,
+machine learning, and statistical learning models into a JuMP optimization
+model.
 
 ## License
 

@@ -2,6 +2,9 @@
 
 # MathOptAI (Mo'ai)
 
+[![Build Status](https://github.com/lanl-ansi/MathOptAI.jl/workflows/CI/badge.svg)](https://github.com/lanl-ansi/MathOptAI.jl/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/lanl-ansi/MathOptAI.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/lanl-ansi/MathOptAI.jl)
+
 MathOptAI.jl (Mo'ai) is a [JuMP](https://jump.dev) extension for embedding
 trained AI, machine learning, and statistical learning models into a JuMP
 optimization model.

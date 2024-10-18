@@ -14,10 +14,17 @@ optimization model.
 MathOptAI.jl is provided under a BSD-3 license as part of the Optimization and
 Machine Learning Toolbox project, O4806.
 
-See [LICENSE.md](LICENSE.md) for details.
+See [LICENSE.md](https://github.com/lanl-ansi/MathOptAI.jl/blob/main/LICENSE.md)
+for details.
 
-_Despite the name similarity, this project is not affiliated with [OMLT](https://github.com/cog-imperial/OMLT),
-the Optimization and Machine Learning Toolkit._
+_Despite the name similarity, this project is not affiliated with
+[OMLT](https://github.com/cog-imperial/OMLT), the Optimization and Machine
+Learning Toolkit._
+
+## Documentation
+
+Documentation is available at
+[https://lanl-ansi.github.io/MathOptAI.jl/dev](https://lanl-ansi.github.io/MathOptAI.jl/dev).
 
 ## Getting help
 
@@ -46,8 +53,3 @@ the field at the time that we started development of MathOptAI.
 > Systems Engineering Tools for Optimization of Trained Machine Learning Models:
 > Comparative and Perspective. _Industrial & Engineering Chemistry Research_,
 > 63(32), 13966-13979. DOI: [10.1021/acs.iecr.4c00632](https://pubs.acs.org/doi/abs/10.1021/acs.iecr.4c00632)
-
-## Documentation
-
-See the `docs/src` folder for now. When this repository is made public, we will
-publish the docs as a website.

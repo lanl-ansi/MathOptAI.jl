@@ -305,7 +305,7 @@ function test_end_to_end_Softmax()
     @constraint(model, x[2] == 2.0)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    y_val, _ = chain(value.(x), parameters, state)
+    y_val = chain(Float32.(value.(x)))
     @test isapprox(value.(y), y_val; atol = 1e-2)
     @test isapprox(sum(value.(y)), 1.0; atol = 1e-2)
     return

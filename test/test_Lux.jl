@@ -161,6 +161,26 @@ function test_end_to_end_ReLU_reduced_space()
     return
 end
 
+function test_end_to_end_Softmax()
+    chain = Lux.Chain(Lux.Dense(2 => 3), Lux.softmax)
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 12345)
+    parameters, state = Lux.setup(rng, chain)
+    predictor = (chain, parameters, state)
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
+    @constraint(model, x[1] == 1.0)
+    @constraint(model, x[2] == 2.0)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    y_val, _ = chain(value.(x), parameters, state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    @test isapprox(sum(value.(y)), 1.0; atol = 1e-2)
+    return
+end
+
 function test_end_to_end_SoftPlus()
     state = _train_lux_model(
         Lux.Chain(Lux.Dense(1 => 16, Lux.softplus), Lux.Dense(16 => 1)),
@@ -225,6 +245,21 @@ function test_unsupported_layer()
     @test_throws(
         ErrorException("Unsupported layer: $layer"),
         MathOptAI.add_predictor(model, (ml_model, parameters, state), x),
+    )
+    return
+end
+
+function test_unsupported_activation()
+    chain = Lux.Chain(Lux.Dense(2 => 3, Lux.celu), Lux.softmax)
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 12345)
+    parameters, state = Lux.setup(rng, chain)
+    predictor = (chain, parameters, state)
+    model = Model()
+    @variable(model, x[1:2])
+    @test_throws(
+        ErrorException("Unsupported activation function: celu"),
+        MathOptAI.add_predictor(model, predictor, x),
     )
     return
 end

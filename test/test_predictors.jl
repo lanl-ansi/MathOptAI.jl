@@ -35,6 +35,18 @@ function test_Affine()
     return
 end
 
+function test_Affine_constructors()
+    # Affine(::Matrix)
+    f = MathOptAI.Affine([1.0 2.0; 3.0 4.0])
+    g = MathOptAI.Affine([1.0 2.0; 3.0 4.0], [0.0, 0.0])
+    @test f.A == g.A && f.b == g.b
+    # Affine(::Vector)
+    f = MathOptAI.Affine([1.0, 2.0])
+    g = MathOptAI.Affine([1.0 2.0], [0.0])
+    @test f.A == g.A && f.b == g.b
+    return
+end
+
 function test_Affine_affine()
     model = Model()
     @variable(model, x[1:2])
@@ -44,6 +56,18 @@ function test_Affine_affine()
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
     @test isequal_canonical(obj.func, 4.0 * x[1] + 6.0 * x[2] - y[1])
+    return
+end
+
+function test_Affine_bounds()
+    model = Model()
+    @variable(model, x[1:2])
+    fix(x[1], 2.0)
+    set_binary(x[2])
+    f = MathOptAI.Affine([2.0, 3.0])
+    y, _ = MathOptAI.add_predictor(model, f, x)
+    @test lower_bound.(y) == [4.0]  # 2 * (x[1]=2) + 3 * (x[2]=0)
+    @test upper_bound.(y) == [7.0]  # 2 * (x[1]=2) + 3 * (x[2]=1)
     return
 end
 

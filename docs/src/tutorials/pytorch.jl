@@ -19,13 +19,12 @@
 # have an existing Python installation (with PyTorch installed), and it is
 # available in the current conda environment, set:
 # ```julia
-# julia> ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
+# ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
 # ```
 # before importing PythonCall.jl. If the Python installation can be found on
 # the path and it is not in a conda environment, set:
-# ```julia
-# julia> ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
-# ```
+
+ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
 
 # ## Required packages
 

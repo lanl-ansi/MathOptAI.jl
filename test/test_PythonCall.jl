@@ -17,11 +17,14 @@ import PythonCall
 is_test(x) = startswith(string(x), "test_")
 
 function runtests()
-    try
-        PythonCall.pyimport("torch")
-    catch
-        @warn("Skipping PythonCall tests because we cannot import PyTorch.")
-        return
+    # If we're running the tests locally, allow skipping Python tests
+    if get(ENV, "CI", "false") == "false"
+        try
+            PythonCall.pyimport("torch")
+        catch
+            @warn("Skipping PythonCall tests because we cannot import PyTorch.")
+            return
+        end
     end
     @testset "$name" for name in filter(is_test, names(@__MODULE__; all = true))
         getfield(@__MODULE__, name)()

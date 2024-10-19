@@ -35,6 +35,7 @@ jobs:
       - name: Install pytorch
         run: |
            pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+           pip3 install numpy
            python3 -c 'import torch'
            which python
            which python3

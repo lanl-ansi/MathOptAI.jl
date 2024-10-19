@@ -15,7 +15,8 @@ jobs:
     env:
       GKSwstype: nul
       DATADEPS_ALWAYS_ACCEPT: true
-      JULIA_CONDAPKG_BACKEND: Null
+      JULIA_CONDAPKG_BACKEND: "Null"
+      JULIA_PYTHONCALL_EXE: "python3"
     steps:
       - uses: actions/checkout@v4
       # Install pytorch
@@ -25,7 +26,8 @@ jobs:
           python-version: '3.10'
       - name: Install pytorch
         run: |
-           pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+          pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+          pip3 install numpy
       # Install Julia
       - uses: julia-actions/setup-julia@latest
         with:

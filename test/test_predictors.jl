@@ -132,6 +132,28 @@ function test_ReLU_direct()
     return
 end
 
+function test_ReLU_bounds()
+    values = [-2, 0, 2]
+    for f in (
+        MathOptAI.ReLU(),
+        MathOptAI.ReLUBigM(100.0),
+        MathOptAI.ReLUQuadratic(),
+        MathOptAI.ReLUSOS1(),
+    )
+        for lb in values, ub in values
+            if lb > ub
+                continue
+            end
+            model = Model()
+            @variable(model, lb <= x <= ub)
+            y, _ = MathOptAI.add_predictor(model, f, [x])
+            @test lower_bound.(y) == [0.0]
+            @test upper_bound.(y) == [max(0.0, ub)]
+        end
+    end
+    return
+end
+
 function test_ReducedSpace_ReLU_direct()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

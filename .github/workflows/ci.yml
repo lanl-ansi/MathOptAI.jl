@@ -23,7 +23,8 @@ jobs:
             os: ubuntu-latest
             arch: x64
     env:
-      JULIA_CONDAPKG_BACKEND: Null
+      JULIA_CONDAPKG_BACKEND: "Null"
+      JULIA_PYTHONCALL_EXE: "python3"
     steps:
       - uses: actions/checkout@v4
       # Install pytorch

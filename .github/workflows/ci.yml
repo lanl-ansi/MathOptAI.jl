@@ -22,8 +22,21 @@ jobs:
           - version: '1'
             os: ubuntu-latest
             arch: x64
+    env:
+      JULIA_CONDAPKG_BACKEND: "Null"
+      JULIA_PYTHONCALL_EXE: "python3"
     steps:
       - uses: actions/checkout@v4
+      # Install pytorch
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: Install pytorch
+        run: |
+           pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+           pip3 install numpy
+      # Install Julia
       - uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.version }}

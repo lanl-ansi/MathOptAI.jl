@@ -35,6 +35,9 @@ jobs:
       - name: Install pytorch
         run: |
            pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+           python3 -c 'import torch'
+           which python
+           which python3
       # Install Julia
       - uses: julia-actions/setup-julia@v2
         with:

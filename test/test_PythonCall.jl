@@ -17,6 +17,8 @@ import PythonCall
 is_test(x) = startswith(string(x), "test_")
 
 function runtests()
+    @show ENV["JULIA_CONDAPKG_BACKEND"]
+    @show ENV["JULIA_PYTHONCALL_EXE"]
     # If we're running the tests locally, allow skipping Python tests
     if get(ENV, "CI", "false") == "false"
         try

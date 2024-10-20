@@ -102,7 +102,7 @@ function MathOptAI.build_predictor(
     end
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
-    torch_model = torch.load(predictor.filename)
+    torch_model = torch.load(predictor.filename; weights_only = false)
     return _predictor(nn, torch_model, config)
 end
 
@@ -134,7 +134,7 @@ function MathOptAI.GrayBox(
     hessian::Bool = false,
 )
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(predictor.filename)
+    torch_model = torch.load(predictor.filename; weights_only = false)
     J = torch.func.jacrev(torch_model)
     H = torch.func.hessian(torch_model)
     # TODO(odow): I'm not sure if there is a better way to get the output

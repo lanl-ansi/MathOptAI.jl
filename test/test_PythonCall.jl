@@ -34,7 +34,7 @@ end
 
 function _evaluate_model(filename, x)
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(filename)
+    torch_model = torch.load(filename; weights_only = false)
     input = torch.tensor(x)
     return PythonCall.pyconvert(Vector, torch_model(input).detach().numpy())
 end
@@ -299,12 +299,12 @@ function test_model_Tanh_scalar_GrayBox()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:2])
+    @variable(model, x[i in 1:2] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 1
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -331,7 +331,7 @@ function test_model_Tanh_scalar_GrayBox_hessian()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:2])
+    @variable(model, x[i in 1:2] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -341,7 +341,7 @@ function test_model_Tanh_scalar_GrayBox_hessian()
         gray_box_hessian = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 1
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -369,19 +369,19 @@ function test_model_Tanh_vector_GrayBox()
     # Full-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 5
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 2
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 5
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
     # Reduced-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -391,7 +391,7 @@ function test_model_Tanh_vector_GrayBox()
         reduced_space = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 0
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -419,7 +419,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
     # Full-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -429,14 +429,14 @@ function test_model_Tanh_vector_GrayBox_hessian()
         gray_box_hessian = true,
     )
     @test num_variables(model) == 5
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 2
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 5
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
     # Reduced-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -446,7 +446,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
         reduced_space = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 0
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)

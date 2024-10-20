@@ -73,6 +73,64 @@ function test_model_ReLU()
     return
 end
 
+function test_model_ReLU_gray_box_config()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_ReLU.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(1, 16),
+            torch.nn.ReLU(),
+            torch.nn.Linear(16, 1),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    @test_throws(
+        ErrorException(
+            "cannot specify the `config` kwarg if `gray_box = true`",
+        ),
+        MathOptAI.build_predictor(
+            MathOptAI.PytorchModel(filename);
+            config = Dict(:ReLU => MathOptAI.ReLUBigM(100)),
+            gray_box = true,
+        )
+    )
+    return
+end
+
+function test_model_unsupported_layer()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_LeakyReLU.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(1, 16),
+            torch.nn.LeakyReLU(),
+            torch.nn.Linear(16, 1),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    torch = PythonCall.pyimport("torch")
+    layer = torch.nn.LeakyReLU()
+    @test_throws(
+        ErrorException("unsupported layer: $layer"),
+        MathOptAI.build_predictor(MathOptAI.PytorchModel(filename)),
+    )
+    return
+end
+
 function test_model_Sigmoid()
     dir = mktempdir()
     filename = joinpath(dir, "model_Sigmoid.pt")

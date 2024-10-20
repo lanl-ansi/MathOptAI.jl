@@ -26,7 +26,7 @@ Learning Toolkit._
 Install `MathOptAI.jl` using the Julia package manager:
 ```julia
 import Pkg
-Pkg.add(; url = "https://github.com/lanl-ansi/MathOptAI.jl")
+Pkg.add("MathOptAI")
 ```
 
 ## Getting started

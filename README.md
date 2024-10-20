@@ -29,6 +29,45 @@ import Pkg
 Pkg.add(; url = "https://github.com/lanl-ansi/MathOptAI.jl")
 ```
 
+## Getting started
+
+Here's an example of using MathOptAI to embed a trained neural network from Flux
+into a JuMP model. The vector of JuMP variables `x` is fed as input to the
+neural network. The output `y` is a vector of JuMP variables that represents the
+output layer of the neural network. The `formulation` object stores the
+additional variables and constraints that were added to `model`.
+
+```julia
+julia> using JuMP, MathOptAI, Flux
+
+julia> predictor = Flux.Chain(
+           Flux.Dense(28^2 => 32, Flux.sigmoid),
+           Flux.Dense(32 => 10),
+           Flux.softmax,
+       );
+
+julia> #= Train the Flux model. Code not shown for simplicity =#
+
+julia> model = JuMP.Model();
+
+julia> JuMP.@variable(model, 0 <= x[1:28^2] <= 1);
+
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
+
+julia> y
+10-element Vector{VariableRef}:
+ moai_SoftMax[1]
+ moai_SoftMax[2]
+ moai_SoftMax[3]
+ moai_SoftMax[4]
+ moai_SoftMax[5]
+ moai_SoftMax[6]
+ moai_SoftMax[7]
+ moai_SoftMax[8]
+ moai_SoftMax[9]
+ moai_SoftMax[10]
+```
+
 ## Documentation
 
 Documentation is available at

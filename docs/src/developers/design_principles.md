@@ -28,8 +28,8 @@ MathOptAI chooses to use "predictor" as the synonym for the machine learning
 model. Hence, we have `AbstractPredictor`, `add_predictor`, and
 `build_predictor`.
 
-In contrast, gurob-machinelearning tennds to use "regression model" and OMLT
-does not have a single unified API.
+In contrast, gurob-machinelearning tends to use "regression model" and OMLT
+uses "formulation."
 
 We choose "predictor" because all models we implement are of the form
 ``y = f(x)``.
@@ -167,9 +167,6 @@ y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
 ```
 for any size of `x`.
 
-We choose this decision to simplify the implementation, and because we think
-deleting a predictor is an uncommon operation.
-
 ## Activations are predictors
 
 OMLT makes a distinction between layers, like `full_space_dense_layer`, and
@@ -196,7 +193,7 @@ Many predictors have multiple ways that they can be formulated in an
 optimization model. For example, [`ReLU`](@ref) implements the non-smooth
 nonlinear formulation ``y = \max\{x, 0\}``, while [`ReLUQuadratic`](@ref)
 implements a the complementarity formulation
-``x = y - slack; y, slack \\ge 0; y * slack == 0``.
+``x = y - slack; y, slack \ge 0; y * slack = 0``.
 
 Choosing the appropriate formulation for the combination of model and solver can
 have a large impact on the performance.

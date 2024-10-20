@@ -304,7 +304,7 @@ function test_model_Tanh_scalar_GrayBox()
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 1
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -341,7 +341,7 @@ function test_model_Tanh_scalar_GrayBox_hessian()
         gray_box_hessian = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 1
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -374,7 +374,7 @@ function test_model_Tanh_vector_GrayBox()
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 5
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 2
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 5
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -391,7 +391,7 @@ function test_model_Tanh_vector_GrayBox()
         reduced_space = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 0
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -429,7 +429,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
         gray_box_hessian = true,
     )
     @test num_variables(model) == 5
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 2
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 5
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -446,7 +446,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
         reduced_space = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 0
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)

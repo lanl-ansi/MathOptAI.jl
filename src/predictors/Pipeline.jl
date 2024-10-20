@@ -10,7 +10,7 @@
 An [`AbstractPredictor`](@ref) that represents a pipeline (composition) of
 nested layers:
 ```math
-f(x) = (l_1 \\cdots l_N)(x)
+f(x) = (l_1 \\cdots (l_N(x))
 ```
 
 ## Example

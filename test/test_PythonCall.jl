@@ -34,7 +34,7 @@ end
 
 function _evaluate_model(filename, x)
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(filename)
+    torch_model = torch.load(filename; weights_only = false)
     input = torch.tensor(x)
     return PythonCall.pyconvert(Vector, torch_model(input).detach().numpy())
 end
@@ -299,7 +299,7 @@ function test_model_Tanh_scalar_GrayBox()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:2])
+    @variable(model, x[i in 1:2] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
@@ -331,7 +331,7 @@ function test_model_Tanh_scalar_GrayBox_hessian()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:2])
+    @variable(model, x[i in 1:2] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -369,7 +369,7 @@ function test_model_Tanh_vector_GrayBox()
     # Full-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
@@ -381,7 +381,7 @@ function test_model_Tanh_vector_GrayBox()
     # Reduced-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -419,7 +419,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
     # Full-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -436,7 +436,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
     # Reduced-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,

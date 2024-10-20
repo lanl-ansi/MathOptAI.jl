@@ -8,7 +8,7 @@
     ReLU() <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\{0, x\}\$ as a non-smooth nonlinear constraint.
+\$y = \\max\\{0, x\\}\$ as a non-smooth nonlinear constraint.
 
 ## Example
 
@@ -77,7 +77,7 @@ end
     ReLUBigM(M::Float64) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\{0, x\}\$ via a big-M MIP reformulation.
+\$y = \\max\\{0, x\\}\$ via a big-M MIP reformulation.
 
 ## Example
 
@@ -151,7 +151,7 @@ end
     ReLUSOS1() <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\{0, x\}\$ by the reformulation:
+\$y = \\max\\{0, x\\}\$ by the reformulation:
 ```math
 \\begin{aligned}
 x = y - z \\\\
@@ -219,7 +219,7 @@ end
     ReLUQuadratic() <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\{0, x\}\$ by the reformulation:
+\$y = \\max\\{0, x\\}\$ by the reformulation:
 ```math
 \\begin{aligned}
 x = y - z \\\\

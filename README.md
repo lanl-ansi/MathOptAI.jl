@@ -71,7 +71,7 @@ julia> y
 ## Documentation
 
 Documentation is available at
-[https://lanl-ansi.github.io/MathOptAI.jl/dev](https://lanl-ansi.github.io/MathOptAI.jl).
+[https://lanl-ansi.github.io/MathOptAI.jl](https://lanl-ansi.github.io/MathOptAI.jl).
 
 ## Getting help
 

@@ -98,12 +98,12 @@ set_silent(model)
 
 # Then, load the model from PyTorch using [`MathOptAI.PytorchModel`](@ref):
 
-ml_model = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
-y, _ = MathOptAI.add_predictor(model, ml_model, [x])
+predictor = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
+y, _ = MathOptAI.add_predictor(model, predictor, [x])
 @objective(model, Min, only(y))
 
-# Now, visualize the fitted function `y = ml_model(x)` by repeatedly solving the
-# optimization problem for different fixed values of `x`:
+# Now, visualize the fitted function `y = predictor(x)` by repeatedly solving
+# the optimization problem for different fixed values of `x`:
 
 X, Y = -2:0.1:2, Float64[]
 @constraint(model, c, x == 0.0)

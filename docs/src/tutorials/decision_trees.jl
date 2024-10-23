@@ -61,9 +61,9 @@ n_students = size(evaluate_df, 1)
 
 train_features = Matrix(train_df[:, [:SAT, :GPA, :merit]])
 train_labels = train_df[:, :enroll]
-ml_model = DecisionTree.DecisionTreeClassifier(; max_depth = 3)
-DecisionTree.fit!(ml_model, train_features, train_labels)
-DecisionTree.print_tree(ml_model)
+predictor = DecisionTree.DecisionTreeClassifier(; max_depth = 3)
+DecisionTree.fit!(predictor, train_features, train_labels)
+DecisionTree.print_tree(predictor)
 
 # ## Decision model
 
@@ -90,7 +90,7 @@ evaluate_df
 
 evaluate_features = Matrix(evaluate_df[:, [:SAT, :GPA, :merit]])
 evaluate_df.enroll = mapreduce(vcat, 1:size(evaluate_features, 1)) do i
-    y, _ = MathOptAI.add_predictor(model, ml_model, evaluate_features[i, :])
+    y, _ = MathOptAI.add_predictor(model, predictor, evaluate_features[i, :])
     return y
 end
 evaluate_df

@@ -18,7 +18,7 @@ julia> size(features)
 
 julia> labels = truth.(Vector.(eachrow(features)));
 
-julia> ml_model = DecisionTree.build_tree(labels, features)
+julia> predictor = DecisionTree.build_tree(labels, features)
 Decision Tree
 Leaves: 3
 Depth:  2
@@ -27,7 +27,7 @@ julia> model = Model();
 
 julia> @variable(model, 0 <= x[1:2] <= 1);
 
-julia> y, formulation = MathOptAI.add_predictor(model, ml_model, x);
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
 
 julia> y
 1-element Vector{VariableRef}:

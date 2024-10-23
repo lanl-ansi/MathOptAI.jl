@@ -22,13 +22,13 @@ Use [`MathOptAI.add_predictor`](@ref) to embed a `Flux.Chain` into a JuMP model:
 ```jldoctest
 julia> using JuMP, Flux, MathOptAI
 
-julia> chain = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
+julia> predictor = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
 
 julia> model = Model();
 
 julia> @variable(model, x[1:1]);
 
-julia> y, formulation = MathOptAI.add_predictor(model, chain, x);
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
 
 julia> y
 1-element Vector{VariableRef}:
@@ -65,14 +65,14 @@ Use the `reduced_space = true` keyword to formulate a reduced-space model:
 ```jldoctest
 julia> using JuMP, Flux, MathOptAI
 
-julia> chain = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
+julia> predictor = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
 
 julia> model = Model();
 
 julia> @variable(model, x[1:1]);
 
 julia> y, formulation =
-           MathOptAI.add_predictor(model, chain, x; reduced_space = true);
+           MathOptAI.add_predictor(model, predictor, x; reduced_space = true);
 
 julia> y
 1-element Vector{NonlinearExpr}:
@@ -97,14 +97,14 @@ Use the `gray_box = true` keyword to embed the network as a nonlinear operator:
 ```jldoctest
 julia> using JuMP, Flux, MathOptAI
 
-julia> chain = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
+julia> predictor = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
 
 julia> model = Model();
 
 julia> @variable(model, x[1:1]);
 
 julia> y, formulation =
-           MathOptAI.add_predictor(model, chain, x; gray_box = true);
+           MathOptAI.add_predictor(model, predictor, x; gray_box = true);
 
 julia> y
 1-element Vector{VariableRef}:
@@ -120,10 +120,13 @@ GrayBox
 
 ## Change how layers are formulated
 
+Pass a dictionary to the `config` keyword that maps Flux activation functions to
+a MathOptAI predictor:
+
 ```jldoctest
 julia> using JuMP, Flux, MathOptAI
 
-julia> chain = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
+julia> predictor = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
 
 julia> model = Model();
 
@@ -131,7 +134,7 @@ julia> @variable(model, x[1:1]);
 
 julia> y, formulation = MathOptAI.add_predictor(
            model,
-           chain,
+           predictor,
            x;
            config = Dict(Flux.relu => MathOptAI.ReLUSOS1()),
        );

@@ -19,13 +19,13 @@ julia> using GLM, JuMP, MathOptAI
 
 julia> X, Y = rand(10, 2), rand(10);
 
-julia> model_glm = GLM.lm(X, Y);
+julia> predictor = GLM.lm(X, Y);
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y, formulation = MathOptAI.add_predictor(model, model_glm, x);
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
 
 julia> y
 1-element Vector{VariableRef}:
@@ -43,13 +43,13 @@ julia> using GLM, JuMP, MathOptAI
 
 julia> X, Y = rand(10, 2), rand(Bool, 10);
 
-julia> model_glm = GLM.glm(X, Y, GLM.Bernoulli());
+julia> predictor = GLM.glm(X, Y, GLM.Bernoulli());
 
 julia> model = Model();
 
 julia> @variable(model, x[1:2]);
 
-julia> y, formulation = MathOptAI.add_predictor(model, model_glm, x);
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
 
 julia> y
 1-element Vector{VariableRef}:

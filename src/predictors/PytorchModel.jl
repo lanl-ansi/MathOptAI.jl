@@ -17,7 +17,7 @@ created using `torch.save(model, filename)`.
 ```jldoctest
 julia> using PythonCall, MathOptAI
 
-julia> ml_model = PytorchModel("model.pt");
+julia> predictor = PytorchModel("model.pt");
 ```
 """
 struct PytorchModel

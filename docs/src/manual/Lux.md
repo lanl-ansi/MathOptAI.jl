@@ -1,4 +1,4 @@
-# Lux
+# Lux.jl
 
 [Lux.jl](https://github.com/LuxDL/Lux.jl) is a library for machine learning in
 Julia.

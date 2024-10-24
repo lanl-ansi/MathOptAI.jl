@@ -1,4 +1,4 @@
-# GLM
+# GLM.jl
 
 [GLM.jl](https://github.com/JuliaStats/GLM.jl) is a library for fitting
 generalized linear models in Julia.

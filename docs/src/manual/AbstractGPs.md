@@ -1,4 +1,4 @@
-# AbstractGPs
+# AbstractGPs.jl
 
 [AbstractGPs.jl](https://github.com/JuliaGaussianProcesses/AbstractGPs.jl) is a
 library for fittinng Gaussian Processes in Julia.

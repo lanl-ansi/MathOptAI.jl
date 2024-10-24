@@ -1,4 +1,4 @@
-# Flux
+# Flux.jl
 
 [Flux.jl](https://github.com/FluxML/Flux.jl) is a library for machine learning
 in Julia.

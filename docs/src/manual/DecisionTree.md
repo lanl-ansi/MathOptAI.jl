@@ -1,4 +1,4 @@
-# DecisionTree
+# DecisionTree.jl
 
 [DecisionTree.jl](https://github.com/JuliaAI/DecisionTree.jl) is a library for
 fitting decision trees in Julia.

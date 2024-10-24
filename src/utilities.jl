@@ -44,7 +44,6 @@ _get_variable_bounds(::Any) = -Inf, Inf
 # Default fallback: skip setting variable bound
 _set_bounds_if_finite(::Vector, ::Any, ::Any, ::Any) = nothing
 
-
 function _set_direct_bounds(f::F, l, u, x::Vector, y::Vector) where {F}
     cons = Any[]
     for (xi, yi) in zip(x, y)

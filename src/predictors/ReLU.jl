@@ -59,10 +59,8 @@ ReducedSpace(ReLU())
 struct ReLU <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
-    ub = last.(_get_variable_bounds.(x))
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
-    cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, ub))
+    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     append!(cons, JuMP.@constraint(model, y .== max.(0, x)))
     return y, Formulation(predictor, y, cons)
 end
@@ -132,14 +130,12 @@ function add_predictor(
     x::Vector,
 )
     m = length(x)
-    bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, last.(bounds)))
+    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     formulation = Formulation(predictor, Any[], cons)
     append!(formulation.variables, y)
     for i in 1:m
-        lb, ub = bounds[i]
+        lb, ub = _get_variable_bounds(x[i])
         z = JuMP.@variable(model, binary = true)
         JuMP.set_name(z, "moai_z[$i]")
         push!(formulation.variables, z)
@@ -217,8 +213,7 @@ function add_predictor(
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
-    cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, last.(bounds)))
+    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "moai_z")
     _set_bounds_if_finite.(Ref(cons), z, nothing, -first.(bounds))
     append!(cons, JuMP.@constraint(model, x .== y - z))
@@ -294,8 +289,7 @@ function add_predictor(
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, last.(bounds)))
+    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     z = JuMP.@variable(model, [1:m], base_name = "moai_z")
     _set_bounds_if_finite.(Ref(cons), z, 0, max.(0, -first.(bounds)))
     append!(cons, JuMP.@constraint(model, x .== y - z))

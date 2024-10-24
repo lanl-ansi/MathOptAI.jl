@@ -58,8 +58,6 @@ ReducedSpace(Tanh())
 """
 struct Tanh <: AbstractPredictor end
 
-_eval(::Tanh, x::Real) = tanh(x)
-
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
     cons = _set_variable_bounds(tanh, -1, 1, x, y)

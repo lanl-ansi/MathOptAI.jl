@@ -17,7 +17,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.Sigmoid()
 Sigmoid()
@@ -35,10 +35,10 @@ Sigmoid()
 │ ├ moai_Sigmoid[1]
 │ └ moai_Sigmoid[2]
 └ constraints [6]
-  ├ moai_Sigmoid[1] ≥ 0
-  ├ moai_Sigmoid[1] ≤ 1
-  ├ moai_Sigmoid[2] ≥ 0
-  ├ moai_Sigmoid[2] ≤ 1
+  ├ moai_Sigmoid[1] ≥ 0.2689414213699951
+  ├ moai_Sigmoid[1] ≤ 0.7310585786300049
+  ├ moai_Sigmoid[2] ≥ 0.2689414213699951
+  ├ moai_Sigmoid[2] ≤ 0.8807970779778823
   ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
   └ moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
 
@@ -58,10 +58,17 @@ ReducedSpace(Sigmoid())
 """
 struct Sigmoid <: AbstractPredictor end
 
+_eval(::Sigmoid, x::Real) = 1 / (1 + exp(-x))
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Sigmoid")
     cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, 1)
+    for i in 1:length(x)
+        x_l, x_u = _get_variable_bounds(x[i])
+        y_l = x_l === nothing ? 0 : _eval(predictor, x_l)
+        y_u = x_u === nothing ? 1 : _eval(predictor, x_u)
+        _set_bounds_if_finite(cons, y[i], y_l, y_u)
+    end
     append!(cons, JuMP.@constraint(model, y .== 1 ./ (1 .+ exp.(-x))))
     return y, Formulation(predictor, y, cons)
 end

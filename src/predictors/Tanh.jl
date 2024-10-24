@@ -17,7 +17,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.Tanh()
 Tanh()
@@ -35,10 +35,10 @@ Tanh()
 │ ├ moai_Tanh[1]
 │ └ moai_Tanh[2]
 └ constraints [6]
-  ├ moai_Tanh[1] ≥ -1
-  ├ moai_Tanh[1] ≤ 1
-  ├ moai_Tanh[2] ≥ -1
-  ├ moai_Tanh[2] ≤ 1
+  ├ moai_Tanh[1] ≥ -0.7615941559557649
+  ├ moai_Tanh[1] ≤ 0.7615941559557649
+  ├ moai_Tanh[2] ≥ -0.7615941559557649
+  ├ moai_Tanh[2] ≤ 0.9640275800758169
   ├ moai_Tanh[1] - tanh(x[1]) = 0
   └ moai_Tanh[2] - tanh(x[2]) = 0
 
@@ -58,10 +58,17 @@ ReducedSpace(Tanh())
 """
 struct Tanh <: AbstractPredictor end
 
+_eval(::Tanh, x::Real) = tanh(x)
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
     cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, -1, 1)
+    for i in 1:length(x)
+        x_l, x_u = _get_variable_bounds(x[i])
+        y_l = x_l === nothing ? -1 : _eval(predictor, x_l)
+        y_u = x_u === nothing ? 1 : _eval(predictor, x_u)
+        _set_bounds_if_finite(cons, y[i], y_l, y_u)
+    end
     append!(cons, JuMP.@constraint(model, y .== tanh.(x)))
     return y, Formulation(predictor, y, cons)
 end

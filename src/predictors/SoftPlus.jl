@@ -17,7 +17,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.SoftPlus(; beta = 2.0)
 SoftPlus(2.0)
@@ -34,9 +34,11 @@ SoftPlus(2.0)
 ├ variables [2]
 │ ├ moai_SoftPlus[1]
 │ └ moai_SoftPlus[2]
-└ constraints [4]
-  ├ moai_SoftPlus[1] ≥ 0
-  ├ moai_SoftPlus[2] ≥ 0
+└ constraints [6]
+  ├ moai_SoftPlus[1] ≥ 0.0634640055214863
+  ├ moai_SoftPlus[1] ≤ 1.0634640055214863
+  ├ moai_SoftPlus[2] ≥ 0.0634640055214863
+  ├ moai_SoftPlus[2] ≤ 2.0090749639589047
   ├ moai_SoftPlus[1] - (log(1.0 + exp(2 x[1])) / 2.0) = 0
   └ moai_SoftPlus[2] - (log(1.0 + exp(2 x[2])) / 2.0) = 0
 
@@ -59,6 +61,8 @@ struct SoftPlus <: AbstractPredictor
     SoftPlus(; beta::Float64 = 1.0) = new(beta)
 end
 
+_eval(f::SoftPlus, x::Real) = log(1 + exp(f.beta * x)) / f.beta
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::SoftPlus,
@@ -66,7 +70,12 @@ function add_predictor(
 )
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
     cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, nothing)
+    for i in 1:length(x)
+        x_l, x_u = _get_variable_bounds(x[i])
+        y_l = x_l === nothing ? 0 : _eval(predictor, x_l)
+        y_u = x_u === nothing ? nothing : _eval(predictor, x_u)
+        _set_bounds_if_finite(cons, y[i], y_l, y_u)
+    end
     beta = predictor.beta
     append!(
         cons,

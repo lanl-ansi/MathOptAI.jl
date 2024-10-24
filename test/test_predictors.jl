@@ -408,7 +408,8 @@ function test_fallback_bound_methods()
     fake_variable = "x"
     l, u = MathOptAI._get_variable_bounds(fake_variable)
     @test (l, u) == (-Inf, Inf)
-    @test MathOptAI._set_bounds_if_finite(fake_variable, l, u) === nothing
+    cons = Any[]
+    @test MathOptAI._set_bounds_if_finite(cons, fake_variable, l, u) === nothing
     return
 end
 

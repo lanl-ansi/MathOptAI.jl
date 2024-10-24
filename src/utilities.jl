@@ -22,15 +22,18 @@ function _get_variable_bounds(x::JuMP.GenericVariableRef{T}) where {T}
 end
 
 function _set_bounds_if_finite(
+    cons::Vector,
     x::JuMP.GenericVariableRef{T},
     l::Union{Nothing,Real},
     u::Union{Nothing,Real},
 ) where {T}
     if l !== nothing && l > typemin(T)
         JuMP.set_lower_bound(x, l)
+        push!(cons, JuMP.LowerBoundRef(x))
     end
     if u !== nothing && u < typemax(T)
         JuMP.set_upper_bound(x, u)
+        push!(cons, JuMP.UpperBoundRef(x))
     end
     return
 end
@@ -39,4 +42,4 @@ end
 _get_variable_bounds(::Any) = -Inf, Inf
 
 # Default fallback: skip setting variable bound
-_set_bounds_if_finite(::Any, ::Any, ::Any) = nothing
+_set_bounds_if_finite(::Vector, ::Any, ::Any, ::Any) = nothing

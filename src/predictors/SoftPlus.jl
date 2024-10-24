@@ -65,10 +65,14 @@ function add_predictor(
     x::Vector,
 )
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
-    _set_bounds_if_finite.(y, 0, nothing)
+    cons = Any[]
+    _set_bounds_if_finite.(Ref(cons), y, 0, nothing)
     beta = predictor.beta
-    cons = JuMP.@constraint(model, y .== log.(1 .+ exp.(beta .* x)) ./ beta)
-    return y, Formulation(predictor, y, Any[JuMP.LowerBoundRef.(y); cons])
+    append!(
+        cons,
+        JuMP.@constraint(model, y .== log.(1 .+ exp.(beta .* x)) ./ beta),
+    )
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(

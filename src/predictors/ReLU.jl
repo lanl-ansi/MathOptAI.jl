@@ -17,7 +17,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.ReLU()
 ReLU()
@@ -34,9 +34,11 @@ ReLU()
 ├ variables [2]
 │ ├ moai_ReLU[1]
 │ └ moai_ReLU[2]
-└ constraints [4]
+└ constraints [6]
   ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
   ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
   ├ moai_ReLU[1] - max(0.0, x[1]) = 0
   └ moai_ReLU[2] - max(0.0, x[2]) = 0
 
@@ -59,10 +61,10 @@ struct ReLU <: AbstractPredictor end
 function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     ub = last.(_get_variable_bounds.(x))
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0, max.(0, ub))
-    cons = JuMP.@constraint(model, y .== max.(0, x))
-    constraints = Any[JuMP.LowerBoundRef.(y); cons]
-    return y, Formulation(predictor, y, constraints)
+    cons = Any[]
+    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, ub))
+    append!(cons, JuMP.@constraint(model, y .== max.(0, x)))
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(
@@ -103,17 +105,21 @@ ReLUBigM(100.0)
 ├ variables [4]
 │ ├ moai_ReLU[1]
 │ ├ moai_ReLU[2]
-│ ├ _[5]
-│ └ _[6]
-└ constraints [8]
-  ├ _[5] binary
+│ ├ moai_z[1]
+│ └ moai_z[2]
+└ constraints [12]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] binary
   ├ -x[1] + moai_ReLU[1] ≥ 0
-  ├ moai_ReLU[1] - _[5] ≤ 0
-  ├ -x[1] + moai_ReLU[1] + 3 _[5] ≤ 3
-  ├ _[6] binary
+  ├ moai_ReLU[1] - moai_z[1] ≤ 0
+  ├ -x[1] + moai_ReLU[1] + 3 moai_z[1] ≤ 3
+  ├ moai_z[2] binary
   ├ -x[2] + moai_ReLU[2] ≥ 0
-  ├ moai_ReLU[2] - 2 _[6] ≤ 0
-  └ -x[2] + moai_ReLU[2] + 3 _[6] ≤ 3
+  ├ moai_ReLU[2] - 2 moai_z[2] ≤ 0
+  └ -x[2] + moai_ReLU[2] + 3 moai_z[2] ≤ 3
 ```
 """
 struct ReLUBigM <: AbstractPredictor
@@ -128,12 +134,14 @@ function add_predictor(
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0, max.(0, last.(bounds)))
-    formulation = Formulation(predictor)
+    cons = Any[]
+    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, last.(bounds)))
+    formulation = Formulation(predictor, Any[], cons)
     append!(formulation.variables, y)
     for i in 1:m
         lb, ub = bounds[i]
         z = JuMP.@variable(model, binary = true)
+        JuMP.set_name(z, "moai_z[$i]")
         push!(formulation.variables, z)
         push!(formulation.constraints, JuMP.BinaryRef(z))
         c = JuMP.@constraint(model, y[i] >= x[i])
@@ -167,7 +175,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2] >= -1);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.ReLUSOS1()
 ReLUSOS1()
@@ -186,7 +194,13 @@ ReLUSOS1()
 │ ├ moai_ReLU[2]
 │ ├ moai_z[1]
 │ └ moai_z[2]
-└ constraints [4]
+└ constraints [10]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] ≤ 1
+  ├ moai_z[2] ≤ 1
   ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
   ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
   ├ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
@@ -203,11 +217,12 @@ function add_predictor(
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0, max.(0, last.(bounds)))
+    cons = Any[]
+    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, last.(bounds)))
     z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "moai_z")
-    _set_bounds_if_finite.(z, nothing, -first.(bounds))
-    cons = JuMP.@constraint(model, x .== y - z)
-    formulation = Formulation(predictor, Any[y; z], Any[cons;])
+    _set_bounds_if_finite.(Ref(cons), z, nothing, -first.(bounds))
+    append!(cons, JuMP.@constraint(model, x .== y - z))
+    formulation = Formulation(predictor, Any[y; z], cons)
     for i in 1:m
         c = JuMP.@constraint(model, [y[i], z[i]] in MOI.SOS1([1.0, 2.0]))
         push!(formulation.constraints, c)
@@ -235,7 +250,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2] >= -1);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.ReLUQuadratic()
 ReLUQuadratic()
@@ -254,7 +269,15 @@ ReLUQuadratic()
 │ ├ moai_ReLU[2]
 │ ├ moai_z[1]
 │ └ moai_z[2]
-└ constraints [4]
+└ constraints [12]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] ≥ 0
+  ├ moai_z[1] ≤ 1
+  ├ moai_z[2] ≥ 0
+  ├ moai_z[2] ≤ 1
   ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
   ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
   ├ moai_ReLU[1]*moai_z[1] = 0
@@ -271,10 +294,11 @@ function add_predictor(
     m = length(x)
     bounds = _get_variable_bounds.(x)
     y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    _set_bounds_if_finite.(y, 0, max.(0, last.(bounds)))
+    cons = Any[]
+    _set_bounds_if_finite.(Ref(cons), y, 0, max.(0, last.(bounds)))
     z = JuMP.@variable(model, [1:m], base_name = "moai_z")
-    _set_bounds_if_finite.(z, 0, max.(0, -first.(bounds)))
-    c1 = JuMP.@constraint(model, x .== y - z)
-    c2 = JuMP.@constraint(model, y .* z .== 0)
-    return y, Formulation(predictor, Any[y; z], Any[c1; c2])
+    _set_bounds_if_finite.(Ref(cons), z, 0, max.(0, -first.(bounds)))
+    append!(cons, JuMP.@constraint(model, x .== y - z))
+    append!(cons, JuMP.@constraint(model, y .* z .== 0))
+    return y, Formulation(predictor, Any[y; z], cons)
 end

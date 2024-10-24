@@ -61,22 +61,16 @@ struct SoftPlus <: AbstractPredictor
     SoftPlus(; beta::Float64 = 1.0) = new(beta)
 end
 
-_eval(f::SoftPlus, x::Real) = log(1 + exp(f.beta * x)) / f.beta
+_softplus(f::SoftPlus, x::Real) = log(1 + exp(f.beta * x)) / f.beta
 
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::SoftPlus,
     x::Vector,
 )
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
-    cons = Any[]
-    for i in 1:length(x)
-        x_l, x_u = _get_variable_bounds(x[i])
-        y_l = x_l === nothing ? 0 : _eval(predictor, x_l)
-        y_u = x_u === nothing ? nothing : _eval(predictor, x_u)
-        _set_bounds_if_finite(cons, y[i], y_l, y_u)
-    end
     beta = predictor.beta
+    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
+    cons = _set_variable_bounds(x -> _softplus(beta), 0, nothing, x, y)
     append!(
         cons,
         JuMP.@constraint(model, y .== log.(1 .+ exp.(beta .* x)) ./ beta),

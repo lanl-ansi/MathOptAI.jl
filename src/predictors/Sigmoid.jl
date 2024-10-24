@@ -58,17 +58,9 @@ ReducedSpace(Sigmoid())
 """
 struct Sigmoid <: AbstractPredictor end
 
-_eval(::Sigmoid, x::Real) = 1 / (1 + exp(-x))
-
 function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Sigmoid")
-    cons = Any[]
-    for i in 1:length(x)
-        x_l, x_u = _get_variable_bounds(x[i])
-        y_l = x_l === nothing ? 0 : _eval(predictor, x_l)
-        y_u = x_u === nothing ? 1 : _eval(predictor, x_u)
-        _set_bounds_if_finite(cons, y[i], y_l, y_u)
-    end
+    cons = _set_direct_bounds(x -> 1 / (1 + exp(-x)), 0, 1, x, y)
     append!(cons, JuMP.@constraint(model, y .== 1 ./ (1 .+ exp.(-x))))
     return y, Formulation(predictor, y, cons)
 end

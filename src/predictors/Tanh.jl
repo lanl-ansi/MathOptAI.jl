@@ -62,13 +62,7 @@ _eval(::Tanh, x::Real) = tanh(x)
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
-    cons = Any[]
-    for i in 1:length(x)
-        x_l, x_u = _get_variable_bounds(x[i])
-        y_l = x_l === nothing ? -1 : _eval(predictor, x_l)
-        y_u = x_u === nothing ? 1 : _eval(predictor, x_u)
-        _set_bounds_if_finite(cons, y[i], y_l, y_u)
-    end
+    cons = _set_variable_bounds(tanh, -1, 1, x, y)
     append!(cons, JuMP.@constraint(model, y .== tanh.(x)))
     return y, Formulation(predictor, y, cons)
 end

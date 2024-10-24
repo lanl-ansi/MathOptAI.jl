@@ -3,17 +3,22 @@
 [Flux.jl](https://github.com/FluxML/Flux.jl) is a library for machine learning
 in Julia.
 
+The upstream documentation is available at
+[https://fluxml.ai/Flux.jl/stable/](https://fluxml.ai/Flux.jl/stable/).
+
 ## Supported layers
 
-MathOptAI supports embedding Flux models in JuMP if they are a `Flux.Chain`
+MathOptAI supports embedding a Flux model into JuMP if it is a
+[`Flux.Chain`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.Chain)
 composed of:
 
- * `Flux.Dense`
- * `Flux.softmax`
- * `Flux.relu`
- * `Flux.sigmoid`
- * `Flux.softplus`
- * `Flux.tanh`
+  * [`Flux.Dense`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.Dense)
+  * [`Flux.Scale`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.Scale)
+  * [`Flux.relu`](https://fluxml.ai/Flux.jl/stable/reference/models/activation/#NNlib.relu)
+  * [`Flux.sigmoid`](https://fluxml.ai/Flux.jl/stable/reference/models/activation/#NNlib.sigmoid)
+  * [`Flux.softmax`](https://fluxml.ai/Flux.jl/stable/reference/models/nnlib/#NNlib.softmax)
+  * [`Flux.softplus`](https://fluxml.ai/Flux.jl/stable/reference/models/activation/#NNlib.softplus)
+  * `Flux.tanh`
 
 ## Basic example
 

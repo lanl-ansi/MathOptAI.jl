@@ -2,16 +2,20 @@
 
 [PyTorch](https://pytorch.org) is a library for machine learning in Python.
 
+The upstream documentation is available at
+[https://pytorch.org/docs/stable/](https://pytorch.org/docs/stable/).
+
 ## Suupported layers
 
-MathOptAI supports embedding PyTorch models in JuMP if they are an
-`nn.Sequential` composed of:
+MathOptAI supports embedding a PyTorch models into JuMP if it is a
+[`nn.Sequential`](https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html)
+composed of:
 
- * `nn.Linear`
- * `nn.ReLU`
- * `nn.Sequential`
- * `nn.Sigmoid`
- * `nn.Tanh`
+ * [`nn.Linear`](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html)
+ * [`nn.ReLU`](https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html)
+ * [`nn.Sigmoid`](https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html)
+ * [`nn.Softplus`](https://pytorch.org/docs/stable/generated/torch.nn.Softplus.html)
+ * [`nn.Tanh`](https://pytorch.org/docs/stable/generated/torch.nn.Tanhh.html)
 
 ## Basic example
 

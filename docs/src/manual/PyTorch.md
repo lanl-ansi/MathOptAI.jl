@@ -111,7 +111,7 @@ formulation
 Pass a dictionary to the `config` keyword that maps the `Symbol` name of each
 PyTorch layer to a MathOptAI predictor:
 
-```julia
+```@repl
 using JuMP, MathOptAI
 model = Model();
 @variable(model, x[1:1]);

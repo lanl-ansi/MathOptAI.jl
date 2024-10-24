@@ -5,7 +5,7 @@
 The upstream documentation is available at
 [https://pytorch.org/docs/stable/](https://pytorch.org/docs/stable/).
 
-## Suupported layers
+## Supported layers
 
 MathOptAI supports embedding a PyTorch models into JuMP if it is a
 [`nn.Sequential`](https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html)

@@ -7,11 +7,11 @@
 """
     Pipeline(layers::Vector{AbstractPredictor}) <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents a pipeline (composition) of
-nested layers:
+An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-y = (l_1 \\cdots (l_N(x))
+y = (l_1 \\circ \\ldots \\circ l_N)(x)
 ```
+where \$l_i\$ are a list of other [`AbstractPredictor`](@ref)s.
 
 ## Example
 

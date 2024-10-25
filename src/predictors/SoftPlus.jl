@@ -61,20 +61,15 @@ struct SoftPlus <: AbstractPredictor
     SoftPlus(; beta::Float64 = 1.0) = new(beta)
 end
 
-_softplus(f::SoftPlus, x::Real) = log(1 + exp(f.beta * x)) / f.beta
-
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::SoftPlus,
     x::Vector,
 )
-    beta = predictor.beta
+    β = predictor.beta
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
-    cons = _set_direct_bounds(x -> _softplus(beta), 0, nothing, x, y)
-    append!(
-        cons,
-        JuMP.@constraint(model, y .== log.(1 .+ exp.(beta .* x)) ./ beta),
-    )
+    cons = _set_direct_bounds(xi -> log(1 + exp(β * xi)) / β, 0, nothing, x, y)
+    append!(cons, JuMP.@constraint(model, y .== log.(1 .+ exp.(β .* x)) ./ β))
     return y, Formulation(predictor, y, cons)
 end
 

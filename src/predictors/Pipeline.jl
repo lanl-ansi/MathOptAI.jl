@@ -46,7 +46,9 @@ ReLUQuadratic()
 ├ variables [2]
 │ ├ moai_ReLU[1]
 │ └ moai_z[1]
-└ constraints [2]
+└ constraints [4]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_z[1] ≥ 0
   ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
   └ moai_ReLU[1]*moai_z[1] = 0
 ```

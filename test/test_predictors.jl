@@ -147,7 +147,7 @@ function test_ReLU_bounds()
             model = Model()
             @variable(model, lb <= x <= ub)
             y, _ = MathOptAI.add_predictor(model, f, [x])
-            @test lower_bound.(y) == [0.0]
+            @test lower_bound.(y) == [max(0.0, lb)]
             @test upper_bound.(y) == [max(0.0, ub)]
         end
     end
@@ -254,6 +254,22 @@ function test_Sigmoid()
     return
 end
 
+function test_Sigmoid_bounds()
+    f(x) = 1 / (1 + exp(-x))
+    values = [-Inf, -2, 0, 2, Inf]
+    for lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), [x])
+        @test lower_bound(y[1]) == f(lb)
+        @test upper_bound(y[1]) == f(ub)
+    end
+    return
+end
+
 function test_ReducedSpace_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -324,6 +340,26 @@ function test_SoftPlus()
     return
 end
 
+function test_SoftPlus_bounds()
+    f(x, beta) = log(1 + exp(beta * x)) / beta
+    values = [-Inf, -2, 0, 2, Inf]
+    for beta in [1.0, 1.5, 2.0], lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(; beta), [x])
+        @test lower_bound(y[1]) == f(lb, beta)
+        if isfinite(ub)
+            @test upper_bound(y[1]) == f(ub, beta)
+        else
+            @test !has_upper_bound(y[1])
+        end
+    end
+    return
+end
+
 function test_ReducedSpace_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -356,6 +392,21 @@ function test_Tanh()
     optimize!(model)
     @assert is_solved_and_feasible(model)
     @test value.(y) ≈ tanh.(X)
+    return
+end
+
+function test_Tanh_bounds()
+    values = [-Inf, -2, 0, 2, Inf]
+    for lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.Tanh(), [x])
+        @test lower_bound.(y) == [tanh(lb)]
+        @test upper_bound.(y) == [tanh(ub)]
+    end
     return
 end
 
@@ -408,7 +459,8 @@ function test_fallback_bound_methods()
     fake_variable = "x"
     l, u = MathOptAI._get_variable_bounds(fake_variable)
     @test (l, u) == (-Inf, Inf)
-    @test MathOptAI._set_bounds_if_finite(fake_variable, l, u) === nothing
+    cons = Any[]
+    @test MathOptAI._set_bounds_if_finite(cons, fake_variable, l, u) === nothing
     return
 end
 

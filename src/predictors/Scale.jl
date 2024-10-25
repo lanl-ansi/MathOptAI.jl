@@ -22,7 +22,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, 0 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
 Scale(scale, bias)
@@ -39,7 +39,11 @@ Scale(scale, bias)
 ├ variables [2]
 │ ├ moai_Scale[1]
 │ └ moai_Scale[2]
-└ constraints [2]
+└ constraints [6]
+  ├ moai_Scale[1] ≥ 4
+  ├ moai_Scale[1] ≤ 6
+  ├ moai_Scale[2] ≥ 5
+  ├ moai_Scale[2] ≤ 11
   ├ 2 x[1] - moai_Scale[1] = -4
   └ 3 x[2] - moai_Scale[2] = -5
 
@@ -70,14 +74,18 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
     m = length(predictor.scale)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Scale")
     bounds = _get_variable_bounds.(x)
+    cons = Any[]
     for (i, scale) in enumerate(predictor.scale)
         y_lb = y_ub = predictor.bias[i]
         lb, ub = bounds[i]
         y_ub += scale * ifelse(scale >= 0, ub, lb)
         y_lb += scale * ifelse(scale >= 0, lb, ub)
-        _set_bounds_if_finite(y[i], y_lb, y_ub)
+        _set_bounds_if_finite(cons, y[i], y_lb, y_ub)
     end
-    cons = JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y)
+    append!(
+        cons,
+        JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y),
+    )
     return y, Formulation(predictor, y, cons)
 end
 

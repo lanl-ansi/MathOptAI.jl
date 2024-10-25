@@ -57,7 +57,7 @@ end
 _literate_directory(joinpath(@__DIR__, "src", "tutorials"))
 
 # ==============================================================================
-#  makedocs
+#  Build the documentation
 # ==============================================================================
 
 Documenter.makedocs(;

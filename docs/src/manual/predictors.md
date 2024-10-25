@@ -42,7 +42,7 @@ linear unit (ReLU).
 
  * [`ReLU`](@ref): requires the solver to support the `max` nonlinear operator.
  * [`ReLUBigM`](@ref): requires the solver to support mixed-integer linear
-   programs, and requires the user to have a priori knowledge of a suitable
+   programs, and requires the user to have prior knowledge of a suitable
    value for the "big-M" parameter.
  * [`ReLUQuadratic`](@ref): requires the solver to support quadratic equality
    constraints

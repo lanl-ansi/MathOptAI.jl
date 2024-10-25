@@ -81,7 +81,7 @@ function data_loader(data; batchsize, shuffle = false)
 end
 
 # and here is a function to score the percentage of correct labels, where we
-# assign a label by choosing the label of the highest softmax in the final
+# assign a label by choosing the label of the highest `softmax` in the final
 # layer.
 
 function score_model(predictor, data)

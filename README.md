@@ -3,7 +3,7 @@
 # MathOptAI.jl
 
 [![Build Status](https://github.com/lanl-ansi/MathOptAI.jl/workflows/CI/badge.svg)](https://github.com/lanl-ansi/MathOptAI.jl/actions?query=workflow%3ACI)
-[![codecov](https://codecov.io/gh/lanl-ansi/MathOptAI.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/lanl-ansi/MathOptAI.jl)
+[![Code coverage](https://codecov.io/gh/lanl-ansi/MathOptAI.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/lanl-ansi/MathOptAI.jl)
 
 MathOptAI.jl is a [JuMP](https://jump.dev) extension for embedding trained AI,
 machine learning, and statistical learning models into a JuMP optimization

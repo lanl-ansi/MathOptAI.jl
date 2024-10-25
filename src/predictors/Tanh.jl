@@ -60,7 +60,7 @@ struct Tanh <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
-    cons = _set_variable_bounds(tanh, -1, 1, x, y)
+    cons = _set_direct_bounds(tanh, -1, 1, x, y)
     append!(cons, JuMP.@constraint(model, y .== tanh.(x)))
     return y, Formulation(predictor, y, cons)
 end

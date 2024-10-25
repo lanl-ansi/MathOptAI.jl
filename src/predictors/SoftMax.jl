@@ -7,8 +7,11 @@
 """
     SoftMax() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the SoftMax constraint
-\$y_i = \\frac{e^{x_i}}{\\sum_j e^{x_j}}\$ as a smooth nonlinear constraint.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\frac{e^{x}}{||e^{x}||_1}
+```
+as a smooth nonlinear constraint.
 
 ## Example
 

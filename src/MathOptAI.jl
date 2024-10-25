@@ -20,6 +20,7 @@ An abstract type representing different types of prediction models.
 All subtypes must implement:
 
  * [`add_predictor`](@ref)
+ * [`build_predictor`](@ref)
 """
 abstract type AbstractPredictor end
 

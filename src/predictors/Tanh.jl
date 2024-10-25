@@ -7,8 +7,11 @@
 """
     Tanh() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the Tanh constraint
-\$y = \\tanh(x)\$ as a smooth nonlinear constraint.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\tanh(x)
+```
+as a smooth nonlinear constraint.
 
 ## Example
 

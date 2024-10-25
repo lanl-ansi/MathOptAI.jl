@@ -7,8 +7,11 @@
 """
     ReLU() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\\{0, x\\}\$ as a non-smooth nonlinear constraint.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\max\\{0, x\\}
+```
+as a non-smooth nonlinear constraint.
 
 ## Example
 
@@ -76,8 +79,20 @@ end
 """
     ReLUBigM(M::Float64) <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\\{0, x\\}\$ via a big-M MIP reformulation.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\max\\{0, x\\}
+```
+via the big-M MIP reformulation:
+```math
+\\begin{aligned}
+y \\ge 0            \\\\
+y \\ge x            \\\\
+y \\le M z          \\\\
+y \\le x + M(1 - z) \\\\
+z \\in\\{0, 1\\}
+\\end{aligned}
+```
 
 ## Example
 
@@ -154,12 +169,15 @@ end
 """
     ReLUSOS1() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\\{0, x\\}\$ by the reformulation:
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\max\\{0, x\\}
+```
+by the reformulation:
 ```math
 \\begin{aligned}
-x = y - z \\\\
-[y, z] \\in SOS1 \\\\
+x = y - z           \\\\
+[y, z] \\in SOS1    \\\\
 y, z \\ge 0
 \\end{aligned}
 ```
@@ -228,12 +246,15 @@ end
 """
     ReLUQuadratic() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the ReLU constraint
-\$y = \\max\\{0, x\\}\$ by the reformulation:
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\max\\{0, x\\}
+```
+by the reformulation:
 ```math
 \\begin{aligned}
 x = y - z \\\\
-y \\times z = 0 \\\\
+y \\cdot z = 0 \\\\
 y, z \\ge 0
 \\end{aligned}
 ```

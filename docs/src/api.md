@@ -33,7 +33,7 @@ add_predictor
 
 ## `build_predictor`
 ```@docs
-build_predictor
+build_predictor(predictor::AbstractPredictor; kwargs...)
 ```
 
 ## `Affine`

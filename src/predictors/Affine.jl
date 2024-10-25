@@ -10,9 +10,9 @@
         b::Vector{T} = zeros(T, size(A, 1)),
     ) where {T} <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents the affine relationship:
+An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-f(x) = A x + b
+y = A x + b
 ```
 
 ## Example

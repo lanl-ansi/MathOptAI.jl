@@ -10,9 +10,9 @@
         bias::Vector{T},
     ) where {T} <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents the affine relationship:
+An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-f(x) = Diag(scale)x + bias
+y = Diag(scale)x + bias
 ```
 
 ## Example

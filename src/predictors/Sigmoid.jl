@@ -7,8 +7,11 @@
 """
     Sigmoid() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the Sigmoid constraint
-\$y = \\frac{1}{1 + e^{-x}}\$ as a smooth nonlinear constraint.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\frac{1}{1 + e^{-x}}
+```
+as a smooth nonlinear constraint.
 
 ## Example
 

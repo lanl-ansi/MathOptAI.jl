@@ -7,8 +7,11 @@
 """
     SoftPlus(; beta = 1.0) <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the SoftPlus constraint
-\$y = \\frac{1}{\\beta} \\log(1 + e^{\\beta x})\$ as a smooth nonlinear constraint.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\frac{1}{\\beta} \\log(1 + e^{\\beta x})
+```
+as a smooth nonlinear constraint.
 
 ## Example
 

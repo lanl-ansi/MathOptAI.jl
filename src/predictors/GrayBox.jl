@@ -11,8 +11,11 @@
         has_hessian::Bool = false,
     ) <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents the function ``f(x)`` as a
-user-defined nonlinear operator.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = f(x)
+```
+as a user-defined nonlinear operator.
 
 ## Arguments
 
@@ -56,7 +59,8 @@ GrayBox
   ├ op_##330(x[1], x[2]) - moai_GrayBox[1] = 0
   └ op_##331(x[1], x[2]) - moai_GrayBox[2] = 0
 
-julia> y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+julia> y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:

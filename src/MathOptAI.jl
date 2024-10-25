@@ -155,7 +155,7 @@ function add_predictor end
     add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
 
 Return a `Matrix`, representing `y` such that `y[:, i] = predictor(x[:, i])` for
-each columnn `i`.
+each column `i`.
 
 ## Example
 

@@ -34,7 +34,7 @@ julia> size(features)
 
 julia> labels = truth.(Vector.(eachrow(features)));
 
-julia> ml_model = DecisionTree.build_tree(labels, features)
+julia> predictor = DecisionTree.build_tree(labels, features)
 Decision Tree
 Leaves: 3
 Depth:  2
@@ -43,7 +43,7 @@ julia> model = Model();
 
 julia> @variable(model, 0 <= x[1:2] <= 1);
 
-julia> y, _ = MathOptAI.add_predictor(model, ml_model, x);
+julia> y, _ = MathOptAI.add_predictor(model, predictor, x);
 
 julia> y
 1-element Vector{VariableRef}:
@@ -80,12 +80,12 @@ julia> size(features)
 
 julia> labels = truth.(Vector.(eachrow(features)));
 
-julia> ml_model = DecisionTree.build_tree(labels, features)
+julia> tree = DecisionTree.build_tree(labels, features)
 Decision Tree
 Leaves: 3
 Depth:  2
 
-julia> MathOptAI.build_predictor(ml_model)
+julia> predictor = MathOptAI.build_predictor(tree)
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ```
 """

@@ -21,7 +21,7 @@ An [`AbstractPredictor`](@ref) that represents a binary decision tree.
 
 To represent the tree `x[1] <= 0.0 ? -1 : (x[1] <= 1.0 ? 0 : 1)`, do:
 
-```jldoctest doc_decision_tree
+```jldoctest
 julia> using JuMP, MathOptAI
 
 julia> model = Model();

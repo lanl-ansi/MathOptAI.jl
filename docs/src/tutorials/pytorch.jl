@@ -17,14 +17,24 @@
 # See [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl) for more control
 # over how to link Julia to an existing Python environment. For example, if you
 # have an existing Python installation (with PyTorch installed), and it is
-# available in the current conda environment, set:
+# available in the current Conda environment, set:
+#
 # ```julia
-# julia> ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
+# ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
 # ```
+#
 # before importing PythonCall.jl. If the Python installation can be found on
-# the path and it is not in a conda environment, set:
+# the path and it is not in a Conda environment, set:
+#
 # ```julia
-# julia> ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+# ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+# ```
+#
+# If `python` is not on your path, you may additionally need to set
+# `JULIA_PYTHONCALL_EXE`, for example, to:
+#
+# ```julia
+# ENV["JULIA_PYTHONCALL_EXE"] = "python3"
 # ```
 
 # ## Required packages
@@ -48,7 +58,7 @@ import Plots
 # The model is unimportant, but for this example, we are trying to fit noisy
 # observations of the function ``f(x) = x^2 - 2x``.
 
-# In Python, I ran:
+# In Python, we ran:
 # ```python
 # #!/usr/bin/python3
 # import torch
@@ -88,12 +98,12 @@ set_silent(model)
 
 # Then, load the model from PyTorch using [`MathOptAI.PytorchModel`](@ref):
 
-ml_model = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
-y, _ = MathOptAI.add_predictor(model, ml_model, [x])
+predictor = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
+y, _ = MathOptAI.add_predictor(model, predictor, [x])
 @objective(model, Min, only(y))
 
-# Now, visualize the fitted function `y = ml_model(x)` by repeatedly solving the
-# optimization problem for different fixed values of `x`:
+# Now, visualize the fitted function `y = predictor(x)` by repeatedly solving
+# the optimization problem for different fixed values of `x`:
 
 X, Y = -2:0.1:2, Float64[]
 @constraint(model, c, x == 0.0)

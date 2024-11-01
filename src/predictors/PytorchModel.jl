@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -17,7 +17,7 @@ created using `torch.save(model, filename)`.
 ```jldoctest
 julia> using PythonCall, MathOptAI
 
-julia> ml_model = PytorchModel("model.pt");
+julia> predictor = PytorchModel("model.pt");
 ```
 """
 struct PytorchModel

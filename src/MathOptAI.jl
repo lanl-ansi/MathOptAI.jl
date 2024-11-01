@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -20,6 +20,7 @@ An abstract type representing different types of prediction models.
 All subtypes must implement:
 
  * [`add_predictor`](@ref)
+ * [`build_predictor`](@ref)
 """
 abstract type AbstractPredictor end
 
@@ -155,7 +156,7 @@ function add_predictor end
     add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
 
 Return a `Matrix`, representing `y` such that `y[:, i] = predictor(x[:, i])` for
-each columnn `i`.
+each column `i`.
 
 ## Example
 
@@ -246,11 +247,10 @@ end
 
 include("utilities.jl")
 
-for file in filter(
-    x -> endswith(x, ".jl"),
-    readdir(joinpath(@__DIR__, "predictors"); join = true),
-)
-    include(file)
+for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
+    if endswith(file, ".jl")
+        include(file)
+    end
 end
 
 for sym in names(@__MODULE__; all = true)

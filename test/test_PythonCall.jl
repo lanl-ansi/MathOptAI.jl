@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -17,11 +17,14 @@ import PythonCall
 is_test(x) = startswith(string(x), "test_")
 
 function runtests()
-    try
-        PythonCall.pyimport("torch")
-    catch
-        @warn("Skipping PythonCall tests because we cannot import PyTorch.")
-        return
+    # If we're running the tests locally, allow skipping Python tests
+    if get(ENV, "CI", "false") == "false"
+        try
+            PythonCall.pyimport("torch")
+        catch
+            @warn("Skipping PythonCall tests because we cannot import PyTorch.")
+            return
+        end
     end
     @testset "$name" for name in filter(is_test, names(@__MODULE__; all = true))
         getfield(@__MODULE__, name)()
@@ -31,7 +34,7 @@ end
 
 function _evaluate_model(filename, x)
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(filename)
+    torch_model = torch.load(filename; weights_only = false)
     input = torch.tensor(x)
     return PythonCall.pyconvert(Vector, torch_model(input).detach().numpy())
 end
@@ -67,6 +70,64 @@ function test_model_ReLU()
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
+    return
+end
+
+function test_model_ReLU_gray_box_config()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_ReLU.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(1, 16),
+            torch.nn.ReLU(),
+            torch.nn.Linear(16, 1),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    @test_throws(
+        ErrorException(
+            "cannot specify the `config` kwarg if `gray_box = true`",
+        ),
+        MathOptAI.build_predictor(
+            MathOptAI.PytorchModel(filename);
+            config = Dict(:ReLU => MathOptAI.ReLUBigM(100)),
+            gray_box = true,
+        )
+    )
+    return
+end
+
+function test_model_unsupported_layer()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_LeakyReLU.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(1, 16),
+            torch.nn.LeakyReLU(),
+            torch.nn.Linear(16, 1),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    torch = PythonCall.pyimport("torch")
+    layer = torch.nn.LeakyReLU()
+    @test_throws(
+        ErrorException("unsupported layer: $layer"),
+        MathOptAI.build_predictor(MathOptAI.PytorchModel(filename)),
+    )
     return
 end
 
@@ -238,12 +299,12 @@ function test_model_Tanh_scalar_GrayBox()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:2])
+    @variable(model, x[i in 1:2] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 1
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -270,7 +331,7 @@ function test_model_Tanh_scalar_GrayBox_hessian()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:2])
+    @variable(model, x[i in 1:2] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -280,7 +341,7 @@ function test_model_Tanh_scalar_GrayBox_hessian()
         gray_box_hessian = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 1
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -308,19 +369,19 @@ function test_model_Tanh_vector_GrayBox()
     # Full-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation =
         MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
     @test num_variables(model) == 5
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 2
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 5
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
     # Reduced-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -330,7 +391,7 @@ function test_model_Tanh_vector_GrayBox()
         reduced_space = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 0
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
@@ -358,7 +419,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
     # Full-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -368,14 +429,14 @@ function test_model_Tanh_vector_GrayBox_hessian()
         gray_box_hessian = true,
     )
     @test num_variables(model) == 5
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 2
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 5
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
     # Reduced-space
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[1:3])
+    @variable(model, x[i in 1:3] == i)
     ml_model = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -385,7 +446,7 @@ function test_model_Tanh_vector_GrayBox_hessian()
         reduced_space = true,
     )
     @test num_variables(model) == 3
-    @test num_constraints(model; count_variable_in_set_constraints = true) == 0
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)

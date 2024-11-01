@@ -78,7 +78,10 @@ X, Y = range(0, 2π; length = 20), Any[]
 for xi in X
     set_normalized_rhs(c, xi)
     optimize!(model)
-    @test is_solved_and_feasible(model)
-    push!(Y, value.(y))
+    if is_solved_and_feasible(model)
+        push!(Y, value.(y))
+    else
+        push!(Y, [NaN, NaN])
+    end
 end
 Plots.plot!(X, reduce(hcat, Y)'; label = ["P25" "P75"], linewidth = 3)

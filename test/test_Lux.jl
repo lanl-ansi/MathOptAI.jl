@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -70,7 +70,9 @@ function test_end_to_end_with_scale()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -91,7 +93,9 @@ function test_end_to_end_ReLUBigM()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -114,7 +118,9 @@ function test_end_to_end_ReLUQuadratic()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -130,7 +136,9 @@ function test_end_to_end_ReLU()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -147,7 +155,29 @@ function test_end_to_end_ReLU_reduced_space()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-2)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    return
+end
+
+function test_end_to_end_Softmax()
+    chain = Lux.Chain(Lux.Dense(2 => 3), Lux.softmax)
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 12345)
+    parameters, state = Lux.setup(rng, chain)
+    predictor = (chain, parameters, state)
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
+    @constraint(model, x[1] == 1.0)
+    @constraint(model, x[2] == 2.0)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    y_val, _ = chain(value.(x), parameters, state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    @test isapprox(sum(value.(y)), 1.0; atol = 1e-2)
     return
 end
 
@@ -163,7 +193,9 @@ function test_end_to_end_SoftPlus()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -179,7 +211,9 @@ function test_end_to_end_Sigmoid()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -195,7 +229,9 @@ function test_end_to_end_Tanh()
     @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
     return
 end
 
@@ -209,6 +245,21 @@ function test_unsupported_layer()
     @test_throws(
         ErrorException("Unsupported layer: $layer"),
         MathOptAI.add_predictor(model, (ml_model, parameters, state), x),
+    )
+    return
+end
+
+function test_unsupported_activation()
+    chain = Lux.Chain(Lux.Dense(2 => 3, Lux.celu), Lux.softmax)
+    rng = Random.MersenneTwister()
+    Random.seed!(rng, 12345)
+    parameters, state = Lux.setup(rng, chain)
+    predictor = (chain, parameters, state)
+    model = Model()
+    @variable(model, x[1:2])
+    @test_throws(
+        ErrorException("Unsupported activation function: celu"),
+        MathOptAI.add_predictor(model, predictor, x),
     )
     return
 end

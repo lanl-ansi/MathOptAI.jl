@@ -3,7 +3,7 @@ Copyright (c) 2024: Oscar Dowson and contributors
 
 All rights reserved.
 
-This software was produced under U.S. Government contract 89233218CNA000001 for
+This program was produced under U.S. Government contract 89233218CNA000001 for
 Los Alamos National Laboratory (LANL), which is operated by Triad National
 Security, LLC for the U.S. Department of Energy/National Nuclear Security
 Administration. All rights in the program are reserved by Triad National
@@ -13,7 +13,7 @@ behalf a nonexclusive, paid-up, irrevocable worldwide license in this material
 to reproduce, prepare derivative works, distribute copies to the public, perform
 publicly and display publicly, and to permit others to do so.
 
-This program is open source under the BSD-3 License.
+This program is Open-Source under the BSD-3 License.
 
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:

@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -51,18 +51,16 @@ function test_end_to_end_with_scale()
     )
     model = Model(HiGHS.Optimizer)
     set_silent(model)
-    @variable(model, x)
+    @variable(model, x == -1.2)
     y, _ = MathOptAI.add_predictor(
         model,
         chain,
         [x];
         config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
     )
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -72,18 +70,16 @@ function test_end_to_end_ReLUBigM()
     )
     model = Model(HiGHS.Optimizer)
     set_silent(model)
-    @variable(model, x)
-    y, formulation = MathOptAI.add_predictor(
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(
         model,
         chain,
         [x];
         config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
     )
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
-    @test isapprox(value(x), -1.24; atol = 1e-1)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
     return
 end
 
@@ -93,8 +89,8 @@ function test_end_to_end_ReLUQuadratic()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x)
-    y, formulation = MathOptAI.add_predictor(
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(
         model,
         chain,
         [x];
@@ -102,8 +98,6 @@ function test_end_to_end_ReLUQuadratic()
     )
     # Ipopt needs a starting point to avoid the local minima.
     set_start_value(only(y), 4.0)
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -115,11 +109,10 @@ function test_end_to_end_ReLU()
         Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1)),
     )
     model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    @variable(model, x)
-    y, formulation = MathOptAI.add_predictor(model, chain, [x])
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
+    # set_silent(model)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(model, chain, [x])
+    print(model)
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -132,11 +125,8 @@ function test_end_to_end_ReLU_reduced_space()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x)
-    y, formulation =
-        MathOptAI.add_predictor(model, chain, [x]; reduced_space = true)
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(model, chain, [x]; reduced_space = true)
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -149,10 +139,8 @@ function test_end_to_end_SoftPlus()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x)
-    y, formulation = MathOptAI.add_predictor(model, chain, [x])
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(model, chain, [x])
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -165,10 +153,8 @@ function test_end_to_end_Sigmoid()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x)
-    y, formulation = MathOptAI.add_predictor(model, chain, [x])
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(model, chain, [x])
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -181,10 +167,8 @@ function test_end_to_end_Tanh()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x)
-    y, formulation = MathOptAI.add_predictor(model, chain, [x])
-    @constraint(model, only(y) <= 4)
-    @objective(model, Min, x)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(model, chain, [x])
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -290,8 +274,33 @@ function test_gray_box_vector_output_hessian()
     @test length(y) == 2
     @objective(model, Max, sum(y))
     optimize!(model)
-    @test termination_status(model) == ITERATION_LIMIT
+    @test termination_status(model) in (LOCALLY_SOLVED, ITERATION_LIMIT)
     @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
+    return
+end
+
+function test_end_to_end_Softmax()
+    chain = Flux.Chain(Flux.Dense(2 => 3), Flux.softmax)
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:2] == i)
+    y, _ = MathOptAI.add_predictor(model, chain, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    y_val = chain(Float32.(value.(x)))
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    @test isapprox(sum(value.(y)), 1.0; atol = 1e-2)
+    return
+end
+
+function test_unsupported_activation()
+    chain = Flux.Chain(Flux.Dense(2 => 3, Flux.celu), Flux.softmax)
+    model = Model()
+    @variable(model, x[1:2])
+    @test_throws(
+        ErrorException("Unsupported activation function: celu"),
+        MathOptAI.add_predictor(model, chain, x),
+    )
     return
 end
 

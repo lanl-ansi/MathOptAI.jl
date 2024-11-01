@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -21,7 +21,7 @@ An [`AbstractPredictor`](@ref) that represents a binary decision tree.
 
 To represent the tree `x[1] <= 0.0 ? -1 : (x[1] <= 1.0 ? 0 : 1)`, do:
 
-```jldoctest doc_decision_tree
+```jldoctest
 julia> using JuMP, MathOptAI
 
 julia> model = Model();

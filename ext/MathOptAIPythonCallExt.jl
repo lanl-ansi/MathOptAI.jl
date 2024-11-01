@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -105,7 +105,7 @@ function MathOptAI.build_predictor(
     end
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
-    torch_model = torch.load(predictor.filename)
+    torch_model = torch.load(predictor.filename; weights_only = false)
     return _predictor(nn, torch_model, config)
 end
 
@@ -138,7 +138,7 @@ function MathOptAI.GrayBox(
     device::String = "cpu",
 )
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(predictor.filename).to(device)
+    torch_model = torch.load(predictor.filename; weights_only = false).to(device)
     J = torch.func.jacrev(torch_model)
     H = torch.func.hessian(torch_model)
     # TODO(odow): I'm not sure if there is a better way to get the output

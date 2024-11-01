@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -7,11 +7,11 @@
 """
     Pipeline(layers::Vector{AbstractPredictor}) <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents a pipeline (composition) of
-nested layers:
+An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-f(x) = (l_1 \\cdots l_N)(x)
+y = (l_1 \\circ \\ldots \\circ l_N)(x)
 ```
+where \$l_i\$ are a list of other [`AbstractPredictor`](@ref)s.
 
 ## Example
 
@@ -46,7 +46,9 @@ ReLUQuadratic()
 ├ variables [2]
 │ ├ moai_ReLU[1]
 │ └ moai_z[1]
-└ constraints [2]
+└ constraints [4]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_z[1] ≥ 0
   ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
   └ moai_ReLU[1]*moai_z[1] = 0
 ```

@@ -28,15 +28,15 @@ MathOptAI chooses to use "predictor" as the synonym for the machine learning
 model. Hence, we have `AbstractPredictor`, `add_predictor`, and
 `build_predictor`.
 
-In contrast, gurob-machinelearning tennds to use "regression model" and OMLT
-does not have a single unified API.
+In contrast, gurobi-machinelearning tends to use "regression model" and OMLT
+uses "formulation."
 
 We choose "predictor" because all models we implement are of the form
 ``y = f(x)``.
 
 We do not use "machine learning model" because we have support for the linear
 and logistic regression models of classical statistical fitting. We could have
-used "regression model", but we find that models like neural networks and
+used "regression model," but we find that models like neural networks and
 binary decision trees are not commonly thought of as regression models.
 
 ## Inputs are vectors
@@ -50,7 +50,7 @@ In our opinion, Julia libraries often take a laissez-faire approach to the types
 that they support. In the optimistic case, this can lead to novel behavior by
 combining two packages that the package author had previously not considered or
 tested. In the pessimistic case, this can lead to incorrect results or cryptic
-error messagges.
+error messages.
 
 Exceptions to the `Vector` rule will be carefully considered and tested.
 
@@ -167,9 +167,6 @@ y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
 ```
 for any size of `x`.
 
-We choose this decision to simplify the implementation, and because we think
-deleting a predictor is an uncommon operation.
-
 ## Activations are predictors
 
 OMLT makes a distinction between layers, like `full_space_dense_layer`, and
@@ -178,7 +175,7 @@ elementwise activation functions, like `sigmoid_activation_function`.
 The downside to this approach is that it treats activation functions as special,
 leading to issues such as [OMLT#125](https://github.com/cog-imperial/OMLT/issues/125).
 
-In constrast, MathOptAI treats activation functions as a vector-valued predictor
+In contrast, MathOptAI treats activation functions as a vector-valued predictor
 like any other:
 ```julia
 y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLU(), x)
@@ -196,7 +193,7 @@ Many predictors have multiple ways that they can be formulated in an
 optimization model. For example, [`ReLU`](@ref) implements the non-smooth
 nonlinear formulation ``y = \max\{x, 0\}``, while [`ReLUQuadratic`](@ref)
 implements a the complementarity formulation
-``x = y - slack; y, slack \\ge 0; y * slack == 0``.
+``x = y - slack; y, slack \ge 0; y * slack = 0``.
 
 Choosing the appropriate formulation for the combination of model and solver can
 have a large impact on the performance.
@@ -213,7 +210,7 @@ In contrast, MathOptAI tries to take a maximally modular approach, where the
 user can control how the layers are formulated at runtime, including using a
 custom formulation that is not defined in MathOptAI.jl.
 
-Currently, we achive this with a `config` dictionary, which maps the various
+Currently, we achieve this with a `config` dictionary, which maps the various
 neural network layers to an [`AbstractPredictor`](@ref). For example:
 ```julia
 chain = Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1));

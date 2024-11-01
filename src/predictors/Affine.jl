@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -10,9 +10,9 @@
         b::Vector{T} = zeros(T, size(A, 1)),
     ) where {T} <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that represents the affine relationship:
+An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-f(x) = A x + b
+y = A x + b
 ```
 
 ## Example
@@ -22,7 +22,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, 0 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.Affine([2.0 3.0], [4.0])
 Affine(A, b) [input: 2, output: 1]
@@ -37,7 +37,9 @@ julia> formulation
 Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
-└ constraints [1]
+└ constraints [3]
+  ├ moai_Affine[1] ≥ 4
+  ├ moai_Affine[1] ≤ 12
   └ 2 x[1] + 3 x[2] - moai_Affine[1] = -4
 
 julia> y, formulation =
@@ -75,6 +77,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")
     bounds = _get_variable_bounds.(x)
+    cons = Any[]
     for i in 1:size(predictor.A, 1)
         y_lb, y_ub = predictor.b[i], predictor.b[i]
         for j in 1:size(predictor.A, 2)
@@ -83,9 +86,9 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
             y_ub += a_ij * ifelse(a_ij >= 0, ub, lb)
             y_lb += a_ij * ifelse(a_ij >= 0, lb, ub)
         end
-        _set_bounds_if_finite(y[i], y_lb, y_ub)
+        _set_bounds_if_finite(cons, y[i], y_lb, y_ub)
     end
-    cons = JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
+    append!(cons, JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y))
     return y, Formulation(predictor, y, cons)
 end
 

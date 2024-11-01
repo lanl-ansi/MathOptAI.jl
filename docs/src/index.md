@@ -1,17 +1,68 @@
 ![](https://upload.wikimedia.org/wikipedia/commons/2/22/Standing_Moai_at_Ahu_Tongariki%2C_Easter_Island%2C_Pacific_Ocean.jpg)
 
-# MathOptAI (Mo'ai)
+# MathOptAI.jl
 
-MathOptAI.jl (Mo'ai) is a [JuMP](https://jump.dev) extension for embedding
-trained AI, machine learning, and statistical learning models into a JuMP
-optimization model.
+MathOptAI.jl is a [JuMP](https://jump.dev) extension for embedding trained AI,
+machine learning, and statistical learning models into a JuMP optimization
+model.
 
 ## License
 
-MathOptAI.jl is provided under a BSD license.
+MathOptAI.jl is provided under a BSD-3 license as part of the Optimization and
+Machine Learning Toolbox project, O4806.
 
 See [LICENSE.md](https://github.com/lanl-ansi/MathOptAI.jl/blob/main/LICENSE.md)
 for details.
+
+_Despite the name similarity, this project is not affiliated with [OMLT](https://github.com/cog-imperial/OMLT),
+the Optimization and Machine Learning Toolkit._
+
+## Installation
+
+Install `MathOptAI.jl` using the Julia package manager:
+```julia
+import Pkg
+Pkg.add("MathOptAI")
+```
+
+## Getting started
+
+Here's an example of using MathOptAI to embed a trained neural network from Flux
+into a JuMP model. The vector of JuMP variables `x` is fed as input to the
+neural network. The output `y` is a vector of JuMP variables that represents the
+output layer of the neural network. The `formulation` object stores the
+additional variables and constraints that were added to `model`.
+
+```julia
+julia> using JuMP, MathOptAI, Flux
+
+julia> predictor = Flux.Chain(
+           Flux.Dense(28^2 => 32, Flux.sigmoid),
+           Flux.Dense(32 => 10),
+           Flux.softmax,
+       );
+
+julia> #= Train the Flux model. Code not shown for simplicity =#
+
+julia> model = JuMP.Model();
+
+julia> JuMP.@variable(model, 0 <= x[1:28^2] <= 1);
+
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
+
+julia> y
+10-element Vector{VariableRef}:
+ moai_SoftMax[1]
+ moai_SoftMax[2]
+ moai_SoftMax[3]
+ moai_SoftMax[4]
+ moai_SoftMax[5]
+ moai_SoftMax[6]
+ moai_SoftMax[7]
+ moai_SoftMax[8]
+ moai_SoftMax[9]
+ moai_SoftMax[10]
+```
 
 ## Getting help
 

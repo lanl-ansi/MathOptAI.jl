@@ -1,0 +1,45 @@
+name: Documentation
+on:
+  push:
+    branches: [main]
+    tags: '*'
+  pull_request:
+    types: [opened, synchronize, reopened]
+permissions:
+  contents: write
+  pull-requests: read
+  statuses: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GKSwstype: nul
+      DATADEPS_ALWAYS_ACCEPT: true
+      JULIA_CONDAPKG_BACKEND: "Null"
+      JULIA_PYTHONCALL_EXE: "python3"
+    steps:
+      - uses: actions/checkout@v4
+      # Install pytorch
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10'
+      - name: Install pytorch
+        run: |
+          pip3 install torch --index-url https://download.pytorch.org/whl/cpu
+          pip3 install numpy
+      # Install Julia
+      - uses: julia-actions/setup-julia@latest
+        with:
+          version: '1'
+      - name: Install dependencies
+        shell: julia --color=yes --project=docs/ {0}
+        run: |
+          using Pkg
+          Pkg.develop(PackageSpec(path=pwd()))
+          Pkg.instantiate()
+      - name: Build and deploy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For authentication with GitHub Actions token
+          DOCUMENTER_KEY: ${{ secrets.DOCUMENTER_KEY }}
+        run: julia --color=yes --project=docs/ docs/make.jl

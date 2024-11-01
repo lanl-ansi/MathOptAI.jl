@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -35,6 +35,18 @@ function test_Affine()
     return
 end
 
+function test_Affine_constructors()
+    # Affine(::Matrix)
+    f = MathOptAI.Affine([1.0 2.0; 3.0 4.0])
+    g = MathOptAI.Affine([1.0 2.0; 3.0 4.0], [0.0, 0.0])
+    @test f.A == g.A && f.b == g.b
+    # Affine(::Vector)
+    f = MathOptAI.Affine([1.0, 2.0])
+    g = MathOptAI.Affine([1.0 2.0], [0.0])
+    @test f.A == g.A && f.b == g.b
+    return
+end
+
 function test_Affine_affine()
     model = Model()
     @variable(model, x[1:2])
@@ -44,6 +56,18 @@ function test_Affine_affine()
     obj = constraint_object(only(cons))
     @test obj.set == MOI.EqualTo(0.0)
     @test isequal_canonical(obj.func, 4.0 * x[1] + 6.0 * x[2] - y[1])
+    return
+end
+
+function test_Affine_bounds()
+    model = Model()
+    @variable(model, x[1:2])
+    fix(x[1], 2.0)
+    set_binary(x[2])
+    f = MathOptAI.Affine([2.0, 3.0])
+    y, _ = MathOptAI.add_predictor(model, f, x)
+    @test lower_bound.(y) == [4.0]  # 2 * (x[1]=2) + 3 * (x[2]=0)
+    @test upper_bound.(y) == [7.0]  # 2 * (x[1]=2) + 3 * (x[2]=1)
     return
 end
 
@@ -105,6 +129,28 @@ function test_ReLU_direct()
     optimize!(model)
     @assert is_solved_and_feasible(model)
     @test value.(y) ≈ [0.0, 2.0]
+    return
+end
+
+function test_ReLU_bounds()
+    values = [-2, 0, 2]
+    for f in (
+        MathOptAI.ReLU(),
+        MathOptAI.ReLUBigM(100.0),
+        MathOptAI.ReLUQuadratic(),
+        MathOptAI.ReLUSOS1(),
+    )
+        for lb in values, ub in values
+            if lb > ub
+                continue
+            end
+            model = Model()
+            @variable(model, lb <= x <= ub)
+            y, _ = MathOptAI.add_predictor(model, f, [x])
+            @test lower_bound.(y) == [max(0.0, lb)]
+            @test upper_bound.(y) == [max(0.0, ub)]
+        end
+    end
     return
 end
 
@@ -208,6 +254,22 @@ function test_Sigmoid()
     return
 end
 
+function test_Sigmoid_bounds()
+    f(x) = 1 / (1 + exp(-x))
+    values = [-Inf, -2, 0, 2, Inf]
+    for lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), [x])
+        @test lower_bound(y[1]) == f(lb)
+        @test upper_bound(y[1]) == f(ub)
+    end
+    return
+end
+
 function test_ReducedSpace_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -278,6 +340,26 @@ function test_SoftPlus()
     return
 end
 
+function test_SoftPlus_bounds()
+    f(x, beta) = log(1 + exp(beta * x)) / beta
+    values = [-Inf, -2, 0, 2, Inf]
+    for beta in [1.0, 1.5, 2.0], lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(; beta), [x])
+        @test lower_bound(y[1]) == f(lb, beta)
+        if isfinite(ub)
+            @test upper_bound(y[1]) == f(ub, beta)
+        else
+            @test !has_upper_bound(y[1])
+        end
+    end
+    return
+end
+
 function test_ReducedSpace_SoftPlus()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -310,6 +392,21 @@ function test_Tanh()
     optimize!(model)
     @assert is_solved_and_feasible(model)
     @test value.(y) ≈ tanh.(X)
+    return
+end
+
+function test_Tanh_bounds()
+    values = [-Inf, -2, 0, 2, Inf]
+    for lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.Tanh(), [x])
+        @test lower_bound.(y) == [tanh(lb)]
+        @test upper_bound.(y) == [tanh(ub)]
+    end
     return
 end
 
@@ -355,6 +452,15 @@ function test_Scale()
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     @test length(cons) == 2
     @test isequal_canonical(y, [2.0 * x[1] + 4.0, 3.0 * x[2] + 5.0])
+    return
+end
+
+function test_fallback_bound_methods()
+    fake_variable = "x"
+    l, u = MathOptAI._get_variable_bounds(fake_variable)
+    @test (l, u) == (-Inf, Inf)
+    cons = Any[]
+    @test MathOptAI._set_bounds_if_finite(cons, fake_variable, l, u) === nothing
     return
 end
 

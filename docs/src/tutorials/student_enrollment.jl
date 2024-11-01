@@ -39,7 +39,7 @@ function read_df(filename)
 end
 
 # There are two important files. The first, `college_student_enroll-s1-1.csv`,
-# contains historial admissions data on anonymized students, their SAT score,
+# contains historical admissions data on anonymized students, their SAT score,
 # their GPA, their merit scholarships, and whether the enrolled in the college.
 
 train_df = read_df("college_student_enroll-s1-1.csv")
@@ -58,7 +58,7 @@ n_students = size(evaluate_df, 1)
 # The first step is to train a logistic regression model to predict the Boolean
 # `enroll` column based on the `SAT`, `GPA`, and `merit` columns.
 
-model_glm = GLM.glm(
+predictor = GLM.glm(
     GLM.@formula(enroll ~ 0 + SAT + GPA + merit),
     train_df,
     GLM.Bernoulli(),
@@ -75,19 +75,19 @@ evaluate_df
 
 model = Model()
 
-# First, we add a new columnn to `evaluate_df`, with one JuMP decision variable
-# for each row. It is important the the `.merit` column name in `evaluate_df`
+# First, we add a new column to `evaluate_df`, with one JuMP decision variable
+# for each row. It is important the `.merit` column name in `evaluate_df`
 # matches the name in `train_df`.
 
 evaluate_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5);
 evaluate_df
 
-# Then, we use [`MathOptAI.add_predictor`](@ref) to embed `model_glm` into the
+# Then, we use [`MathOptAI.add_predictor`](@ref) to embed `predictor` into the
 # JuMP `model`. [`MathOptAI.add_predictor`](@ref) returns a vector of variables,
 # one for each row inn `evaluate_df`, corresponding to the output `enroll` of
 # our logistic regression.
 
-evaluate_df.enroll, _ = MathOptAI.add_predictor(model, model_glm, evaluate_df);
+evaluate_df.enroll, _ = MathOptAI.add_predictor(model, predictor, evaluate_df);
 evaluate_df
 
 # The `.enroll` column name in `evaluate_df` is just a name. It doesn't have to

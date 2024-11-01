@@ -40,7 +40,7 @@ function read_df(filename)
 end
 
 # There are two important files. The first, `college_student_enroll-s1-1.csv`,
-# contains historial admissions data on anonymized students, their SAT score,
+# contains historical admissions data on anonymized students, their SAT score,
 # their GPA, their merit scholarships, and whether the enrolled in the college.
 
 train_df = read_df("college_student_enroll-s1-1.csv")
@@ -61,9 +61,9 @@ n_students = size(evaluate_df, 1)
 
 train_features = Matrix(train_df[:, [:SAT, :GPA, :merit]])
 train_labels = train_df[:, :enroll]
-ml_model = DecisionTree.DecisionTreeClassifier(; max_depth = 3)
-DecisionTree.fit!(ml_model, train_features, train_labels)
-DecisionTree.print_tree(ml_model)
+predictor = DecisionTree.DecisionTreeClassifier(; max_depth = 3)
+DecisionTree.fit!(predictor, train_features, train_labels)
+DecisionTree.print_tree(predictor)
 
 # ## Decision model
 
@@ -76,8 +76,8 @@ evaluate_df
 
 model = Model()
 
-# First, we add a new columnn to `evaluate_df`, with one JuMP decision variable
-# for each row. It is important the the `.merit` column name in `evaluate_df`
+# First, we add a new column to `evaluate_df`, with one JuMP decision variable
+# for each row. It is important the `.merit` column name in `evaluate_df`
 # matches the name in `train_df`.
 
 evaluate_df.merit = @variable(model, 0 <= x_merit[1:n_students] <= 2.5);
@@ -90,7 +90,7 @@ evaluate_df
 
 evaluate_features = Matrix(evaluate_df[:, [:SAT, :GPA, :merit]])
 evaluate_df.enroll = mapreduce(vcat, 1:size(evaluate_features, 1)) do i
-    y, _ = MathOptAI.add_predictor(model, ml_model, evaluate_features[i, :])
+    y, _ = MathOptAI.add_predictor(model, predictor, evaluate_features[i, :])
     return y
 end
 evaluate_df

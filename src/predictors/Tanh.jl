@@ -1,5 +1,5 @@
-# Copyright (c) 2024: Oscar Dowson and contributors
 # Copyright (c) 2024: Triad National Security, LLC
+# Copyright (c) 2024: Oscar Dowson and contributors
 #
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
@@ -7,8 +7,11 @@
 """
     Tanh() <: AbstractPredictor
 
-An [`AbstractPredictor`](@ref) that implements the Tanh constraint
-\$y = \\tanh(x)\$ as a smooth nonlinear constraint.
+An [`AbstractPredictor`](@ref) that represents the relationship:
+```math
+y = \\tanh(x)
+```
+as a smooth nonlinear constraint.
 
 ## Example
 
@@ -17,7 +20,7 @@ julia> using JuMP, MathOptAI
 
 julia> model = Model();
 
-julia> @variable(model, x[1:2]);
+julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.Tanh()
 Tanh()
@@ -35,10 +38,10 @@ Tanh()
 │ ├ moai_Tanh[1]
 │ └ moai_Tanh[2]
 └ constraints [6]
-  ├ moai_Tanh[1] ≥ -1
-  ├ moai_Tanh[2] ≥ -1
-  ├ moai_Tanh[1] ≤ 1
-  ├ moai_Tanh[2] ≤ 1
+  ├ moai_Tanh[1] ≥ -0.7615941559557649
+  ├ moai_Tanh[1] ≤ 0.7615941559557649
+  ├ moai_Tanh[2] ≥ -0.7615941559557649
+  ├ moai_Tanh[2] ≤ 0.9640275800758169
   ├ moai_Tanh[1] - tanh(x[1]) = 0
   └ moai_Tanh[2] - tanh(x[2]) = 0
 
@@ -60,10 +63,9 @@ struct Tanh <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = JuMP.@variable(model, [1:length(x)], base_name = "moai_Tanh")
-    _set_bounds_if_finite.(y, -1, 1)
-    cons = JuMP.@constraint(model, y .== tanh.(x))
-    constraints = Any[JuMP.LowerBoundRef.(y); JuMP.UpperBoundRef.(y); cons]
-    return y, Formulation(predictor, y, constraints)
+    cons = _set_direct_bounds(tanh, -1, 1, x, y)
+    append!(cons, JuMP.@constraint(model, y .== tanh.(x)))
+    return y, Formulation(predictor, y, cons)
 end
 
 function add_predictor(

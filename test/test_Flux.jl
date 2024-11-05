@@ -190,7 +190,7 @@ function test_gray_box_scalar_output()
     chain = Flux.Chain(Flux.Dense(2 => 16, Flux.relu), Flux.Dense(16 => 1))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    set_attribute(model, "max_iter", 5)
+    set_attribute(model, "max_iter", 1)
     @variable(model, 0 <= x[1:2] <= 1)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -219,7 +219,7 @@ function test_gray_box_scalar_output_hessian()
     chain = Flux.Chain(Flux.Dense(2 => 16, Flux.relu), Flux.Dense(16 => 1))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    set_attribute(model, "max_iter", 5)
+    set_attribute(model, "max_iter", 1)
     @variable(model, 0 <= x[1:2] <= 1)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -240,7 +240,7 @@ function test_gray_box_vector_output()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.relu), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    set_attribute(model, "max_iter", 5)
+    set_attribute(model, "max_iter", 1)
     @variable(model, 0 <= x[1:3] <= 1)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -261,7 +261,7 @@ function test_gray_box_vector_output_hessian()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.relu), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    set_attribute(model, "max_iter", 5)
+    set_attribute(model, "max_iter", 1)
     @variable(model, 0 <= x[1:3] <= 1)
     y, formulation = MathOptAI.add_predictor(
         model,

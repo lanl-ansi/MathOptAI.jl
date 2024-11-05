@@ -107,7 +107,9 @@ function MathOptAI.build_predictor(
             error("cannot specify the `config` kwarg if `gray_box = true`")
         end
         return MathOptAI.GrayBox(
-            predictor; hessian = gray_box_hessian, device = gray_box_device
+            predictor;
+            hessian = gray_box_hessian,
+            device = gray_box_device,
         )
     end
     torch = PythonCall.pyimport("torch")
@@ -145,14 +147,17 @@ function MathOptAI.GrayBox(
     device::String = "cpu",
 )
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(predictor.filename; weights_only = false).to(device)
+    torch_model = torch.load(
+        predictor.filename;
+        weights_only = false,
+    ).to(device)
     J = torch.func.jacrev(torch_model)
     H = torch.func.hessian(torch_model)
     # TODO(odow): I'm not sure if there is a better way to get the output
     # dimension of a torch model object?
     output_size(::Any) = PythonCall.pyconvert(Int, torch_model[-1].out_features)
     function callback(x)
-        py_x = torch.tensor(collect(x), device=device)
+        py_x = torch.tensor(collect(x), device = device)
         py_value = torch_model(py_x).detach().cpu().numpy()
         value = PythonCall.pyconvert(Vector, py_value)
         py_jacobian = J(py_x).detach().cpu().numpy()

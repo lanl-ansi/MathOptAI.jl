@@ -12,10 +12,18 @@ A wrapper struct for loading a PyTorch model.
 The only supported file extension is `.pt`, where the `.pt` file has been
 created using `torch.save(model, filename)`.
 
+!!! warning
+    To use [`PytorchModel`](@ref), your code must load the `PythonCall` package:
+    ```julia
+    import PythonCall
+    ```
+
 ## Example
 
 ```jldoctest
-julia> using PythonCall, MathOptAI
+julia> using MathOptAI
+
+julia> using PythonCall  #  This line is important!
 
 julia> predictor = PytorchModel("model.pt");
 ```

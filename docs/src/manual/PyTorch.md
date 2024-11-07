@@ -38,27 +38,37 @@ torch.save(model, "saved_pytorch_model.pt")
 MathOptAI uses [PythonCall.jl](https://github.com/JuliaPy/PythonCall.jl) to call
 from Julia into Python.
 
-See [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl) for more control over
-how to link Julia to an existing Python environment. For example, if you have an
-existing Python installation (with PyTorch installed), and it is available in
-the current Conda environment, set:
+To use [`PytorchModel`](@ref) your code must load the `PythonCall` package:
+```julia
+import PythonCall
+```
+
+PythonCall uses [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl) to manage
+Python dependencies. See [CondaPkg.jl](https://github.com/JuliaPy/CondaPkg.jl)
+for more control over how to link Julia to an existing Python environment. For
+example, if you have an existing Python installation (with PyTorch installed),
+and it is available in the current Conda environment, do:
 
 ```julia
 ENV["JULIA_CONDAPKG_BACKEND"] = "Current"
+import PythonCall
 ```
 
-before importing PythonCall.jl. If the Python installation can be found on the
-path and it is not in a Conda environment, set:
+If the Python installation can be found on the path and it is not in a Conda
+environment, do:
 
 ```julia
 ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+import PythonCall
 ```
 
 If `python` is not on your path, you may additionally need to set
-`JULIA_PYTHONCALL_EXE`, for example, to:
+`JULIA_PYTHONCALL_EXE`, for example, do:
 
 ```julia
 ENV["JULIA_PYTHONCALL_EXE"] = "python3"
+ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+import PythonCall
 ```
 
 ## Basic example
@@ -67,7 +77,7 @@ Use [`MathOptAI.add_predictor`](@ref) to embed a PyTorch model into a JuMP
 model:
 
 ```@repl
-using JuMP, MathOptAI
+using JuMP, MathOptAI, PythonCall
 model = Model();
 @variable(model, x[1:1]);
 predictor = MathOptAI.PytorchModel("saved_pytorch_model.pt");
@@ -81,7 +91,7 @@ formulation
 Use the `reduced_space = true` keyword to formulate a reduced-space model:
 
 ```@repl
-using JuMP, MathOptAI
+using JuMP, MathOptAI, PythonCall
 model = Model();
 @variable(model, x[1:1]);
 predictor = MathOptAI.PytorchModel("saved_pytorch_model.pt");
@@ -96,7 +106,7 @@ formulation
 Use the `gray_box = true` keyword to embed the network as a nonlinear operator:
 
 ```@repl
-using JuMP, MathOptAI
+using JuMP, MathOptAI, PythonCall
 model = Model();
 @variable(model, x[1:1]);
 predictor = MathOptAI.PytorchModel("saved_pytorch_model.pt");
@@ -112,7 +122,7 @@ Pass a dictionary to the `config` keyword that maps the `Symbol` name of each
 PyTorch layer to a MathOptAI predictor:
 
 ```@repl
-using JuMP, MathOptAI
+using JuMP, MathOptAI, PythonCall
 model = Model();
 @variable(model, x[1:1]);
 predictor = MathOptAI.PytorchModel("saved_pytorch_model.pt");

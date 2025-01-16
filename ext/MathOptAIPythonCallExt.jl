@@ -156,7 +156,8 @@ function MathOptAI.GrayBox(
         # We do this instead of `torch_model[-1].out_features` as the last layer
         # may not support out_features.
         z = torch.zeros(length(x))
-        return PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(torch_model(z)))
+        y = torch_model(z)
+        return PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     end
     function callback(x)
         py_x = torch.tensor(collect(x); device = device)

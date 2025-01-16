@@ -453,6 +453,55 @@ function test_model_Tanh_vector_GrayBox_hessian()
     return
 end
 
+function test_model_Sigmoid_last_layer_GrayBox()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Sigmoid_last_layer_GrayBox.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(3, 16),
+            torch.nn.Sigmoid(),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    # Full-space
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:3] == i)
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, x; gray_box = true)
+    @test num_variables(model) == 19
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 19
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
+    # Reduced-space
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:3] == i)
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(
+        model,
+        ml_model,
+        x;
+        gray_box = true,
+        reduced_space = true,
+    )
+    @test num_variables(model) == 3
+    @test num_constraints(model; count_variable_in_set_constraints = true) == 3
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

@@ -151,9 +151,13 @@ function MathOptAI.GrayBox(
     torch_model = torch_model.to(device)
     J = torch.func.jacrev(torch_model)
     H = torch.func.hessian(torch_model)
-    # TODO(odow): I'm not sure if there is a better way to get the output
-    # dimension of a torch model object?
-    output_size(::Any) = PythonCall.pyconvert(Int, torch_model[-1].out_features)
+    function output_size(x::Vector)
+        # Get the output size by passing a zero vector through the torch model.
+        # We do this instead of `torch_model[-1].out_features` as the last layer
+        # may not support out_features.
+        z = torch.zeros(length(x))
+        return PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(torch_model(z)))
+    end
     function callback(x)
         py_x = torch.tensor(collect(x); device = device)
         py_value = torch_model(py_x).detach().cpu().numpy()

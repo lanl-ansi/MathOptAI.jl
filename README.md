@@ -100,3 +100,17 @@ the field at the time that we started development of MathOptAI.
 > Systems Engineering Tools for Optimization of Trained Machine Learning Models:
 > Comparative and Perspective. _Industrial & Engineering Chemistry Research_,
 > 63(32), 13966-13979. DOI: [10.1021/acs.iecr.4c00632](https://pubs.acs.org/doi/abs/10.1021/acs.iecr.4c00632)
+
+## Citation
+
+```bibtex
+@misc{parker2024formulations,
+      title={Formulations and scalability of neural network surrogates in nonlinear optimization problems}, 
+      author={Robert B. Parker and Oscar Dowson and Nicole LoGiudice and Manuel Garcia and Russell Bent},
+      year={2024},
+      eprint={2412.11403},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2412.11403}, 
+}
+```

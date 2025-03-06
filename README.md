@@ -103,6 +103,8 @@ the field at the time that we started development of MathOptAI.
 
 ## Citation
 
+If you use this package for academic research, please cite the following preprint:
+
 ```bibtex
 @misc{parker2024formulations,
       title={Formulations and scalability of neural network surrogates in nonlinear optimization problems}, 

@@ -304,6 +304,63 @@ function test_unsupported_activation()
     return
 end
 
+function test_vector_nonlinear_oracle_errors()
+    chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
+    @test_throws(
+        ErrorException(
+            "cannot specify `gray_box = true` if `vector_nonlinear_oracle = true`",
+        ),
+        MathOptAI.build_predictor(
+            chain;
+            gray_box = true,
+            vector_nonlinear_oracle = true,
+        ),
+    )
+    @test_throws(
+        ErrorException(
+            "cannot specify the `config` kwarg if `vector_nonlinear_oracle = true`",
+        ),
+        MathOptAI.build_predictor(
+            chain;
+            config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
+            vector_nonlinear_oracle = true,
+        ),
+    )
+    return
+end
+
+function test_vector_nonlinear_oracle_sigmoid()
+    chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i = 1:3] == i)
+    y, formulation =
+        MathOptAI.add_predictor(model, chain, x; vector_nonlinear_oracle = true)
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-4)
+    return
+end
+
+function test_vector_nonlinear_oracle_sigmoid_2()
+    chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i = 1:3] == i)
+    @constraint(model, x[1] * x[2]^1.23 <= 4)
+    y, formulation = MathOptAI.add_predictor(
+        model,
+        chain,
+        x;
+        hessian = false,
+        vector_nonlinear_oracle = true,
+    )
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-4)
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

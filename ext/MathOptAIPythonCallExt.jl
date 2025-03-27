@@ -18,8 +18,9 @@ import MathOptAI
         config::Dict = Dict{Any,Any}(),
         reduced_space::Bool = false,
         gray_box::Bool = false,
-        gray_box_hessian::Bool = false,
-        gray_box_device::String = "cpu",
+        vector_nonlinear_oracle::Bool = false,
+        hessian::Bool = vector_nonlinear_oracle,
+        device::String = "cpu",
     )
 
 Add a trained neural network from PyTorch via PythonCall.jl to `model`.
@@ -41,11 +42,23 @@ Add a trained neural network from PyTorch via PythonCall.jl to `model`.
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
    The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftMax`, `:SoftPlus`, and
    `:Tanh`.
- * `gray_box`: if `true`, the neural network is added as a user-defined
-   nonlinear operator, with gradients provided by `torch.func.jacrev`.
- * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
-   of the output using `torch.func.hessian`.
- * `gray_box_device`: device used to construct PyTorch tensors, e.g. `"cuda"`
+
+ * `reduced_space`: if `true`, the neural network is added using a
+   [`ReducedSpace`](@ref) formulation.
+
+ * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
+   formulation.
+
+ * `vector_nonlinear_oracle`: if `true`, the neural network is added using
+   `Ipopt._VectorNonlinearOracle`. This is an experimental feature that may
+   offer better performance than `gray_box`.
+
+ * `hessian`: if `true`, the `gray_box` and `vector_nonlinear_oracle`
+   formulations compute the Hessian of the output using `torch.func.hessian`.
+   The default for `hessian` is `false` if `gray_box` is used, and `true` if
+   `vector_nonlinear_oracle` is used.
+
+ * `device`: device used to construct PyTorch tensors, for example, `"cuda"`
    to run on an Nvidia GPU.
 """
 function MathOptAI.add_predictor(
@@ -68,8 +81,9 @@ end
         predictor::MathOptAI.PytorchModel;
         config::Dict = Dict{Any,Any}(),
         gray_box::Bool = false,
-        gray_box_hessian::Bool = false,
-        gray_box_device::String = "cpu",
+        vector_nonlinear_oracle::Bool = false,
+        hessian::Bool = vector_nonlinear_oracle,
+        device::String = "cpu",
     )
 
 Convert a trained neural network from PyTorch via PythonCall.jl to a
@@ -92,28 +106,57 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
    The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftMax`, `:SoftPlus`, and
    `:Tanh`.
- * `gray_box`: if `true`, the neural network is added as a user-defined
-   nonlinear operator, with gradients provided by `torch.func.jacrev`.
- * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
-   of the output using `torch.func.hessian`.
- * `gray_box_device`: device used to construct PyTorch tensors, e.g. `"cuda"`
+
+ * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
+   formulation.
+
+ * `vector_nonlinear_oracle`: if `true`, the neural network is added using
+   `Ipopt._VectorNonlinearOracle`. This is an experimental feature that may
+   offer better performance than `gray_box`.
+
+ * `hessian`: if `true`, the `gray_box` and `vector_nonlinear_oracle`
+   formulations compute the Hessian of the output using `torch.func.hessian`.
+   The default for `hessian` is `false` if `gray_box` is used, and `true` if
+   `vector_nonlinear_oracle` is used.
+
+ * `device`: device used to construct PyTorch tensors, for example, `"cuda"`
    to run on an Nvidia GPU.
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;
     config::Dict = Dict{Any,Any}(),
     gray_box::Bool = false,
+    vector_nonlinear_oracle::Bool = false,
+    device::String = "cpu",
+    hessian::Bool = vector_nonlinear_oracle,
+    # For backwards compatibility
     gray_box_hessian::Bool = false,
-    gray_box_device::String = "cpu",
+    gray_box_device::Union{Nothing,String} = nothing,
 )
+    if vector_nonlinear_oracle
+        if gray_box
+            error(
+                "cannot specify `gray_box = true` if `vector_nonlinear_oracle = true`",
+            )
+        elseif !isempty(config)
+            error(
+                "cannot specify the `config` kwarg if `vector_nonlinear_oracle = true`",
+            )
+        end
+        return MathOptAI.VectorNonlinearOracle(
+            predictor;
+            hessian = hessian | gray_box_hessian,
+            device = something(gray_box_device, device),
+        )
+    end
     if gray_box
         if !isempty(config)
             error("cannot specify the `config` kwarg if `gray_box = true`")
         end
         return MathOptAI.GrayBox(
             predictor;
-            hessian = gray_box_hessian,
-            device = gray_box_device,
+            hessian = hessian | gray_box_hessian,
+            device = something(gray_box_device, device),
         )
     end
     torch = PythonCall.pyimport("torch")

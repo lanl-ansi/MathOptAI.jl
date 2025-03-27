@@ -47,12 +47,12 @@ function _build_set_and_callback(
     torch_model = torch.load(predictor.filename; weights_only = false)
     torch_model = torch_model.to(device)
     J = torch.func.jacrev(torch_model)
-    y = torch_model(torch.zeros(input_dimension; device = device))
+    y = torch_model(torch.zeros(input_dimension; device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     # We model the function as:
     #     0 <= f(x) - y <= 0
     function eval_f(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device = device)
+        py_x = torch.tensor(x[1:input_dimension]; device)
         py_value = torch_model(py_x).detach().cpu().numpy()
         value = PythonCall.pyconvert(Vector, py_value)
         for i in 1:output_dimension
@@ -71,7 +71,7 @@ function _build_set_and_callback(
         push!(jacobian_structure, (i, input_dimension + i))
     end
     function eval_jacobian(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device = device)
+        py_x = torch.tensor(x[1:input_dimension]; device)
         py_value = J(py_x).detach().cpu().numpy()
         value = PythonCall.pyconvert(Matrix, py_value)
         for i in 1:length(value)
@@ -91,21 +91,34 @@ function _build_set_and_callback(
     hessian_lagrangian_structure = Tuple{Int64,Int64}[
         (i, j) for j in 1:input_dimension for i in 1:input_dimension if j >= i
     ]
-    lagrangian = torch.nn.Sequential(
-        torch_model,
-        torch.nn.Linear(output_dimension, 1; bias = false),
-    )
-    lagrangian.to(device)
-    ∇²L = torch.func.hessian(lagrangian)
+    # We want to compute the Hessian-of-the-Lagrangian:
+    #   ∇²L(x) = Σ μᵢ ∇²fᵢ(x)
+    # We could compute this by calculating the
+    # `output_dimension * input_dimension * input_dimension` dense hessian and
+    # then sum over the first dimension multiplying by μᵢ. This is pretty slow.
+    #
+    # Instead, we define L(x) = Σ μᵢ fᵢ(x), and then compute a single dense
+    # Hessian ∇²L(x).
+    #
+    # We can define L(x) by adding a new output_dimension-by-1 linear layer to
+    # the output of `torch_model` that does the multiplication f(x)' * μ.
+    #
+    # We update the parameters of μ_layer in our `eval_hessian_lagrangian`
+    # function.
+    μ_layer = torch.nn.Linear(output_dimension, 1; bias = false)
+    L = torch.nn.Sequential(torch_model, μ_layer)
+    L.to(device)
+    ∇²L = torch.func.hessian(L)
     function eval_hessian_lagrangian(
         ret::AbstractVector,
         x::AbstractVector,
-        mult::AbstractVector,
+        μ::AbstractVector,
     )
-        py_x = torch.tensor(x[1:input_dimension]; device = device)
-        mult_tensor = torch.tensor([mult]; device = device)
-        lagrangian[-1].weight =
-            torch.nn.Parameter(mult_tensor; requires_grad = false)
+        py_x = torch.tensor(x[1:input_dimension]; device)
+        # [μ] is Python syntax to make a 1xN tensor. Even though μ_layer is Nx1,
+        # torch.nn.Linear stores the weight matrix transposed.
+        py_μ = torch.tensor([μ]; device)
+        μ_layer.weight = torch.nn.Parameter(py_μ; requires_grad = false)
         py_hessian = ∇²L(py_x)[0].detach().cpu().numpy()
         hessian = PythonCall.pyconvert(Array, py_hessian)
         k = 0

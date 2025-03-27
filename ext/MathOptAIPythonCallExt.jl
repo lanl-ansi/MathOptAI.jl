@@ -156,7 +156,7 @@ function MathOptAI.GrayBox(
         # Get the output size by passing a zero vector through the torch model.
         # We do this instead of `torch_model[-1].out_features` as the last layer
         # may not support out_features.
-        z = torch.zeros(length(x))
+        z = torch.zeros(length(x); device = device)
         y = torch_model(z)
         return PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     end
@@ -184,12 +184,12 @@ function Ipopt.VectorNonlinearOracle(
     torch_model = torch.load(predictor.filename; weights_only = false)
     torch_model = torch_model.to(device)
     J = torch.func.jacrev(torch_model)
-    y = torch_model(torch.zeros(input_dimension))
+    y = torch_model(torch.zeros(input_dimension; device = device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     # We model the function as:
     #     0 <= f(x) - y <= 0
     function eval_f(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device)
+        py_x = torch.tensor(x[1:input_dimension]; device = device)
         py_value = torch_model(py_x).detach().cpu().numpy()
         value = PythonCall.pyconvert(Vector, py_value)
         for i in 1:output_dimension
@@ -208,7 +208,7 @@ function Ipopt.VectorNonlinearOracle(
         push!(jacobian_structure, (i, input_dimension + i))
     end
     function eval_jacobian(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device)
+        py_x = torch.tensor(x[1:input_dimension]; device = device)
         py_value = J(py_x).detach().cpu().numpy()
         value = PythonCall.pyconvert(Matrix, py_value)
         for i in 1:length(value)
@@ -234,9 +234,9 @@ function Ipopt.VectorNonlinearOracle(
     ∇²L = torch.func.hessian(lagrangian)
     function eval_hessian_lagrangian(ret, x, mult)
         # x contains inputs and outputs
-        py_x = torch.tensor(x[1:input_dimension], device = device)
-        mult_tensor = torch.tensor([mult], device=device)
-        mult_param = torch.nn.Parameter(mult_tensor, requires_grad=false)
+        py_x = torch.tensor(x[1:input_dimension]; device = device)
+        mult_tensor = torch.tensor([mult]; device = device)
+        mult_param = torch.nn.Parameter(mult_tensor, requires_grad = false)
         lagrangian[-1].weight = mult_param
         hessian = PythonCall.pyconvert(Array, ∇²L(py_x)[0].detach().cpu().numpy())
         k = 0

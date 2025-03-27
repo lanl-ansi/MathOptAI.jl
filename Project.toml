@@ -24,8 +24,9 @@ MathOptAIAbstractGPsExt = "AbstractGPs"
 MathOptAIDecisionTreeExt = "DecisionTree"
 MathOptAIFluxExt = "Flux"
 MathOptAIGLMExt = "GLM"
+MathOptAIIpoptPythonCallExt = ["Ipopt", "PythonCall"]
 MathOptAILuxExt = "Lux"
-MathOptAIPythonCallExt = ["Ipopt", "PythonCall"]
+MathOptAIPythonCallExt = "PythonCall"
 MathOptAIStatsModelsExt = ["DataFrames", "StatsModels"]
 
 [compat]
@@ -35,6 +36,7 @@ DecisionTree = "0.12"
 Distributions = "0.25"
 Flux = "0.14"
 GLM = "1.9"
+Ipopt = "1.7, =1.8.0"
 JuMP = "1"
 Lux = "0.5"
 MathOptInterface = "1"

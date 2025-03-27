@@ -7,7 +7,6 @@
 module MathOptAIPythonCallExt
 
 import JuMP
-import Ipopt
 import PythonCall
 import MathOptAI
 
@@ -173,91 +172,6 @@ function MathOptAI.GrayBox(
         return (; value, jacobian, hessian = permutedims(hessians, (2, 3, 1)))
     end
     return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
-end
-
-function Ipopt.VectorNonlinearOracle(
-    predictor::MathOptAI.PytorchModel,
-    input_dimension::Int;
-    device::String = "cpu",
-)
-    torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(predictor.filename; weights_only = false)
-    torch_model = torch_model.to(device)
-    J = torch.func.jacrev(torch_model)
-    y = torch_model(torch.zeros(input_dimension; device = device))
-    output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
-    # We model the function as:
-    #     0 <= f(x) - y <= 0
-    function eval_f(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device = device)
-        py_value = torch_model(py_x).detach().cpu().numpy()
-        value = PythonCall.pyconvert(Vector, py_value)
-        for i in 1:output_dimension
-            ret[i] = value[i] - x[input_dimension+i]
-        end
-        return
-    end
-    # Note the order of the for-loops, first over the output_dimension, and then
-    # across the input_dimension. This makes the Jacobian structure of ∇f(x) be
-    # column-major and dense with respect to x.
-    jacobian_structure = Tuple{Int64,Int64}[
-        (r, c) for c in 1:input_dimension for r in 1:output_dimension
-    ]
-    # We also need to add non-zero terms for the `-I` component of the Jacobian.
-    for i in 1:output_dimension
-        push!(jacobian_structure, (i, input_dimension + i))
-    end
-    function eval_jacobian(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device = device)
-        py_value = J(py_x).detach().cpu().numpy()
-        value = PythonCall.pyconvert(Matrix, py_value)
-        for i in 1:length(value)
-            ret[i] = value[i]             # ∇f(x)
-        end
-        for i in 1:output_dimension
-            ret[length(value)+i] = -1.0   # -I
-        end
-        return
-    end
-    # We need to compute only ∇²f(x) because the -y part does not appear in
-    # the Hessian.
-    #
-    # Note the order of the for-loops, first over the rows, and then across the
-    # columns, with j >= i ensuring that this is the upper triangle portion of
-    # the Hessian-of-the-Lagrangian.
-    hessian_lagrangian_structure = Tuple{Int64,Int64}[
-        (i, j) for j in 1:input_dimension for i in 1:input_dimension if j >= i
-    ]
-    lagrangian_layer = torch.nn.Linear(output_dimension, 1, bias = false)
-    lagrangian = torch.nn.Sequential(torch_model, lagrangian_layer)
-    lagrangian.to(device)
-    ∇²L = torch.func.hessian(lagrangian)
-    function eval_hessian_lagrangian(ret, x, mult)
-        # x contains inputs and outputs
-        py_x = torch.tensor(x[1:input_dimension]; device = device)
-        mult_tensor = torch.tensor([mult]; device = device)
-        mult_param = torch.nn.Parameter(mult_tensor, requires_grad = false)
-        lagrangian[-1].weight = mult_param
-        hessian = PythonCall.pyconvert(Array, ∇²L(py_x)[0].detach().cpu().numpy())
-        k = 0
-        for j in 1:input_dimension
-            for i in 1:j
-                k += 1
-                ret[k] = hessian[i, j]
-            end
-        end
-        return
-    end
-    return Ipopt.VectorNonlinearOracle(;
-        dimension = input_dimension + output_dimension,
-        l = zeros(output_dimension),
-        u = zeros(output_dimension),
-        f = eval_f,
-        jacobian_structure,
-        jacobian = eval_jacobian,
-        hessian_lagrangian_structure,
-        hessian_lagrangian = eval_hessian_lagrangian,
-    )
 end
 
 end  # module

@@ -155,7 +155,7 @@ function MathOptAI.GrayBox(
         # Get the output size by passing a zero vector through the torch model.
         # We do this instead of `torch_model[-1].out_features` as the last layer
         # may not support out_features.
-        z = torch.zeros(length(x); device = device)
+        z = torch.zeros(length(x))
         y = torch_model(z)
         return PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     end

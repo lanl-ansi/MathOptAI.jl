@@ -38,6 +38,10 @@ function MathOptAI.add_predictor(
     return y, MathOptAI.Formulation(predictor, y, [con])
 end
 
+function _pyconvert(::Type{T}, tensor) where {T}
+    return PythonCall.pyconvert(T, tensor.detach().cpu().numpy())
+end
+
 function _build_set_and_callback(
     predictor::MathOptAI.PytorchModel,
     input_dimension::Int;
@@ -46,15 +50,13 @@ function _build_set_and_callback(
     torch = PythonCall.pyimport("torch")
     torch_model = torch.load(predictor.filename; weights_only = false)
     torch_model = torch_model.to(device)
-    J = torch.func.jacrev(torch_model)
     y = torch_model(torch.zeros(input_dimension; device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     # We model the function as:
     #     0 <= f(x) - y <= 0
     function eval_f(ret::AbstractVector, x::AbstractVector)
         py_x = torch.tensor(x[1:input_dimension]; device)
-        py_value = torch_model(py_x).detach().cpu().numpy()
-        value = PythonCall.pyconvert(Vector, py_value)
+        value = _pyconvert(Vector, torch_model(py_x))
         for i in 1:output_dimension
             ret[i] = value[i] - x[input_dimension+i]
         end
@@ -70,10 +72,10 @@ function _build_set_and_callback(
     for i in 1:output_dimension
         push!(jacobian_structure, (i, input_dimension + i))
     end
+    J = torch.func.jacrev(torch_model)
     function eval_jacobian(ret::AbstractVector, x::AbstractVector)
         py_x = torch.tensor(x[1:input_dimension]; device)
-        py_value = J(py_x).detach().cpu().numpy()
-        value = PythonCall.pyconvert(Matrix, py_value)
+        value = _pyconvert(Matrix, J(py_x))
         for i in 1:length(value)
             ret[i] = value[i]             # ∇f(x)
         end
@@ -119,8 +121,7 @@ function _build_set_and_callback(
         # torch.nn.Linear stores the weight matrix transposed.
         py_μ = torch.tensor([μ]; device)
         μ_layer.weight = torch.nn.Parameter(py_μ; requires_grad = false)
-        py_hessian = ∇²L(py_x)[0].detach().cpu().numpy()
-        hessian = PythonCall.pyconvert(Array, py_hessian)
+        hessian = _pyconvert(Matrix, ∇²L(py_x)[0])
         k = 0
         for j in 1:input_dimension
             for i in 1:j

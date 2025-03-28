@@ -29,7 +29,7 @@ function plot_image(instance::NamedTuple)
     return plot_image(instance.features; title = &quot;Label = $(instance.targets)&quot;)
 end
 
-Plots.plot([plot_image(train_data[i]) for i in 1:6]...; layout = (2, 3))</code></pre><img src="1f5e4748.svg" alt="Example block output"/><h2 id="Training"><a class="docs-heading-anchor" href="#Training">Training</a><a id="Training-1"></a><a class="docs-heading-anchor-permalink" href="#Training" title="Permalink"></a></h2><p>We use a simple neural network with one hidden layer and a sigmoid activation function. (There are better performing networks; try experimenting.)</p><pre><code class="language-julia hljs">predictor = Flux.Chain(
+Plots.plot([plot_image(train_data[i]) for i in 1:6]...; layout = (2, 3))</code></pre><img src="2880cb7b.svg" alt="Example block output"/><h2 id="Training"><a class="docs-heading-anchor" href="#Training">Training</a><a id="Training-1"></a><a class="docs-heading-anchor-permalink" href="#Training" title="Permalink"></a></h2><p>We use a simple neural network with one hidden layer and a sigmoid activation function. (There are better performing networks; try experimenting.)</p><pre><code class="language-julia hljs">predictor = Flux.Chain(
     Flux.Dense(28^2 =&gt; 32, Flux.sigmoid),
     Flux.Dense(32 =&gt; 10),
     Flux.softmax,
@@ -49,8 +49,8 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
     println(&quot;Accuracy = $p %&quot;)
     return
 end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">score_model (generic function with 1 method)</code></pre><p>The accuracy of our model is only around 10% before training:</p><pre><code class="language-julia hljs">score_model(predictor, train_data)
-score_model(predictor, test_data)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Accuracy = 9.44 %
-Accuracy = 9.63 %</code></pre><p>Let&#39;s improve that by training our model.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>It is not the purpose of this tutorial to explain how Flux works; see the documentation at <a href="https://fluxml.ai">https://fluxml.ai</a> for more details. Changing the number of epochs or the learning rate can improve the loss.</p></div></div><pre><code class="language-julia hljs">begin
+score_model(predictor, test_data)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Accuracy = 12.69 %
+Accuracy = 12.88 %</code></pre><p>Let&#39;s improve that by training our model.</p><div class="admonition is-info"><header class="admonition-header">Note</header><div class="admonition-body"><p>It is not the purpose of this tutorial to explain how Flux works; see the documentation at <a href="https://fluxml.ai">https://fluxml.ai</a> for more details. Changing the number of epochs or the learning rate can improve the loss.</p></div></div><pre><code class="language-julia hljs">begin
     train_loader = data_loader(train_data; batchsize = 256, shuffle = true)
     optimizer_state = Flux.setup(Flux.Adam(3e-4), predictor)
     for epoch in 1:30
@@ -66,47 +66,47 @@ Accuracy = 9.63 %</code></pre><p>Let&#39;s improve that by training our model.</
         print(&quot;Epoch $epoch: loss = $loss\t&quot;)
         score_model(predictor, test_data)
     end
-end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Epoch 1: loss = 1.7263	Accuracy = 77.71 %
-Epoch 2: loss = 1.1189	Accuracy = 83.54 %
-Epoch 3: loss = 0.8367	Accuracy = 86.32 %
-Epoch 4: loss = 0.6725	Accuracy = 88.24 %
-Epoch 5: loss = 0.5681	Accuracy = 89.11 %
-Epoch 6: loss = 0.4965	Accuracy = 89.92 %
-Epoch 7: loss = 0.4453	Accuracy = 90.37 %
-Epoch 8: loss = 0.4073	Accuracy = 90.81 %
-Epoch 9: loss = 0.3777	Accuracy = 91.24 %
-Epoch 10: loss = 0.3539	Accuracy = 91.64 %
-Epoch 11: loss = 0.3344	Accuracy = 91.97 %
-Epoch 12: loss = 0.3187	Accuracy = 92.09 %
-Epoch 13: loss = 0.3044	Accuracy = 92.25 %
-Epoch 14: loss = 0.2925	Accuracy = 92.42 %
-Epoch 15: loss = 0.2817	Accuracy = 92.58 %
-Epoch 16: loss = 0.2725	Accuracy = 92.67 %
-Epoch 17: loss = 0.2635	Accuracy = 92.86 %
-Epoch 18: loss = 0.2558	Accuracy = 92.96 %
-Epoch 19: loss = 0.2486	Accuracy = 93.14 %
-Epoch 20: loss = 0.2417	Accuracy = 93.26 %
-Epoch 21: loss = 0.2355	Accuracy = 93.38 %
-Epoch 22: loss = 0.2294	Accuracy = 93.48 %
-Epoch 23: loss = 0.2243	Accuracy = 93.62 %
-Epoch 24: loss = 0.2187	Accuracy = 93.79 %
-Epoch 25: loss = 0.2142	Accuracy = 93.87 %
-Epoch 26: loss = 0.2098	Accuracy = 93.91 %
-Epoch 27: loss = 0.2051	Accuracy = 94.03 %
-Epoch 28: loss = 0.2008	Accuracy = 94.1 %
-Epoch 29: loss = 0.1971	Accuracy = 94.17 %
-Epoch 30: loss = 0.1932	Accuracy = 94.27 %</code></pre><p>Here are the first eight predictions of the test data:</p><pre><code class="language-julia hljs">function plot_image(predictor, x::Matrix)
+end</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Epoch 1: loss = 1.8151	Accuracy = 76.87 %
+Epoch 2: loss = 1.1375	Accuracy = 84.24 %
+Epoch 3: loss = 0.8262	Accuracy = 86.9 %
+Epoch 4: loss = 0.6549	Accuracy = 88.53 %
+Epoch 5: loss = 0.55	Accuracy = 89.39 %
+Epoch 6: loss = 0.4804	Accuracy = 89.91 %
+Epoch 7: loss = 0.4312	Accuracy = 90.51 %
+Epoch 8: loss = 0.3952	Accuracy = 90.93 %
+Epoch 9: loss = 0.3667	Accuracy = 91.28 %
+Epoch 10: loss = 0.3443	Accuracy = 91.59 %
+Epoch 11: loss = 0.3257	Accuracy = 91.77 %
+Epoch 12: loss = 0.3101	Accuracy = 92.12 %
+Epoch 13: loss = 0.2967	Accuracy = 92.47 %
+Epoch 14: loss = 0.2849	Accuracy = 92.53 %
+Epoch 15: loss = 0.2747	Accuracy = 92.73 %
+Epoch 16: loss = 0.2655	Accuracy = 93.04 %
+Epoch 17: loss = 0.257	Accuracy = 93.14 %
+Epoch 18: loss = 0.2494	Accuracy = 93.26 %
+Epoch 19: loss = 0.2422	Accuracy = 93.34 %
+Epoch 20: loss = 0.236	Accuracy = 93.4 %
+Epoch 21: loss = 0.2299	Accuracy = 93.6 %
+Epoch 22: loss = 0.2246	Accuracy = 93.6 %
+Epoch 23: loss = 0.2198	Accuracy = 93.7 %
+Epoch 24: loss = 0.2146	Accuracy = 93.84 %
+Epoch 25: loss = 0.21	Accuracy = 93.84 %
+Epoch 26: loss = 0.2057	Accuracy = 93.96 %
+Epoch 27: loss = 0.2019	Accuracy = 94.0 %
+Epoch 28: loss = 0.1978	Accuracy = 94.13 %
+Epoch 29: loss = 0.1942	Accuracy = 94.18 %
+Epoch 30: loss = 0.1911	Accuracy = 94.22 %</code></pre><p>Here are the first eight predictions of the test data:</p><pre><code class="language-julia hljs">function plot_image(predictor, x::Matrix)
     score, index = findmax(predictor(vec(x)))
     title = &quot;Predicted: $(index - 1) ($(round(Int, 100 * score))%)&quot;
     return plot_image(x; title)
 end
 
 plots = [plot_image(predictor, test_data[i].features) for i in 1:8]
-Plots.plot(plots...; size = (1200, 600), layout = (2, 4))</code></pre><img src="1b626f13.svg" alt="Example block output"/><p>We can also look at the best and worst four predictions:</p><pre><code class="language-julia hljs">x, y = only(data_loader(test_data; batchsize = length(test_data)))
+Plots.plot(plots...; size = (1200, 600), layout = (2, 4))</code></pre><img src="4cf6f296.svg" alt="Example block output"/><p>We can also look at the best and worst four predictions:</p><pre><code class="language-julia hljs">x, y = only(data_loader(test_data; batchsize = length(test_data)))
 losses = Flux.crossentropy(predictor(x), y; agg = identity)
 indices = sortperm(losses; dims = 2)[[1:4; end-3:end]]
 plots = [plot_image(predictor, test_data[i].features) for i in indices]
-Plots.plot(plots...; size = (1200, 600), layout = (2, 4))</code></pre><img src="fa3f8dd1.svg" alt="Example block output"/><p>There are still some fairly bad mistakes. Can you change the model or training parameters improve to improve things?</p><h2 id="JuMP"><a class="docs-heading-anchor" href="#JuMP">JuMP</a><a id="JuMP-1"></a><a class="docs-heading-anchor-permalink" href="#JuMP" title="Permalink"></a></h2><p>Now that we have a trained machine learning model, we can embed it in a JuMP model.</p><p>Here&#39;s a function which takes a test case and returns an example that maximizes the probability of the adversarial example.</p><pre><code class="language-julia hljs">function find_adversarial_image(test_case; adversary_label, δ = 0.05)
+Plots.plot(plots...; size = (1200, 600), layout = (2, 4))</code></pre><img src="131f9575.svg" alt="Example block output"/><p>There are still some fairly bad mistakes. Can you change the model or training parameters improve to improve things?</p><h2 id="JuMP"><a class="docs-heading-anchor" href="#JuMP">JuMP</a><a id="JuMP-1"></a><a class="docs-heading-anchor-permalink" href="#JuMP" title="Permalink"></a></h2><p>Now that we have a trained machine learning model, we can embed it in a JuMP model.</p><p>Here&#39;s a function which takes a test case and returns an example that maximizes the probability of the adversarial example.</p><pre><code class="language-julia hljs">function find_adversarial_image(test_case; adversary_label, δ = 0.05)
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, 0 &lt;= x[1:28, 1:28] &lt;= 1)
@@ -122,4 +122,4 @@ end</code></pre><pre class="documenter-example-output"><code class="nohighlight 
 Plots.plot(
     plot_image(predictor, test_data[3].features),
     plot_image(predictor, Float32.(x_adversary)),
-)</code></pre><img src="6f65210f.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../decision_trees/">« Classification problems with DecisionTree.jl</a><a class="docs-footer-nextpage" href="../mnist_lux/">Adversarial machine learning with Lux.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.9.0 on <span class="colophon-date" title="Friday 28 March 2025 01:46">Friday 28 March 2025</span>. Using Julia version 1.11.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+)</code></pre><img src="e84f6813.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../decision_trees/">« Classification problems with DecisionTree.jl</a><a class="docs-footer-nextpage" href="../mnist_lux/">Adversarial machine learning with Lux.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.9.0 on <span class="colophon-date" title="Friday 28 March 2025 01:52">Friday 28 March 2025</span>. Using Julia version 1.11.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

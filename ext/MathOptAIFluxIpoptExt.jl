@@ -16,6 +16,9 @@ function MathOptAI.add_predictor(
     predictor::MathOptAI.VectorNonlinearOracle{<:Flux.Chain},
     x::Vector,
 )
+    if !isdefined(Ipopt, :_VectorNonlinearOracle)
+        error("This version of Ipopt does not support `_VectorNonlinearOracle`")
+    end
     set = _build_set(predictor.predictor, length(x), predictor.hessian)
     y = JuMP.@variable(model, [1:set.output_dimension])
     con = JuMP.@constraint(model, [x; y] in set)

@@ -16,9 +16,6 @@ function MathOptAI.add_predictor(
     predictor::MathOptAI.VectorNonlinearOracle{MathOptAI.PytorchModel},
     x::Vector,
 )
-    if !isdefined(Ipopt, :_VectorNonlinearOracle)
-        error("This version of Ipopt does not support `_VectorNonlinearOracle`")
-    end
     set = _build_set(
         predictor.predictor.filename,
         length(x),

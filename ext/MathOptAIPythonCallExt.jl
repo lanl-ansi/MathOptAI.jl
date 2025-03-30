@@ -30,6 +30,7 @@ Add a trained neural network from PyTorch via PythonCall.jl to `model`.
  * `nn.ReLU`
  * `nn.Sequential`
  * `nn.Sigmoid`
+ * `nn.Softmax`
  * `nn.Softplus`
  * `nn.Tanh`
 
@@ -38,7 +39,8 @@ Add a trained neural network from PyTorch via PythonCall.jl to `model`.
  * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftPlus`, and `:Tanh`.
+   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftMax`, `:SoftPlus`, and
+   `:Tanh`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `torch.func.jacrev`.
  * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
@@ -79,6 +81,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `nn.ReLU`
  * `nn.Sequential`
  * `nn.Sigmoid`
+ * `nn.Softmax`
  * `nn.Softplus`
  * `nn.Tanh`
 
@@ -87,7 +90,8 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftPlus`, and `:Tanh`.
+   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftMax`, `:SoftPlus`, and
+   `:Tanh`.
  * `gray_box`: if `true`, the neural network is added as a user-defined
    nonlinear operator, with gradients provided by `torch.func.jacrev`.
  * `gray_box_hessian`: if `true`, the gray box additionally computes the Hessian
@@ -133,7 +137,7 @@ function _predictor(nn, layer, config)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sigmoid))
         return get(config, :Sigmoid, MathOptAI.Sigmoid())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softmax))
-        return get(config, :Softmax, MathOptAI.SoftMax())
+        return get(config, :SoftMax, MathOptAI.SoftMax())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softplus))
         beta = PythonCall.pyconvert(Float64, layer.beta)
         return get(config, :SoftPlus, MathOptAI.SoftPlus(; beta = beta))

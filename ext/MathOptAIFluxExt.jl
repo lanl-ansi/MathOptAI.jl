@@ -52,7 +52,8 @@ Add a trained neural network from Flux.jl to `model`.
 
  * `vector_nonlinear_oracle`: if `true`, the neural network is added using
    `Ipopt._VectorNonlinearOracle`. This is an experimental feature that may
-   offer better performance than `gray_box`.
+   offer better performance than `gray_box`. To use this feature, you MUST use
+   Ipopt as the optimizer.
 
  * `hessian`: if `true`, the `gray_box` and `vector_nonlinear_oracle`
    formulations compute the Hessian of the output using `Flux.hessian`.
@@ -148,7 +149,8 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
 
  * `vector_nonlinear_oracle`: if `true`, the neural network is added using
    `Ipopt._VectorNonlinearOracle`. This is an experimental feature that may
-   offer better performance than `gray_box`.
+   offer better performance than `gray_box`. To use this feature, you MUST use
+   Ipopt as the optimizer.
 
  * `hessian`: if `true`, the `gray_box` and `vector_nonlinear_oracle`
    formulations compute the Hessian of the output using `Flux.hessian`.

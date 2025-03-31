@@ -35,5 +35,7 @@ function add_predictor(
     predictor::ReducedSpace{<:VectorNonlinearOracle},
     x::Vector;
 )
-    error("cannot construct reduced-space formulation of VectorNonlinearOracle")
+    error(
+        "cannot construct reduced-space formulation of VectorNonlinearOracle",
+    )
 end

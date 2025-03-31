@@ -33,8 +33,9 @@ end
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::ReducedSpace{<:VectorNonlinearOracle},
-    x::Vector;
+    x::Vector,
 )
-    error("cannot construct reduced-space formulation of VectorNonlinearOracle")
-    return
+    return error(
+        "cannot construct reduced-space formulation of VectorNonlinearOracle",
+    )
 end

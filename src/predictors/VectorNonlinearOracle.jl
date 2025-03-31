@@ -38,4 +38,5 @@ function add_predictor(
     error(
         "cannot construct reduced-space formulation of VectorNonlinearOracle",
     )
+    return
 end

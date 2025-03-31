@@ -29,3 +29,11 @@ struct VectorNonlinearOracle{P} <: AbstractPredictor
         return new{P}(predictor, device, hessian)
     end
 end
+
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::ReducedSpace{<:VectorNonlinearOracle},
+    x::Vector;
+)
+    error("cannot construct reduced-space formulation of VectorNonlinearOracle")
+end

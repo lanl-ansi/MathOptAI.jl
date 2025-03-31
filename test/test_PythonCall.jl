@@ -552,6 +552,20 @@ function test_vector_nonlinear_oracle_errors()
             vector_nonlinear_oracle = true,
         ),
     )
+    model = Model()
+    x = zeros(10)
+    @test_throws(
+        ErrorException(
+            "cannot construct reduced-space formulation of VectorNonlinearOracle",
+        ),
+        MathOptAI.add_predictor(
+            model,
+            MathOptAI.PytorchModel("model.pt"),
+            x;
+            reduced_space = true,
+            vector_nonlinear_oracle = true,
+        ),
+    )
     return
 end
 

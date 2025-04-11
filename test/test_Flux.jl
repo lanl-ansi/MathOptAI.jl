@@ -361,7 +361,7 @@ function test_vector_nonlinear_oracle_sigmoid_2()
     return
 end
 
-function test_vector_nonlinear_oracle_sigmoid_2()
+function test_vector_nonlinear_oracle_sigmoid_reduced_space_error()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model()
     @variable(model, x[i = 1:3] == i)

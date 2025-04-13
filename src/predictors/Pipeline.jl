@@ -42,7 +42,7 @@ Affine(A, b) [input: 2, output: 1]
 │ └ moai_Affine[1]
 └ constraints [1]
   └ x[1] + 2 x[2] - moai_Affine[1] = 0
-ReLUQuadratic()
+ReLUQuadratic(nothing)
 ├ variables [2]
 │ ├ moai_ReLU[1]
 │ └ moai_z[1]

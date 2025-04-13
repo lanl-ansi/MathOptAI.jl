@@ -303,10 +303,12 @@ ReLUQuadratic()
 struct ReLUQuadratic <: AbstractPredictor
     relax_equality::Bool
     relaxation_parameter::Float64
-    ReLUQuadratic(;
+    function ReLUQuadratic(;
         relax_equality::Bool = false,
         relaxation_parameter::Float64 = 0.0,
-    ) = new(relax_equality, relaxation_parameter)
+    )
+        return new(relax_equality, relaxation_parameter)
+    end
 end
 
 function add_predictor(

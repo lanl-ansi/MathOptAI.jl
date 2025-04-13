@@ -244,7 +244,7 @@ function add_predictor(
 end
 
 """
-    ReLUQuadratic() <: AbstractPredictor
+    ReLUQuadratic(; relaxation_parameter = nothing) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
@@ -269,7 +269,7 @@ julia> model = Model();
 julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.ReLUQuadratic()
-ReLUQuadratic()
+ReLUQuadratic(nothing)
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
@@ -279,7 +279,7 @@ julia> y
  moai_ReLU[2]
 
 julia> formulation
-ReLUQuadratic()
+ReLUQuadratic(nothing)
 ├ variables [4]
 │ ├ moai_ReLU[1]
 │ ├ moai_ReLU[2]

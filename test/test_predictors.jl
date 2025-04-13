@@ -237,6 +237,31 @@ function test_ReLU_Quadratic()
     return
 end
 
+function test_ReLU_Quadratic_relaxed()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = MathOptAI.ReLUQuadratic(;
+        relax_equality = true,
+        relaxation_parameter = 1e-4,
+    )
+    y, formulation = MathOptAI.add_predictor(model, f, x)
+    # Maximize sum of all variables to exercise the ReLU relaxation
+    @objective(model, Max, sum(formulation.variables))
+    @test length(y) == 2
+    @test num_variables(model) == 6
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @test num_constraints(model, QuadExpr, MOI.LessThan{Float64}) == 2
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    # We do not satisfy equality to a tight tolerance
+    @test !isapprox(value.(y), [0.0, 2.0]; atol = 1e-6)
+    # But we satisfy equality to a loose tolerance
+    @test isapprox(value.(y), [0.0, 2.0]; atol = 1e-2)
+    return
+end
+
 function test_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

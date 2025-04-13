@@ -300,7 +300,14 @@ ReLUQuadratic()
   └ moai_ReLU[2]*moai_z[2] = 0
 ```
 """
-struct ReLUQuadratic <: AbstractPredictor end
+struct ReLUQuadratic <: AbstractPredictor
+    relax_equality::Bool
+    relaxation_parameter::Float64
+    ReLUQuadratic(;
+        relax_equality::Bool = false,
+        relaxation_parameter::Float64 = 0.0,
+    ) = new(relax_equality, relaxation_parameter)
+end
 
 function add_predictor(
     model::JuMP.AbstractModel,
@@ -314,6 +321,11 @@ function add_predictor(
     z = JuMP.@variable(model, [1:m], base_name = "moai_z")
     _set_bounds_if_finite.(Ref(cons), z, 0, max.(0, -first.(bounds)))
     append!(cons, JuMP.@constraint(model, x .== y - z))
-    append!(cons, JuMP.@constraint(model, y .* z .== 0))
+    if predictor.relax_equality
+        ϵ = predictor.relaxation_parameter
+        append!(cons, JuMP.@constraint(model, y .* z .<= ϵ))
+    else
+        append!(cons, JuMP.@constraint(model, y .* z .== 0))
+    end
     return y, Formulation(predictor, Any[y; z], cons)
 end

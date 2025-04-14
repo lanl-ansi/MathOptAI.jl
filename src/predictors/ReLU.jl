@@ -314,6 +314,7 @@ struct ReLUQuadratic <: AbstractPredictor
     function ReLUQuadratic(;
         relaxation_parameter::Union{Nothing,Float64} = nothing,
     )
+        @assert something(relaxation_parameter, 0.0) >= 0.0
         return new(relaxation_parameter)
     end
 end

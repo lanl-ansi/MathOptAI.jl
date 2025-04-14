@@ -258,6 +258,15 @@ y \\cdot z = 0 \\\\
 y, z \\ge 0
 \\end{aligned}
 ```
+If `relaxation_parameter` is set to a value `ϵ`, the constraints become:
+```math
+\\begin{aligned}
+x = y - z \\\\
+y \\cdot z \\leq \\epsilon \\\\
+y, z \\ge 0
+\\end{aligned}
+```
+
 
 ## Example
 

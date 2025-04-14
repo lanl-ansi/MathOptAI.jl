@@ -244,7 +244,7 @@ function add_predictor(
 end
 
 """
-    ReLUQuadratic() <: AbstractPredictor
+    ReLUQuadratic(; relaxation_parameter = nothing) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
@@ -258,6 +258,15 @@ y \\cdot z = 0 \\\\
 y, z \\ge 0
 \\end{aligned}
 ```
+If `relaxation_parameter` is set to a value `ϵ`, the constraints become:
+```math
+\\begin{aligned}
+x = y - z \\\\
+y \\cdot z \\leq \\epsilon \\\\
+y, z \\ge 0
+\\end{aligned}
+```
+
 
 ## Example
 
@@ -269,7 +278,7 @@ julia> model = Model();
 julia> @variable(model, -1 <= x[i in 1:2] <= i);
 
 julia> f = MathOptAI.ReLUQuadratic()
-ReLUQuadratic()
+ReLUQuadratic(nothing)
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
@@ -279,7 +288,7 @@ julia> y
  moai_ReLU[2]
 
 julia> formulation
-ReLUQuadratic()
+ReLUQuadratic(nothing)
 ├ variables [4]
 │ ├ moai_ReLU[1]
 │ ├ moai_ReLU[2]
@@ -300,7 +309,15 @@ ReLUQuadratic()
   └ moai_ReLU[2]*moai_z[2] = 0
 ```
 """
-struct ReLUQuadratic <: AbstractPredictor end
+struct ReLUQuadratic <: AbstractPredictor
+    relaxation_parameter::Union{Nothing,Float64}
+    function ReLUQuadratic(;
+        relaxation_parameter::Union{Nothing,Float64} = nothing,
+    )
+        @assert something(relaxation_parameter, 0.0) >= 0.0
+        return new(relaxation_parameter)
+    end
+end
 
 function add_predictor(
     model::JuMP.AbstractModel,
@@ -314,6 +331,11 @@ function add_predictor(
     z = JuMP.@variable(model, [1:m], base_name = "moai_z")
     _set_bounds_if_finite.(Ref(cons), z, 0, max.(0, -first.(bounds)))
     append!(cons, JuMP.@constraint(model, x .== y - z))
-    append!(cons, JuMP.@constraint(model, y .* z .== 0))
+    if predictor.relaxation_parameter === nothing
+        append!(cons, JuMP.@constraint(model, y .* z .== 0))
+    else
+        ϵ = predictor.relaxation_parameter
+        append!(cons, JuMP.@constraint(model, y .* z .<= ϵ))
+    end
     return y, Formulation(predictor, Any[y; z], cons)
 end

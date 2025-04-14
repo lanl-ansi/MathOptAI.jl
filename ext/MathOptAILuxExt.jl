@@ -148,7 +148,7 @@ julia> MathOptAI.build_predictor(
        )
 Pipeline with layers:
  * Affine(A, b) [input: 1, output: 16]
- * ReLUQuadratic()
+ * ReLUQuadratic(nothing)
  * Affine(A, b) [input: 16, output: 1]
 ```
 """

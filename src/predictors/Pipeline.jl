@@ -28,7 +28,7 @@ julia> f = MathOptAI.Pipeline(
        )
 Pipeline with layers:
  * Affine(A, b) [input: 2, output: 1]
- * ReLUQuadratic()
+ * ReLUQuadratic(nothing)
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
@@ -42,7 +42,7 @@ Affine(A, b) [input: 2, output: 1]
 │ └ moai_Affine[1]
 └ constraints [1]
   └ x[1] + 2 x[2] - moai_Affine[1] = 0
-ReLUQuadratic()
+ReLUQuadratic(nothing)
 ├ variables [2]
 │ ├ moai_ReLU[1]
 │ └ moai_z[1]

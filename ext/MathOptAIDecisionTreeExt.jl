@@ -13,11 +13,15 @@ import MathOptAI
 """
     MathOptAI.add_predictor(
         model::JuMP.AbstractModel,
-        predictor::Union{DecisionTree.Root,DecisionTree.DecisionTreeClassifier},
+        predictor::Union{
+            DecisionTree.Root,
+            DecisionTree.DecisionTreeClassifier,
+            DecisionTree.Ensemble,
+        },
         x::Vector,
     )
 
-Add a binary decision tree from DecisionTree.jl to `model`.
+Add a binary decision tree (or random forest) from DecisionTree.jl to `model`.
 
 ## Example
 
@@ -52,7 +56,11 @@ julia> y
 """
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
-    predictor::Union{DecisionTree.Root,DecisionTree.DecisionTreeClassifier},
+    predictor::Union{
+        DecisionTree.Root,
+        DecisionTree.DecisionTreeClassifier,
+        DecisionTree.Ensemble,
+    },
     x::Vector,
 )
     inner_predictor = MathOptAI.build_predictor(predictor)
@@ -107,5 +115,11 @@ function MathOptAI.build_predictor(node::DecisionTree.Node{K,V}) where {K,V}
 end
 
 MathOptAI.build_predictor(node::DecisionTree.Leaf) = node.majority
+
+function MathOptAI.build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
+    trees = MathOptAI.build_predictor.(node.trees)
+    weights = fill(1 / length(trees), length(trees))
+    return MathOptAI.LinearCombination(trees, weights)
+end
 
 end  # module

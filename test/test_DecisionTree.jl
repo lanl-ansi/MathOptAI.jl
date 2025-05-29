@@ -72,6 +72,34 @@ function test_DecisionTreeClassifier()
     return
 end
 
+function test_DecisionTree_RandomForest()
+    truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
+    rng = Random.MersenneTwister(1234)
+    features = rand(rng, 100, 2)
+    labels = truth.(Vector.(eachrow(features)))
+    ml_model = DecisionTree.build_forest(labels, features)
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, 0 <= x[1:2] <= 1)
+    y, formulation = MathOptAI.add_predictor(model, ml_model, x)
+    @constraint(model, c_rhs, x .== 0.0)
+    @objective(model, Min, sum(y))
+    tree_y = filter!(mapreduce(f -> f.variables, vcat, formulation.layers)) do v
+        return occursin("_value", name(v))
+    end
+    for _ in 1:10
+        xi = rand(rng, 2)
+        if minimum(abs.(xi .- [0.5, 0.3])) < 1e-2
+            continue  # Skip points near kink
+        end
+        set_normalized_rhs.(c_rhs, xi)
+        optimize!(model)
+        tree_values = value.(tree_y)
+        @test ≈(value(only(y)), sum(tree_values / length(tree_y)); atol = 1e-6)
+    end
+    return
+end
+
 end  # module
 
 TestDecisionTreeExt.runtests()

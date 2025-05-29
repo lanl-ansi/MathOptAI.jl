@@ -115,6 +115,39 @@ function test_Quantile()
     return
 end
 
+function test_RandomForest()
+    #     x <= 0
+    #      /  \
+    #   -1     x <= 1
+    #           /  \
+    #         0      1
+    rhs = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 1.0, 0, 1)
+    tree_1 = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 0.0, -1, rhs)
+    #        x <= 0.9
+    #        /      \
+    #    x <= -0.1    1
+    #     /  \
+    #  -1     0
+    lhs = MathOptAI.BinaryDecisionTree{Float64,Int}(1, -0.1, -1, 0)
+    tree_2 = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 0.9, lhs, 1)
+    predictor = MathOptAI.LinearCombination([tree_1, tree_2], [0.5, 0.5])
+    @test sprint(show, predictor) == """
+    LinearCombination
+    ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+    └ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]"""
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, -3 <= x <= 5)
+    y, formulation = MathOptAI.add_predictor(model, predictor, [x])
+    @constraint(model, c_rhs, x == 0.0)
+    for (xi, yi) in (-0.4 => -1, -0.05 => -0.5, 0.4 => 0, 0.95 => 0.5, 1.3 => 1)
+        set_normalized_rhs(c_rhs, xi)
+        optimize!(model)
+        @test ≈(value(only(y)), yi; atol = 1e-6)
+    end
+    return
+end
+
 function test_ReLU_direct()
     model = Model(Ipopt.Optimizer)
     set_silent(model)

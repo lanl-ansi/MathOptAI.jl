@@ -51,6 +51,11 @@ BinaryDecisionTree
 GrayBox
 ```
 
+## `LinearCombination`
+```@docs
+LinearCombination
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

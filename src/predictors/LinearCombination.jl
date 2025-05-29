@@ -35,7 +35,6 @@ julia> tree_1 = MathOptAI.BinaryDecisionTree(1, 0.0, -1, rhs);
 julia> tree_2 = MathOptAI.BinaryDecisionTree(1, 0.9, lhs, 1);
 
 julia> random_forest = MathOptAI.LinearCombination([tree_1, tree_2], [0.5, 0.5])
-
 LinearCombination
 ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 └ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]

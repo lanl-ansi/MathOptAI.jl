@@ -84,8 +84,8 @@ function test_DecisionTree_RandomForest()
     y, formulation = MathOptAI.add_predictor(model, ml_model, x)
     @constraint(model, c_rhs, x .== 0.0)
     @objective(model, Min, sum(y))
-    tree_y = filter!(formulation.variables) do xi
-        return occursin("_value", name(xi))
+    tree_y = filter!(mapreduce(f -> f.variables, vcat, formulation.layers)) do v
+        return occursin("_value", name(v))
     end
     for _ in 1:10
         xi = rand(rng, 2)

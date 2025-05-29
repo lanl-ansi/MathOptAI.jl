@@ -51,6 +51,11 @@ BinaryDecisionTree
 GrayBox
 ```
 
+## `LinearCombination`
+```@docs
+LinearCombination
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline
@@ -64,11 +69,6 @@ PytorchModel
 ## `Quantile`
 ```@docs
 Quantile
-```
-
-## `RandomForest`
-```@docs
-RandomForest
 ```
 
 ## `ReducedSpace`

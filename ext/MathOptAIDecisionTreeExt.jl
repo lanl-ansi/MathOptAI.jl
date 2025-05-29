@@ -117,7 +117,9 @@ end
 MathOptAI.build_predictor(node::DecisionTree.Leaf) = node.majority
 
 function MathOptAI.build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
-    return MathOptAI.RandomForest{K,V}(MathOptAI.build_predictor.(node.trees))
+    trees = MathOptAI.build_predictor.(node.trees)
+    weights = fill(1 / length(trees), length(trees))
+    return MathOptAI.LinearCombination(trees, weights)
 end
 
 end  # module

@@ -66,6 +66,11 @@ PytorchModel
 Quantile
 ```
 
+## `RandomForest`
+```@docs
+RandomForest
+```
+
 ## `ReducedSpace`
 ```@docs
 ReducedSpace

@@ -21,6 +21,7 @@ The following predictors are supported. See their docstrings for details:
 | [`GrayBox`](@ref)  |  $f(x)$                                | $M \rightarrow N$   |
 | [`Pipeline`](@ref) |  $f(x) = (l_1 \circ \ldots \circ l_N)(x)$ | $M \rightarrow N$ |
 | [`Quantile`](@ref) |  The quantiles of a distribution       | $M \rightarrow N$   |
+| [`RandomForest`](@ref) | A random forest                    | $M \rightarrow 1$   |
 | [`ReLU`](@ref)     |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |
 | [`ReLUBigM`](@ref) |  $f(x) = \max.(0, x)$                  | $M \rightarrow M$   |
 | [`ReLUQuadratic`](@ref) |  $f(x) = \max.(0, x)$             | $M \rightarrow M$   |

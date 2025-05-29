@@ -117,9 +117,7 @@ end
 MathOptAI.build_predictor(node::DecisionTree.Leaf) = node.majority
 
 function MathOptAI.build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
-    return MathOptAI.RandomForest{K,V}(
-        [MathOptAI.build_predictor(t) for t in node.trees]
-    )
+    return MathOptAI.RandomForest{K,V}(MathOptAI.build_predictor.(node.trees))
 end
 
 end  # module

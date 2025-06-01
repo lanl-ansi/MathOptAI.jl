@@ -41,6 +41,11 @@ build_predictor(predictor::AbstractPredictor; kwargs...)
 Affine
 ```
 
+## `AffineCombination`
+```@docs
+AffineCombination
+```
+
 ## `BinaryDecisionTree`
 ```@docs
 BinaryDecisionTree
@@ -49,11 +54,6 @@ BinaryDecisionTree
 ## `GrayBox`
 ```@docs
 GrayBox
-```
-
-## `LinearCombination`
-```@docs
-LinearCombination
 ```
 
 ## `Pipeline`

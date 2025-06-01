@@ -141,16 +141,42 @@ Formulation
 PipelineFormulation
 ```
 
-## Extensions
-
+## `AbstractGPs`
 ```@autodocs
-Modules = [
-    Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt),
-    Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
-    Base.get_extension(MathOptAI, :MathOptAIFluxExt),
-    Base.get_extension(MathOptAI, :MathOptAIGLMExt),
-    Base.get_extension(MathOptAI, :MathOptAILuxExt),
-    Base.get_extension(MathOptAI, :MathOptAIPythonCallExt),
-    Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt),
-]
+Modules = [Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt)]
+```
+
+## `DecisionTree`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt)
+```
+
+## `EvoTrees`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAIEvoTreesExt)
+```
+
+## `Flux`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAIFluxExt)
+```
+
+## `GLM`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAIGLMExt)
+```
+
+## `Lux`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAILuxExt)
+```
+
+## `PythonCall`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAIPythonCallExt)
+```
+
+## `StatsModels`
+```@autodocs
+Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt)
 ```

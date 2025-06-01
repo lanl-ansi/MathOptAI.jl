@@ -24,6 +24,7 @@ function runtests()
 end
 
 function test_EvoTreeRegressor()
+    rng = Random.MersenneTwister(1234)
     truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
     x_train = abs.(sin.((1:10) .* (3:4)'))
     y_train = truth.(Vector.(eachrow(x_train)))

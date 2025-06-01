@@ -34,7 +34,7 @@ julia> size(x_train)
 
 julia> y_train = truth.(Vector.(eachrow(x_train)));
 
-julia> config = EvoTrees.EvoTreeClassifier(; nrounds = 3);
+julia> config = EvoTrees.EvoTreeRegressor(; nrounds = 3);
 
 julia> predictor = EvoTrees.fit(config; x_train, y_train);
 
@@ -51,9 +51,9 @@ julia> y
 """
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
-    predictor::EvoTrees.EvoTree,
+    predictor::EvoTrees.EvoTree{L,1},
     x::Vector,
-)
+) where {L}
     inner_predictor = MathOptAI.build_predictor(predictor)
     return MathOptAI.add_predictor(model, inner_predictor, x)
 end
@@ -79,7 +79,7 @@ julia> size(x_train)
 
 julia> y_train = truth.(Vector.(eachrow(x_train)));
 
-julia> config = EvoTrees.EvoTreeClassifier(; nrounds = 3);
+julia> config = EvoTrees.EvoTreeRegressor(; nrounds = 3);
 
 julia> tree = EvoTrees.fit(config; x_train, y_train);
 
@@ -88,7 +88,7 @@ AffineCombination
 ├ 1.0 * BinaryDecisionTree{Float64,Float64} [leaves=3, depth=2]
 ├ 1.0 * BinaryDecisionTree{Float64,Float64} [leaves=3, depth=2]
 ├ 1.0 * BinaryDecisionTree{Float64,Float64} [leaves=3, depth=2]
-└ 1.0 * [-0.5108256340026855]
+└ 1.0 * [2.0]
 ```
 """
 function _to_tree(predictor::EvoTrees.EvoTree, tree::EvoTrees.Tree, i::Int = 1)
@@ -103,7 +103,7 @@ function _to_tree(predictor::EvoTrees.EvoTree, tree::EvoTrees.Tree, i::Int = 1)
     )
 end
 
-function MathOptAI.build_predictor(predictor::EvoTrees.EvoTree)
+function MathOptAI.build_predictor(predictor::EvoTrees.EvoTree{L,1}) where {L}
     trees = MathOptAI.AbstractPredictor[]
     constant = 0.0
     for tree in predictor.trees

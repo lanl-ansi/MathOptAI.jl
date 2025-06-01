@@ -49,4 +49,4 @@ end
 
 end  # module
 
-TestDecisionTreeExt.runtests()
+TestEvoTreesExt.runtests()

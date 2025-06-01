@@ -8,6 +8,7 @@ import AbstractGPs
 import DataFrames
 import DecisionTree
 import Documenter
+import EvoTrees
 import Flux
 import GLM
 import Literate
@@ -74,6 +75,7 @@ Documenter.makedocs(;
             "manual/predictors.md",
             "manual/AbstractGPs.md",
             "manual/DecisionTree.md",
+            "manual/EvoTrees.md",
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",
@@ -93,6 +95,7 @@ Documenter.makedocs(;
     modules = [
         MathOptAI,
         Base.get_extension(MathOptAI, :MathOptAIAbstractGPsExt),
+        Base.get_extension(MathOptAI, :MathOptAIEvoTreesExt),
         Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt),
         Base.get_extension(MathOptAI, :MathOptAIFluxExt),
         Base.get_extension(MathOptAI, :MathOptAIGLMExt),

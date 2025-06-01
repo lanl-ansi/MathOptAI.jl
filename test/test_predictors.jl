@@ -130,11 +130,12 @@ function test_RandomForest()
     #  -1     0
     lhs = MathOptAI.BinaryDecisionTree{Float64,Int}(1, -0.1, -1, 0)
     tree_2 = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 0.9, lhs, 1)
-    predictor = MathOptAI.LinearCombination([tree_1, tree_2], [0.5, 0.5])
+    predictor = MathOptAI.AffineCombination([tree_1, tree_2], [0.5, 0.5], [0.0])
     @test sprint(show, predictor) == """
-    LinearCombination
+    AffineCombination
     ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
-    └ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]"""
+    ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+    └ 1.0 * [0.0]"""
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, -3 <= x <= 5)

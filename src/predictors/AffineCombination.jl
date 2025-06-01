@@ -5,9 +5,10 @@
 # in the LICENSE.md file.
 
 """
-    LinearCombination(
+    AffineCombination(
         predictors::Vector{<:AbstractPredictor},
         weights::Vector{Float64},
+        constant::Vector{Float64},
     )
 
 An [`AbstractPredictor`](@ref) that represents the linear combination of other
@@ -34,10 +35,15 @@ julia> tree_1 = MathOptAI.BinaryDecisionTree(1, 0.0, -1, rhs);
 
 julia> tree_2 = MathOptAI.BinaryDecisionTree(1, 0.9, lhs, 1);
 
-julia> random_forest = MathOptAI.LinearCombination([tree_1, tree_2], [0.5, 0.5])
-LinearCombination
+julia> random_forest = MathOptAI.AffineCombination(
+           [tree_1, tree_2],
+           [0.5, 0.5],
+           [0.0],
+       )
+AffineCombination
 ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
-└ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+└ 1.0 * [0.0]
 
 julia> model = Model();
 
@@ -47,16 +53,17 @@ julia> y, formulation = MathOptAI.add_predictor(model, random_forest, x);
 
 julia> y
 1-element Vector{VariableRef}:
- moai_LinearCombination[1]
+ moai_AffineCombination[1]
 
 julia> formulation
-LinearCombination
+AffineCombination
 ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
-└ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+└ 1.0 * [0.0]
 ├ variables [1]
-│ └ moai_LinearCombination[1]
+│ └ moai_AffineCombination[1]
 └ constraints [1]
-  └ 0.5 moai_BinaryDecisionTree_value + 0.5 moai_BinaryDecisionTree_value - moai_LinearCombination[1] = 0
+  └ 0.5 moai_BinaryDecisionTree_value + 0.5 moai_BinaryDecisionTree_value - moai_AffineCombination[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ variables [4]
 │ ├ moai_BinaryDecisionTree_value
@@ -87,26 +94,24 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
   └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
 ```
 """
-struct LinearCombination <: AbstractPredictor
+struct AffineCombination <: AbstractPredictor
     predictors::Vector{AbstractPredictor}
     weights::Vector{Float64}
+    constant::Vector{Float64}
 end
 
-function Base.show(io::IO, predictor::LinearCombination)
-    println(io, "LinearCombination")
-    for (i, (w, p)) in enumerate(zip(predictor.weights, predictor.predictors))
-        if i == length(predictor.predictors)
-            print(io, "└ ", w, " * ", p)
-        else
-            println(io, "├ ", w, " * ", p)
-        end
+function Base.show(io::IO, predictor::AffineCombination)
+    println(io, "AffineCombination")
+    for (w, p) in zip(predictor.weights, predictor.predictors)
+        println(io, "├ ", w, " * ", p)
     end
+    print(io, "└ ", 1.0, " * ", predictor.constant)
     return
 end
 
 function add_predictor(
     model::JuMP.AbstractModel,
-    predictor::LinearCombination,
+    predictor::AffineCombination,
     x::Vector;
     kwargs...,
 )
@@ -118,9 +123,9 @@ function add_predictor(
     y = JuMP.@variable(
         model,
         [1:length(lhs)],
-        base_name = "moai_LinearCombination",
+        base_name = "moai_AffineCombination",
     )
-    c = JuMP.@constraint(model, lhs .== y)
+    c = JuMP.@constraint(model, lhs .+ predictor.constant .== y)
     layers = vcat(Formulation(predictor, y, c), last.(p))
     return y, PipelineFormulation(predictor, layers)
 end

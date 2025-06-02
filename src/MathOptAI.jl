@@ -114,15 +114,26 @@ end
 """
     add_predictor(
         model::JuMP.AbstractModel,
-        predictor::AbstractPredictor,
-        x::Vector,
-    )::Vector
+        predictor::Any,
+        x::Vector;
+        reduced_space::Bool = false,
+        kwargs...,
+    )::Tuple{<:Vector,<:AbstractFormulation}
 
-Return a `Vector` representing `y` such that `y = predictor(x)`.
+Return a `Vector` representing `y` such that `y = predictor(x)` and an
+[`AbstractFormulation`](@ref) containing the variables and constraints that were
+added to the model.
 
 The element type of `x` is deliberately unspecified. The vector `x` may contain
 any mix of scalar constants, JuMP decision variables, and scalar JuMP functions
 like `AffExpr`, `QuadExpr`, or `NonlinearExpr`.
+
+## Keyword arguments
+
+ * `reduced_space`: if `true`, wrap `predictor` in [`ReducedSpace`](@ref) before
+   adding to the model.
+
+All other keyword arguments are passed to [`build_predictor`](@ref).
 
 ## Example
 
@@ -148,6 +159,17 @@ Affine(A, b) [input: 2, output: 1]
 │ └ moai_Affine[1]
 └ constraints [1]
   └ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
+
+julia> y, formulation = MathOptAI.add_predictor(model, f, x; reduced_space = true);
+
+julia> y
+1-element Vector{AffExpr}:
+ 2 x[1] + 3 x[2]
+
+julia> formulation
+ReducedSpace(Affine(A, b) [input: 2, output: 1])
+├ variables [0]
+└ constraints [0]
 ```
 """
 function add_predictor(

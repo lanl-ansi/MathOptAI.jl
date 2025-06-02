@@ -54,6 +54,21 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
    The default for `hessian` is `false` if `gray_box` is used, and `true` if
    `vector_nonlinear_oracle` is used.
 
+## Compatibility
+
+The `vector_nonlinear_oracle` feature is experimental. It relies on a private
+API feature of Ipopt.jl that will change in a future release.
+
+If you use this feature, you must pin the version of Ipopt.jl in your
+`Project.toml` to ensure that future updates to Ipopt.jl do not break your
+existing code.
+
+A known good version of Ipopt.jl is v1.8.0. Pin the version using:
+```
+[compat]
+Ipopt = "=1.8.0"
+```
+
 ## Example
 
 ```jldoctest

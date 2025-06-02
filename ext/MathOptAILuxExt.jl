@@ -80,12 +80,12 @@ function MathOptAI.build_predictor(
     chain, parameters, _ = predictor
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for (layer, parameter) in zip(chain.layers, parameters)
-        _add_predictor(inner_predictor, layer, parameter, config)
+        _build_predictor(inner_predictor, layer, parameter, config)
     end
     return inner_predictor
 end
 
-function _add_predictor(::MathOptAI.Pipeline, layer::Any, ::Any, ::Dict)
+function _build_predictor(::MathOptAI.Pipeline, layer::Any, ::Any, ::Dict)
     return error("Unsupported layer: $layer")
 end
 
@@ -98,7 +98,11 @@ _default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus()
 _default(::typeof(Lux.tanh)) = MathOptAI.Tanh()
 _default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 
-function _add_predictor(predictor::MathOptAI.Pipeline, activation, config::Dict)
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
+    activation,
+    config::Dict,
+)
     layer = get(config, activation, _default(activation))
     if layer === nothing
         # Do nothing: a linear activation
@@ -110,29 +114,29 @@ function _add_predictor(predictor::MathOptAI.Pipeline, activation, config::Dict)
     return
 end
 
-function _add_predictor(
+function _build_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Lux.Dense,
     p::Any,
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Affine(p.weight, vec(p.bias)))
-    _add_predictor(predictor, layer.activation, config)
+    _build_predictor(predictor, layer.activation, config)
     return
 end
 
-function _add_predictor(
+function _build_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Lux.Scale,
     p::Any,
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Scale(p.weight, p.bias))
-    _add_predictor(predictor, layer.activation, config)
+    _build_predictor(predictor, layer.activation, config)
     return
 end
 
-function _add_predictor(
+function _build_predictor(
     predictor::MathOptAI.Pipeline,
     ::Lux.WrappedFunction{typeof(Lux.softmax)},
     ::Any,

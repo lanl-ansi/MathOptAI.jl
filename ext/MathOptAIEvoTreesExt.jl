@@ -57,7 +57,7 @@ function MathOptAI.build_predictor(predictor::EvoTrees.EvoTree{L,1}) where {L}
     trees = MathOptAI.AbstractPredictor[]
     constant = 0.0
     for tree in predictor.trees
-        p = _to_tree(predictor, tree)
+        p = _build_predictor(predictor, tree)
         if p isa MathOptAI.BinaryDecisionTree
             push!(trees, p)
         else
@@ -67,15 +67,19 @@ function MathOptAI.build_predictor(predictor::EvoTrees.EvoTree{L,1}) where {L}
     return MathOptAI.AffineCombination(trees, ones(length(trees)), [constant])
 end
 
-function _to_tree(predictor::EvoTrees.EvoTree, tree::EvoTrees.Tree, i::Int = 1)
+function _build_predictor(
+    predictor::EvoTrees.EvoTree,
+    tree::EvoTrees.Tree,
+    i::Int = 1,
+)
     if iszero(tree.feat[i])  # It's a leaf
         return Float64(tree.pred[i])
     end
     return MathOptAI.BinaryDecisionTree{Float64,Float64}(
         tree.feat[i],
         predictor.info[:edges][tree.feat[i]][tree.cond_bin[i]],
-        _to_tree(predictor, tree, i << 1),
-        _to_tree(predictor, tree, i << 1 + true),
+        _build_predictor(predictor, tree, i << 1),
+        _build_predictor(predictor, tree, i << 1 + true),
     )
 end
 

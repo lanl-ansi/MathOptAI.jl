@@ -145,7 +145,7 @@ function MathOptAI.build_predictor(
     end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
-        _add_predictor(inner_predictor, layer, config)
+        _build_predictor(inner_predictor, layer, config)
     end
     return inner_predictor
 end
@@ -169,7 +169,7 @@ function MathOptAI.GrayBox(predictor::Flux.Chain; hessian::Bool = false)
     return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
-function _add_predictor(::MathOptAI.Pipeline, layer::Any, ::Dict)
+function _build_predictor(::MathOptAI.Pipeline, layer::Any, ::Dict)
     return error("Unsupported layer: $layer")
 end
 
@@ -181,7 +181,7 @@ _default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus()
 _default(::typeof(Flux.softmax)) = MathOptAI.SoftMax()
 _default(::typeof(Flux.tanh)) = MathOptAI.Tanh()
 
-function _add_predictor(
+function _build_predictor(
     predictor::MathOptAI.Pipeline,
     activation::Function,
     config::Dict,
@@ -197,23 +197,23 @@ function _add_predictor(
     return
 end
 
-function _add_predictor(
+function _build_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Flux.Dense,
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Affine(layer.weight, layer.bias))
-    _add_predictor(predictor, layer.σ, config)
+    _build_predictor(predictor, layer.σ, config)
     return
 end
 
-function _add_predictor(
+function _build_predictor(
     predictor::MathOptAI.Pipeline,
     layer::Flux.Scale,
     config::Dict,
 )
     push!(predictor.layers, MathOptAI.Scale(layer.scale, layer.bias))
-    _add_predictor(predictor, layer.σ, config)
+    _build_predictor(predictor, layer.σ, config)
     return
 end
 

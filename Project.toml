@@ -1,7 +1,7 @@
 name = "MathOptAI"
 uuid = "e52c2cb8-508e-4e12-9dd2-9c4755b60e73"
 authors = ["odow <o.dowson@gmail.com>"]
-version = "0.1.10"
+version = "0.1.11"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"

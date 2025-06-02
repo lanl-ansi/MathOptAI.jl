@@ -9,8 +9,8 @@
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ -2.4369022846221924 x[1] - moai_Affine[1] = -0.929436206817627
-  └ -0.4152482748031616 x[1] - moai_Affine[2] = -0.9939861297607422
+  ├ -0.4963836371898651 x[1] - moai_Affine[1] = -0.5139651298522949
+  └ -0.7291207313537598 x[1] - moai_Affine[2] = 0.19438743591308594
 MathOptAI.ReLU()
 ├ variables [2]
 │ ├ moai_ReLU[1]
@@ -23,14 +23,15 @@ MathOptAI.ReLU()
 Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
-└ constraints [1]
-  └ -1.114371657371521 moai_ReLU[1] + 0.816342830657959 moai_ReLU[2] - moai_Affine[1] = 0.0025085804518312216</code></pre><h2 id="Reduced-space"><a class="docs-heading-anchor" href="#Reduced-space">Reduced-space</a><a id="Reduced-space-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-space" title="Permalink"></a></h2><p>Use the <code>reduced_space = true</code> keyword to formulate a reduced-space model:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, Lux, MathOptAI, Random</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rng = Random.MersenneTwister();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 2, Lux.relu), Lux.Dense(2 =&gt; 1))</code><code class="nohighlight hljs ansi" style="display:block;">Chain(
+└ constraints [2]
+  ├ moai_Affine[1] ≤ -0.47211703658103943
+  └ -0.2509669065475464 moai_ReLU[1] - 0.24281859397888184 moai_ReLU[2] - moai_Affine[1] = 0.47211703658103943</code></pre><h2 id="Reduced-space"><a class="docs-heading-anchor" href="#Reduced-space">Reduced-space</a><a id="Reduced-space-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-space" title="Permalink"></a></h2><p>Use the <code>reduced_space = true</code> keyword to formulate a reduced-space model:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, Lux, MathOptAI, Random</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rng = Random.MersenneTwister();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 2, Lux.relu), Lux.Dense(2 =&gt; 1))</code><code class="nohighlight hljs ansi" style="display:block;">Chain(
     layer_1 = Dense(1 =&gt; 2, relu),      <span class="sgr90"># 4 parameters</span>
     layer_2 = Dense(2 =&gt; 1),            <span class="sgr90"># 3 parameters</span>
 ) <span class="sgr90">        # Total: </span>7 parameters,
 <span class="sgr90">          #        plus </span>0 states.</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; parameters, state = Lux.setup(rng, chain);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; predictor = (chain, parameters, state);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; model = Model();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; @variable(model, x[1:1]);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y, formulation =
            MathOptAI.add_predictor(model, predictor, x; reduced_space = true);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y</code><code class="nohighlight hljs ansi" style="display:block;">1-element Vector{JuMP.NonlinearExpr}:
- ((+(0.0) + (-1.0493685007095337 * max(0.0, -0.6298443078994751 x[1] + 0.17339205741882324))) + (1.0509690046310425 * max(0.0, -2.4772799015045166 x[1] - 0.49569249153137207))) + -0.40818142890930176</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">ReducedSpace(Affine(A, b) [input: 1, output: 2])
+ ((+(0.0) + (-1.2042574882507324 * max(0.0, 1.7530758380889893 x[1] - 0.6561543941497803))) + (-0.1666204035282135 * max(0.0, -0.05970228090882301 x[1] - 0.6752321720123291))) + 0.41995590925216675</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">ReducedSpace(Affine(A, b) [input: 1, output: 2])
 ├ variables [0]
 └ constraints [0]
 ReducedSpace(MathOptAI.ReLU())
@@ -53,8 +54,8 @@ ReducedSpace(Affine(A, b) [input: 2, output: 1])
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ -1.3850826025009155 x[1] - moai_Affine[1] = 0.066558837890625
-  └ -2.1257834434509277 x[1] - moai_Affine[2] = 0.9571990966796875
+  ├ -2.830288887023926 x[1] - moai_Affine[1] = 0.9705798625946045
+  └ -3.3206465244293213 x[1] - moai_Affine[2] = -0.2967057228088379
 MathOptAI.ReLUSOS1()
 ├ variables [4]
 │ ├ moai_ReLU[1]
@@ -72,5 +73,5 @@ Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
 └ constraints [2]
-  ├ moai_Affine[1] ≥ -0.3878321051597595
-  └ 0.4207856059074402 moai_ReLU[1] + 0.27535638213157654 moai_ReLU[2] - moai_Affine[1] = 0.3878321051597595</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../GLM/">« GLM.jl</a><a class="docs-footer-nextpage" href="../PyTorch/">PyTorch »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.11.4 on <span class="colophon-date" title="Monday 2 June 2025 08:45">Monday 2 June 2025</span>. Using Julia version 1.11.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+  ├ moai_Affine[1] ≤ 0.2627459764480591
+  └ -0.8647024035453796 moai_ReLU[1] - 0.9559553861618042 moai_ReLU[2] - moai_Affine[1] = -0.2627459764480591</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../GLM/">« GLM.jl</a><a class="docs-footer-nextpage" href="../PyTorch/">PyTorch »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.11.4 on <span class="colophon-date" title="Monday 2 June 2025 22:14">Monday 2 June 2025</span>. Using Julia version 1.11.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

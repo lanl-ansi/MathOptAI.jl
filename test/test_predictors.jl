@@ -246,7 +246,7 @@ function test_ReLU_SOS1_no_bounds()
     @variable(model, x[1:2])
     y, formulation = MathOptAI.add_predictor(model, MathOptAI.ReLUSOS1(), x)
     err = if isdefined(MOI.Bridges, :BridgeRequiresFiniteDomainError)
-        MOI.Bridgges.BridgeRequiresFiniteDomainError
+        MOI.Bridges.BridgeRequiresFiniteDomainError
     else
         ErrorException(
             "Unable to use SOS1ToMILPBridge because element 1 in the function has a non-finite domain: MOI.VariableIndex(3)",

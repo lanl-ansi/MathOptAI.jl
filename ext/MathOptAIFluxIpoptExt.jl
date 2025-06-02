@@ -113,4 +113,4 @@ function _build_set(chain::Flux.Chain, input_dimension::Int, hessian::Bool)
     )
 end
 
-end  # module
+end  # module MathOptAIFluxIpoptExt

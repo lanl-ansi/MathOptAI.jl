@@ -93,4 +93,4 @@ function _build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
     return MathOptAI.AffineCombination(trees, weights, [0.0])
 end
 
-end  # module
+end  # module MathOptAIDecisionTreeExt

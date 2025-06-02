@@ -83,4 +83,4 @@ function _build_predictor(
     )
 end
 
-end  # module
+end  # module MathOptAIEvoTreesExt

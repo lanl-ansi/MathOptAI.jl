@@ -96,4 +96,4 @@ function MathOptAI.build_predictor(
     return MathOptAI.Pipeline(affine, sigmoid)
 end
 
-end  # module
+end  # module MathOptAIGLMExt

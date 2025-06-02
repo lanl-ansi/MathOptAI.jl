@@ -161,4 +161,4 @@ function _build_predictor(
     return
 end
 
-end  # module
+end  # module MathOptAILuxExt

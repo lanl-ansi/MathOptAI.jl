@@ -173,4 +173,4 @@ function MathOptAI.GrayBox(
     return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
-end  # module
+end  # module MathOptAIPythonCallExt

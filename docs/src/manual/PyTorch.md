@@ -14,6 +14,7 @@ composed of:
  * [`nn.Linear`](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html)
  * [`nn.ReLU`](https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html)
  * [`nn.Sigmoid`](https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html)
+ * [`nn.Softmax`](https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html)
  * [`nn.Softplus`](https://pytorch.org/docs/stable/generated/torch.nn.Softplus.html)
  * [`nn.Tanh`](https://pytorch.org/docs/stable/generated/torch.nn.Tanhh.html)
 

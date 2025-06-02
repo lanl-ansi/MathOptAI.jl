@@ -41,7 +41,7 @@ Convert a trained neural network from Lux.jl to a [`Pipeline`](@ref).
 ## Example
 
 ```jldoctest; filter=r"[┌|└].+"
-julia> using Lux, MathOptAI, Random
+julia> using JuMP, MathOptAI, Lux, Random
 
 julia> rng = Random.MersenneTwister();
 
@@ -54,7 +54,22 @@ Chain(
 
 julia> parameters, state = Lux.setup(rng, chain);
 
-julia> predictor = MathOptAI.build_predictor(
+julia> model = Model();
+
+julia> @variable(model, x[1:1]);
+
+julia> y, _ = MathOptAI.add_predictor(
+           model,
+           (chain, parameters, state),
+           x;
+           config = Dict(Lux.relu => MathOptAI.ReLU()),
+       );
+
+julia> y
+1-element Vector{VariableRef}:
+ moai_Affine[1]
+
+julia> MathOptAI.build_predictor(
            (chain, parameters, state);
            config = Dict(Lux.relu => MathOptAI.ReLU()),
        )

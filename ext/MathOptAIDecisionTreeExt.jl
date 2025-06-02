@@ -19,7 +19,7 @@ Convert a binary decision tree from DecisionTree.jl to a
 ## Example
 
 ```jldoctest
-julia> using MathOptAI, DecisionTree
+julia> using JuMP, MathOptAI, DecisionTree
 
 julia> truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
 truth (generic function with 1 method)
@@ -36,7 +36,17 @@ Decision Tree
 Leaves: 3
 Depth:  2
 
-julia> predictor = MathOptAI.build_predictor(tree)
+julia> model = Model();
+
+julia> @variable(model, 0 <= x[1:2] <= 1);
+
+julia> y, _ = MathOptAI.add_predictor(model, tree, x);
+
+julia> y
+1-element Vector{VariableRef}:
+ moai_BinaryDecisionTree_value
+
+julia> MathOptAI.build_predictor(tree)
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ```
 """

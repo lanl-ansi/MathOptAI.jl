@@ -19,7 +19,7 @@ Convert a boosted tree from EvoTrees.jl to an [`AffineCombination`](@ref) of
 ## Example
 
 ```jldoctest
-julia> using MathOptAI, EvoTrees
+julia> using JuMP, MathOptAI, EvoTrees
 
 julia> truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
 truth (generic function with 1 method)
@@ -35,7 +35,17 @@ julia> config = EvoTrees.EvoTreeRegressor(; nrounds = 3);
 
 julia> tree = EvoTrees.fit(config; x_train, y_train);
 
-julia> predictor = MathOptAI.build_predictor(tree)
+julia> model = Model();
+
+julia> @variable(model, 0 <= x[1:2] <= 1);
+
+julia> y, _ = MathOptAI.add_predictor(model, tree, x);
+
+julia> y
+1-element Vector{VariableRef}:
+ moai_AffineCombination[1]
+
+julia> MathOptAI.build_predictor(tree)
 AffineCombination
 ├ 1.0 * BinaryDecisionTree{Float64,Float64} [leaves=3, depth=2]
 ├ 1.0 * BinaryDecisionTree{Float64,Float64} [leaves=3, depth=2]

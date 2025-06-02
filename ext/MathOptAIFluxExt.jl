@@ -72,9 +72,24 @@ Ipopt = "=1.8.0"
 ## Example
 
 ```jldoctest
-julia> using Flux, MathOptAI
+julia> using JuMP, MathOptAI, Flux
 
 julia> chain = Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1));
+
+julia> model = Model();
+
+julia> @variable(model, x[1:1]);
+
+julia> y, _ = MathOptAI.add_predictor(
+           model,
+           chain,
+           x;
+           config = Dict(Flux.relu => MathOptAI.ReLU()),
+       );
+
+julia> y
+1-element Vector{VariableRef}:
+ moai_Affine[1]
 
 julia> MathOptAI.build_predictor(
            chain;

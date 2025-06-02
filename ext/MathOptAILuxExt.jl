@@ -172,6 +172,7 @@ _default(::typeof(identity)) = nothing
 _default(::Any) = missing
 _default(::typeof(Lux.relu)) = MathOptAI.ReLU()
 _default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid()
+_default(::typeof(Lux.sigmoid)) = MathOptAI.Sigmoid()
 _default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus()
 _default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 

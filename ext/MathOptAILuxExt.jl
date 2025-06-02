@@ -171,8 +171,10 @@ end
 _default(::typeof(identity)) = nothing
 _default(::Any) = missing
 _default(::typeof(Lux.relu)) = MathOptAI.ReLU()
+_default(::typeof(Lux.sigmoid)) = MathOptAI.Sigmoid()
 _default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid()
 _default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus()
+_default(::typeof(Lux.tanh)) = MathOptAI.Tanh()
 _default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
 
 function _add_predictor(predictor::MathOptAI.Pipeline, activation, config::Dict)
@@ -211,7 +213,7 @@ end
 
 function _add_predictor(
     predictor::MathOptAI.Pipeline,
-    ::Lux.WrappedFunction{:direct_call,typeof(Lux.softmax)},
+    ::Lux.WrappedFunction{typeof(Lux.softmax)},
     ::Any,
     config::Dict,
 )

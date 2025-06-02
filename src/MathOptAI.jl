@@ -150,7 +150,19 @@ Affine(A, b) [input: 2, output: 1]
   └ 2 x[1] + 3 x[2] - moai_Affine[1] = 0
 ```
 """
-function add_predictor end
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Any,
+    x::Vector;
+    reduced_space::Bool = false,
+    kwargs...,
+)
+    inner_predictor = MathOptAI.build_predictor(predictor; kwargs...)
+    if reduced_space
+        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
+    end
+    return MathOptAI.add_predictor(model, inner_predictor, x)
+end
 
 """
     add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)

@@ -217,9 +217,45 @@ function test_end_to_end_Sigmoid()
     return
 end
 
+function test_end_to_end_Sigmoid_fast()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.sigmoid_fast), Lux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y, formulation = MathOptAI.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    return
+end
+
 function test_end_to_end_Tanh()
     state = _train_lux_model(
         Lux.Chain(Lux.Dense(1 => 16, Lux.tanh), Lux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x)
+    y, formulation = MathOptAI.add_predictor(model, state, [x])
+    @constraint(model, only(y) <= 4)
+    @objective(model, Min, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    lux_model, lux_p, lux_state = state
+    y_val, _ = lux_model(Float32[value(x)], lux_p, lux_state)
+    @test isapprox(value.(y), y_val; atol = 1e-2)
+    return
+end
+
+function test_end_to_end_Tanh_fast()
+    state = _train_lux_model(
+        Lux.Chain(Lux.Dense(1 => 16, Lux.tanh_fast), Lux.Dense(16 => 1)),
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)

@@ -11,17 +11,18 @@ import JuMP
 import MathOptAI
 
 """
-    MathOptAI.add_predictor(
-        model::JuMP.AbstractModel,
+    MathOptAI.build_predictor(
         predictor::Union{
-            DecisionTree.Root,
-            DecisionTree.DecisionTreeClassifier,
             DecisionTree.Ensemble,
+            DecisionTree.DecisionTreeClassifier,
+            DecisionTree.Leaf,
+            DecisionTree.Node,
+            DecisionTree.Root,
         },
-        x::Vector,
     )
 
-Add a binary decision tree (or random forest) from DecisionTree.jl to `model`.
+Convert a binary decision tree from DecisionTree.jl to a
+[`BinaryDecisionTree`](@ref).
 
 ## Example
 
@@ -38,7 +39,7 @@ julia> size(features)
 
 julia> labels = truth.(Vector.(eachrow(features)));
 
-julia> predictor = DecisionTree.build_tree(labels, features)
+julia> tree = DecisionTree.build_tree(labels, features)
 Decision Tree
 Leaves: 3
 Depth:  2
@@ -47,79 +48,49 @@ julia> model = Model();
 
 julia> @variable(model, 0 <= x[1:2] <= 1);
 
-julia> y, _ = MathOptAI.add_predictor(model, predictor, x);
+julia> y, _ = MathOptAI.add_predictor(model, tree, x);
 
 julia> y
 1-element Vector{VariableRef}:
  moai_BinaryDecisionTree_value
-```
-"""
-function MathOptAI.add_predictor(
-    model::JuMP.AbstractModel,
-    predictor::Union{
-        DecisionTree.Root,
-        DecisionTree.DecisionTreeClassifier,
-        DecisionTree.Ensemble,
-    },
-    x::Vector,
-)
-    inner_predictor = MathOptAI.build_predictor(predictor)
-    return MathOptAI.add_predictor(model, inner_predictor, x)
-end
 
-"""
-    MathOptAI.build_predictor(predictor::DecisionTree.Root)
-
-Convert a binary decision tree from DecisionTree.jl to a
-[`BinaryDecisionTree`](@ref).
-
-## Example
-
-```jldoctest
-julia> using MathOptAI, DecisionTree
-
-julia> truth(x::Vector) = x[1] <= 0.5 ? -2 : (x[2] <= 0.3 ? 3 : 4)
-truth (generic function with 1 method)
-
-julia> features = abs.(sin.((1:10) .* (3:4)'));
-
-julia> size(features)
-(10, 2)
-
-julia> labels = truth.(Vector.(eachrow(features)));
-
-julia> tree = DecisionTree.build_tree(labels, features)
-Decision Tree
-Leaves: 3
-Depth:  2
-
-julia> predictor = MathOptAI.build_predictor(tree)
+julia> MathOptAI.build_predictor(tree)
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ```
 """
-function MathOptAI.build_predictor(p::DecisionTree.Root)
-    return MathOptAI.build_predictor(p.node)
+function MathOptAI.build_predictor(
+    predictor::Union{
+        DecisionTree.Ensemble,
+        DecisionTree.DecisionTreeClassifier,
+        DecisionTree.Leaf,
+        DecisionTree.Node,
+        DecisionTree.Root,
+    },
+)
+    return _build_predictor(predictor)
 end
 
-function MathOptAI.build_predictor(p::DecisionTree.DecisionTreeClassifier)
-    return MathOptAI.build_predictor(p.root)
+_build_predictor(p::DecisionTree.Root) = _build_predictor(p.node)
+
+function _build_predictor(p::DecisionTree.DecisionTreeClassifier)
+    return _build_predictor(p.root)
 end
 
-function MathOptAI.build_predictor(node::DecisionTree.Node{K,V}) where {K,V}
+function _build_predictor(node::DecisionTree.Node{K,V}) where {K,V}
     return MathOptAI.BinaryDecisionTree{K,V}(
         node.featid,
         node.featval,
-        MathOptAI.build_predictor(node.left),
-        MathOptAI.build_predictor(node.right),
+        _build_predictor(node.left),
+        _build_predictor(node.right),
     )
 end
 
-MathOptAI.build_predictor(node::DecisionTree.Leaf) = node.majority
+_build_predictor(node::DecisionTree.Leaf) = node.majority
 
-function MathOptAI.build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
-    trees = MathOptAI.build_predictor.(node.trees)
+function _build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
+    trees = _build_predictor.(node.trees)
     weights = fill(1 / length(trees), length(trees))
     return MathOptAI.AffineCombination(trees, weights, [0.0])
 end
 
-end  # module
+end  # module MathOptAIDecisionTreeExt

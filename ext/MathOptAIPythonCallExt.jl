@@ -11,88 +11,6 @@ import PythonCall
 import MathOptAI
 
 """
-    MathOptAI.add_predictor(
-        model::JuMP.AbstractModel,
-        predictor::MathOptAI.PytorchModel,
-        x::Vector;
-        config::Dict = Dict{Any,Any}(),
-        reduced_space::Bool = false,
-        gray_box::Bool = false,
-        vector_nonlinear_oracle::Bool = false,
-        hessian::Bool = vector_nonlinear_oracle,
-        device::String = "cpu",
-    )
-
-Add a trained neural network from PyTorch via PythonCall.jl to `model`.
-
-## Supported layers
-
- * `nn.Linear`
- * `nn.ReLU`
- * `nn.Sequential`
- * `nn.Sigmoid`
- * `nn.Softmax`
- * `nn.Softplus`
- * `nn.Tanh`
-
-## Keyword arguments
-
- * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
-   that control how the activation functions are reformulated. For example,
-   `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftMax`, `:SoftPlus`, and
-   `:Tanh`.
-
- * `reduced_space`: if `true`, the neural network is added using a
-   [`ReducedSpace`](@ref) formulation.
-
- * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
-   formulation.
-
- * `vector_nonlinear_oracle`: if `true`, the neural network is added using
-   `Ipopt._VectorNonlinearOracle`. This is an experimental feature that may
-   offer better performance than `gray_box`. To use this feature, you MUST use
-   Ipopt as the optimizer.
-
- * `hessian`: if `true`, the `gray_box` and `vector_nonlinear_oracle`
-   formulations compute the Hessian of the output using `torch.func.hessian`.
-   The default for `hessian` is `false` if `gray_box` is used, and `true` if
-   `vector_nonlinear_oracle` is used.
-
- * `device`: device used to construct PyTorch tensors, for example, `"cuda"`
-   to run on an Nvidia GPU.
-
-## Compatibility
-
-The `vector_nonlinear_oracle` feature is experimental. It relies on a private
-API feature of Ipopt.jl that will change in a future release.
-
-If you use this feature, you must pin the version of Ipopt.jl in your
-`Project.toml` to ensure that future updates to Ipopt.jl do not break your
-existing code.
-
-A known good version of Ipopt.jl is v1.8.0. Pin the version using:
-```
-[compat]
-Ipopt = "=1.8.0"
-```
-"""
-function MathOptAI.add_predictor(
-    model::JuMP.AbstractModel,
-    predictor::MathOptAI.PytorchModel,
-    x::Vector;
-    config::Dict = Dict{Any,Any}(),
-    reduced_space::Bool = false,
-    kwargs...,
-)
-    inner_predictor = MathOptAI.build_predictor(predictor; config, kwargs...)
-    if reduced_space
-        inner_predictor = MathOptAI.ReducedSpace(inner_predictor)
-    end
-    return MathOptAI.add_predictor(model, inner_predictor, x)
-end
-
-"""
     MathOptAI.build_predictor(
         predictor::MathOptAI.PytorchModel;
         config::Dict = Dict{Any,Any}(),
@@ -138,6 +56,21 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
  * `device`: device used to construct PyTorch tensors, for example, `"cuda"`
    to run on an Nvidia GPU.
+
+## Compatibility
+
+The `vector_nonlinear_oracle` feature is experimental. It relies on a private
+API feature of Ipopt.jl that will change in a future release.
+
+If you use this feature, you must pin the version of Ipopt.jl in your
+`Project.toml` to ensure that future updates to Ipopt.jl do not break your
+existing code.
+
+A known good version of Ipopt.jl is v1.8.0. Pin the version using:
+```
+[compat]
+Ipopt = "=1.8.0"
+```
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;
@@ -240,4 +173,4 @@ function MathOptAI.GrayBox(
     return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
-end  # module
+end  # module MathOptAIPythonCallExt

@@ -77,4 +77,4 @@ function MathOptAI.add_predictor(
     return reshape(y, length(y)), formulation
 end
 
-end  # module
+end  # module MathOptAIStatsModelsExt

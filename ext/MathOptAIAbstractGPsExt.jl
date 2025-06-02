@@ -82,4 +82,4 @@ function MathOptAI.add_predictor(
     return y, MathOptAI.Formulation(predictor)
 end
 
-end  # module
+end  # module MathOptAIAbstractGPsExt

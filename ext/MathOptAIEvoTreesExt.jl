@@ -13,9 +13,9 @@ import MathOptAI
 """
     MathOptAI.add_predictor(
         model::JuMP.AbstractModel,
-        predictor::EvoTrees.EvoTree,
+        predictor::EvoTrees.EvoTree{L,1},
         x::Vector,
-    )
+    ) where {L}
 
 Add a boosted tree from EvoTrees.jl to `model`.
 
@@ -59,9 +59,9 @@ function MathOptAI.add_predictor(
 end
 
 """
-    MathOptAI.build_predictor(predictor::DecisionTree.Root)
+    MathOptAI.build_predictor(predictor::EvoTrees.EvoTree{L,1}) where {L}
 
-Convert a boosted tree from EvoTrees.jl to a [`AffineCombination`](@ref) of
+Convert a boosted tree from EvoTrees.jl to an [`AffineCombination`](@ref) of
 [`BinaryDecisionTree`](@ref).
 
 ## Example
@@ -91,18 +91,6 @@ AffineCombination
 └ 1.0 * [2.0]
 ```
 """
-function _to_tree(predictor::EvoTrees.EvoTree, tree::EvoTrees.Tree, i::Int = 1)
-    if iszero(tree.feat[i])  # It's a leaf
-        return Float64(tree.pred[i])
-    end
-    return MathOptAI.BinaryDecisionTree{Float64,Float64}(
-        tree.feat[i],
-        predictor.info[:edges][tree.feat[i]][tree.cond_bin[i]],
-        _to_tree(predictor, tree, i << 1),
-        _to_tree(predictor, tree, i << 1 + true),
-    )
-end
-
 function MathOptAI.build_predictor(predictor::EvoTrees.EvoTree{L,1}) where {L}
     trees = MathOptAI.AbstractPredictor[]
     constant = 0.0
@@ -115,6 +103,18 @@ function MathOptAI.build_predictor(predictor::EvoTrees.EvoTree{L,1}) where {L}
         end
     end
     return MathOptAI.AffineCombination(trees, ones(length(trees)), [constant])
+end
+
+function _to_tree(predictor::EvoTrees.EvoTree, tree::EvoTrees.Tree, i::Int = 1)
+    if iszero(tree.feat[i])  # It's a leaf
+        return Float64(tree.pred[i])
+    end
+    return MathOptAI.BinaryDecisionTree{Float64,Float64}(
+        tree.feat[i],
+        predictor.info[:edges][tree.feat[i]][tree.cond_bin[i]],
+        _to_tree(predictor, tree, i << 1),
+        _to_tree(predictor, tree, i << 1 + true),
+    )
 end
 
 end  # module

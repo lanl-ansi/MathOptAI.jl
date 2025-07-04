@@ -64,13 +64,36 @@ ReducedSpace(Scale(scale, bias))
 struct Scale{T} <: AbstractPredictor
     scale::Vector{T}
     bias::Vector{T}
+
+    function Scale{T}(scale::Vector{T}, bias::Vector{T}) where {T}
+        if length(scale) != length(bias)
+            msg = "[Scale] the `scale` and `bias` vectors must have the same length. Got `$(length(scale))` and `$(length(bias))`."
+            throw(DimensionMismatch(msg))
+        end
+        return new(scale, bias)
+    end
+end
+
+function Scale(scale::AbstractVector{U}, bias::AbstractVector{V}) where {U,V}
+    T = promote_type(U, V)
+    return Scale{T}(convert(Vector{T}, scale), convert(Vector{T}, bias))
 end
 
 function Base.show(io::IO, ::Scale)
     return print(io, "Scale(scale, bias)")
 end
 
+function _check_dimension(predictor::Scale, x::Vector)
+    m, n = length(predictor.scale), length(x)
+    if m != n
+        msg = "[Scale] mismatch between the length of the input `x` ($n) and the number of columns of the `Scale` predictor ($m)."
+        throw(DimensionMismatch(msg))
+    end
+    return
+end
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
+    _check_dimension(predictor, x)
     m = length(predictor.scale)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Scale")
     bounds = _get_variable_bounds.(x)
@@ -94,6 +117,7 @@ function add_predictor(
     predictor::ReducedSpace{<:Scale},
     x::Vector,
 )
+    _check_dimension(predictor.predictor, x)
     scale, bias = predictor.predictor.scale, predictor.predictor.bias
     y = JuMP.@expression(model, scale .* x .+ bias)
     return y, Formulation(predictor)

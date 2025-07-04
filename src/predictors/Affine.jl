@@ -58,6 +58,19 @@ ReducedSpace(Affine(A, b) [input: 2, output: 1])
 struct Affine{T} <: AbstractPredictor
     A::Matrix{T}
     b::Vector{T}
+
+    function Affine{T}(A::Matrix{T}, b::Vector{T}) where {T}
+        if size(A, 1) != length(b)
+            msg = "[Affine] the `A` matrix must have the same number of rows as the `b` vector. Got `$(size(A, 1))` and `$(length(b))`."
+            throw(DimensionMismatch(msg))
+        end
+        return new(A, b)
+    end
+end
+
+function Affine(A::AbstractMatrix{U}, b::AbstractVector{V}) where {U,V}
+    T = promote_type(U, V)
+    return Affine{T}(convert(Matrix{T}, A), convert(Vector{T}, b))
 end
 
 function Affine(A::Matrix{T}) where {T}
@@ -73,7 +86,17 @@ function Base.show(io::IO, p::Affine)
     return print(io, "Affine(A, b) [input: $n, output: $m]")
 end
 
+function _check_dimension(predictor::Affine, x::Vector)
+    m, n = size(predictor.A, 2), length(x)
+    if m != n
+        msg = "[Affine] mismatch between the length of the input `x` ($n) and the number of columns of the `Affine` predictor ($m)."
+        throw(DimensionMismatch(msg))
+    end
+    return
+end
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
+    _check_dimension(predictor, x)
     m = size(predictor.A, 1)
     y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")
     bounds = _get_variable_bounds.(x)
@@ -97,6 +120,7 @@ function add_predictor(
     predictor::ReducedSpace{<:Affine},
     x::Vector,
 )
+    _check_dimension(predictor.predictor, x)
     A, b = predictor.predictor.A, predictor.predictor.b
     y = JuMP.@expression(model, A * x .+ b)
     return y, Formulation(predictor)

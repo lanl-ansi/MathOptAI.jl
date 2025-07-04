@@ -44,6 +44,10 @@ function test_Affine_constructors()
     f = MathOptAI.Affine([1.0, 2.0])
     g = MathOptAI.Affine([1.0 2.0], [0.0])
     @test f.A == g.A && f.b == g.b
+    # Affine(::AbstractMatrix, ::AbstractVector)
+    f = MathOptAI.Affine([1 2; 3 4], 5.0:6.0)
+    g = MathOptAI.Affine([1.0 2.0; 3.0 4.0], [5.0, 6.0])
+    @test f.A == g.A && f.b == g.b
     return
 end
 
@@ -514,12 +518,38 @@ function test_Scale()
     return
 end
 
+function test_Scale_constructor()
+    # Scale(::AbstractVector, ::AbstractVector)
+    f = MathOptAI.Scale([1 // 2, 2 // 5], 3.0:4.0)
+    g = MathOptAI.Scale([0.5, 0.4], [3.0, 4.0])
+    @test f.scale == g.scale && f.bias == g.bias
+    return
+end
+
 function test_fallback_bound_methods()
     fake_variable = "x"
     l, u = MathOptAI._get_variable_bounds(fake_variable)
     @test (l, u) == (-Inf, Inf)
     cons = Any[]
     @test MathOptAI._set_bounds_if_finite(cons, fake_variable, l, u) === nothing
+    return
+end
+
+function test_Affine_DimensionMismatch()
+    @test_throws DimensionMismatch MathOptAI.Affine([1 2; 3 4], [5, 6, 7])
+    model = Model()
+    @variable(model, x[1:2])
+    f = MathOptAI.Affine([1 2 3; 4 5 6], [7, 8])
+    @test_throws DimensionMismatch MathOptAI.add_predictor(model, f, x)
+    return
+end
+
+function test_Scale_DimensionMismatch()
+    @test_throws DimensionMismatch MathOptAI.Scale([1, 2], [5, 6, 7])
+    model = Model()
+    @variable(model, x[1:2])
+    f = MathOptAI.Scale([1, 2, 3], [4, 5, 6])
+    @test_throws DimensionMismatch MathOptAI.add_predictor(model, f, x)
     return
 end
 

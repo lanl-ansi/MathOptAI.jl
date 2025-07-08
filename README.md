@@ -103,16 +103,16 @@ the field at the time that we started development of MathOptAI.
 
 ## Citation
 
-If you use this package for academic research, please cite the following preprint:
+If you use this package for academic research, please cite the [following preprint](https://www.arxiv.org/abs/2507.03159):
 
 ```bibtex
-@misc{parker2024formulations,
-      title={Formulations and scalability of neural network surrogates in nonlinear optimization problems}, 
-      author={Robert B. Parker and Oscar Dowson and Nicole LoGiudice and Manuel Garcia and Russell Bent},
-      year={2024},
-      eprint={2412.11403},
+@misc{dowson2025MathOptAI.jl,
+      title={MathOptAI.jl: Embed trained machine learning predictors into JuMP models},
+      author={Oscar Dowson and Robert B. Parker and Russell Bent},
+      year={2025},
+      eprint={2507.03159},
       archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2412.11403}, 
+      primaryClass={cs.ML},
+      url={https://arxiv.org/abs/2507.03159}
 }
 ```

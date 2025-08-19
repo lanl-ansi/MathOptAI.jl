@@ -111,7 +111,11 @@ function MathOptAI.build_predictor(
     end
     torch = PythonCall.pyimport("torch")
     nn = PythonCall.pyimport("torch.nn")
-    torch_model = torch.load(predictor.filename; weights_only = false)
+    torch_model = torch.load(
+        predictor.filename;
+        weights_only = false,
+        map_location = "cpu",
+    )
     return _predictor(nn, torch_model, config)
 end
 
@@ -148,7 +152,11 @@ function MathOptAI.GrayBox(
     device::String = "cpu",
 )
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(predictor.filename; weights_only = false)
+    torch_model = torch.load(
+        predictor.filename;
+        weights_only = false,
+        map_location = "cpu",
+    )
     torch_model = torch_model.to(device)
     J = torch.func.jacrev(torch_model)
     H = torch.func.hessian(torch_model)

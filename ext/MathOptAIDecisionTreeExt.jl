@@ -68,7 +68,7 @@ function MathOptAI.build_predictor(
     };
     kwargs...,
 )
-    return _build_predictor(predictor; kwargs...,)
+    return _build_predictor(predictor; kwargs...)
 end
 
 function _build_predictor(p::DecisionTree.Root; kwargs...)

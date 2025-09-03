@@ -72,9 +72,9 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0}
+  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ -1.0e-6}
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≥ 0}
-  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 1}
+  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.999999}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
   └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
@@ -86,9 +86,9 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0.9}
-  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ -0.1}
-  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.9}
+  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0.899999}
+  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ -0.100001}
+  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.899999}
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≥ -0.1}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0.9}
   └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0

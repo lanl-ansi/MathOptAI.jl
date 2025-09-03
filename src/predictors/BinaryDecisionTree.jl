@@ -10,12 +10,13 @@
         feat_value::K,
         lhs::Union{V,BinaryDecisionTree{K,V}},
         rhs::Union{V,BinaryDecisionTree{K,V}},
+        atol::Float64 = 1e-6,
     )
 
 An [`AbstractPredictor`](@ref) that represents a binary decision tree.
 
- * If `x[feat_id] <= feat_value`, then return `lhs`
- * If `x[feat_id] > feat_value`, then return `rhs`
+ * If `x[feat_id] <= feat_value - atol`, then return `lhs`
+ * If `x[feat_id] >= feat_value`, then return `rhs`
 
 ## Example
 
@@ -51,9 +52,9 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ 0}
+  ├ moai_BinaryDecisionTree_z[1] --> {x[1] ≤ -1.0e-6}
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≥ 0}
-  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 1}
+  ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.999999}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
   └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
@@ -64,6 +65,27 @@ struct BinaryDecisionTree{K,V} <: AbstractPredictor
     feat_value::K
     lhs::Union{V,BinaryDecisionTree{K,V}}
     rhs::Union{V,BinaryDecisionTree{K,V}}
+    atol::Float64
+
+    function BinaryDecisionTree{K,V}(
+        feat_id::Int,
+        feat_value::K,
+        lhs::Union{V,BinaryDecisionTree{K,V}},
+        rhs::Union{V,BinaryDecisionTree{K,V}},
+        atol::Float64 = 1e-6,
+    ) where {K,V}
+        return new{K,V}(feat_id, feat_value, lhs, rhs, atol)
+    end
+
+    function BinaryDecisionTree(
+        feat_id::Int,
+        feat_value::K,
+        lhs::Union{V,BinaryDecisionTree{K,V}},
+        rhs::Union{V,BinaryDecisionTree{K,V}},
+        atol::Float64 = 1e-6,
+    ) where {K,V}
+        return new{K,V}(feat_id, feat_value, lhs, rhs, atol)
+    end
 end
 
 function Base.show(io::IO, predictor::BinaryDecisionTree{K,V}) where {K,V}
@@ -75,8 +97,7 @@ end
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::BinaryDecisionTree,
-    x::Vector;
-    atol::Float64 = 0.0,
+    x::Vector,
 )
     paths = _tree_to_paths(predictor)
     z = JuMP.@variable(
@@ -91,11 +112,11 @@ function add_predictor(
     formulation = Formulation(predictor, Any[y; z], Any[c])
     for (zi, (leaf, path)) in zip(z, paths)
         JuMP.add_to_expression!(y_expr, leaf, zi)
-        for (id, value, branch) in path
+        for (id, value, branch, atol) in path
             c = if branch
-                JuMP.@constraint(model, zi --> {x[id] <= value})
+                JuMP.@constraint(model, zi --> {x[id] <= value - atol})
             else
-                JuMP.@constraint(model, zi --> {x[id] >= value + atol})
+                JuMP.@constraint(model, zi --> {x[id] >= value})
             end
             push!(formulation.constraints, c)
         end
@@ -105,26 +126,27 @@ function add_predictor(
 end
 
 function _tree_to_paths(predictor::BinaryDecisionTree{K,V}) where {K,V}
-    paths = Pair{V,Vector{Tuple{Int,K,Bool}}}[]
-    _tree_to_paths(paths, Tuple{Int,K,Bool}[], predictor)
+    paths = Pair{V,Vector{Tuple{Int,K,Bool,Float64}}}[]
+    _tree_to_paths(paths, Tuple{Int,K,Bool,Float64}[], predictor)
     return paths
 end
 
 function _tree_to_paths(
-    paths::Vector{Pair{V,Vector{Tuple{Int,K,Bool}}}},
-    current_path::Vector{Tuple{Int,K,Bool}},
+    paths::Vector{Pair{V,Vector{Tuple{Int,K,Bool,Float64}}}},
+    current_path::Vector{Tuple{Int,K,Bool,Float64}},
     node::BinaryDecisionTree{K,V},
 ) where {K,V}
-    left_path = vcat(current_path, (node.feat_id, node.feat_value, true))
+    left_path =
+        vcat(current_path, (node.feat_id, node.feat_value, true, node.atol))
     _tree_to_paths(paths, left_path, node.lhs)
-    right_path = vcat(current_path, (node.feat_id, node.feat_value, false))
+    right_path = vcat(current_path, (node.feat_id, node.feat_value, false, 0.0))
     _tree_to_paths(paths, right_path, node.rhs)
     return
 end
 
 function _tree_to_paths(
-    paths::Vector{Pair{V,Vector{Tuple{Int,K,Bool}}}},
-    current_path::Vector{Tuple{Int,K,Bool}},
+    paths::Vector{Pair{V,Vector{Tuple{Int,K,Bool,Float64}}}},
+    current_path::Vector{Tuple{Int,K,Bool,Float64}},
     node::V,
 ) where {K,V}
     push!(paths, node => current_path)

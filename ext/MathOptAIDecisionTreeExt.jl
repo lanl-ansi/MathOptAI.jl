@@ -65,30 +65,40 @@ function MathOptAI.build_predictor(
         DecisionTree.Leaf,
         DecisionTree.Node,
         DecisionTree.Root,
-    },
+    };
+    kwargs...,
 )
-    return _build_predictor(predictor)
+    return _build_predictor(predictor; kwargs...,)
 end
 
-_build_predictor(p::DecisionTree.Root) = _build_predictor(p.node)
-
-function _build_predictor(p::DecisionTree.DecisionTreeClassifier)
-    return _build_predictor(p.root)
+function _build_predictor(p::DecisionTree.Root; kwargs...)
+    return _build_predictor(p.node; kwargs...)
 end
 
-function _build_predictor(node::DecisionTree.Node{K,V}) where {K,V}
+function _build_predictor(p::DecisionTree.DecisionTreeClassifier; kwargs...)
+    return _build_predictor(p.root; kwargs...)
+end
+
+function _build_predictor(
+    node::DecisionTree.Node{K,V};
+    atol::Float64 = 1e-6,
+) where {K,V}
     return MathOptAI.BinaryDecisionTree{K,V}(
         node.featid,
         node.featval,
-        _build_predictor(node.left),
-        _build_predictor(node.right),
+        _build_predictor(node.left; atol),
+        _build_predictor(node.right; atol),
+        atol,
     )
 end
 
-_build_predictor(node::DecisionTree.Leaf) = node.majority
+_build_predictor(node::DecisionTree.Leaf; kwargs...) = node.majority
 
-function _build_predictor(node::DecisionTree.Ensemble{K,V}) where {K,V}
-    trees = _build_predictor.(node.trees)
+function _build_predictor(
+    node::DecisionTree.Ensemble{K,V};
+    kwargs...,
+) where {K,V}
+    trees = _build_predictor.(node.trees; kwargs...)
     weights = fill(1 / length(trees), length(trees))
     return MathOptAI.AffineCombination(trees, weights, [0.0])
 end

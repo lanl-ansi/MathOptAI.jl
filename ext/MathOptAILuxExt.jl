@@ -47,8 +47,8 @@ julia> rng = Random.MersenneTwister();
 
 julia> chain = Lux.Chain(Lux.Dense(1 => 16, Lux.relu), Lux.Dense(16 => 1))
 Chain(
-    layer_1 = Dense(1 => 16, relu),     # 32 parameters
-    layer_2 = Dense(16 => 1),           # 17 parameters
+    layer_1 = Dense(1 => 16, relu),               # 32 parameters
+    layer_2 = Dense(16 => 1),                     # 17 parameters
 )         # Total: 49 parameters,
           #        plus 0 states.
 

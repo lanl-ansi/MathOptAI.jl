@@ -100,6 +100,56 @@ function test_DecisionTree_RandomForest()
     return
 end
 
+function test_issue_195()
+    predictor = DecisionTree.Root(
+        DecisionTree.Node(
+            1,
+            0.0,
+            DecisionTree.Leaf(2.0, [2.0]),
+            DecisionTree.Leaf(0.0, [0.0]),
+        ),
+        1,
+        [1.0],
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, -1 <= x[1:1] <= 5)
+    y, _ = MathOptAI.add_predictor(model, predictor, x)
+    @objective(model, Max, only(y))
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test ≈(value.(x), [-1e-6]; atol = 1e-7)
+    @test ≈(objective_value(model), 2.0; atol = 1e-6)
+    @test ≈(DecisionTree.apply_tree(predictor, value.(x)), 2.0; atol = 1e-5)
+    return
+end
+
+function test_issue_195_atol_0()
+    predictor = DecisionTree.Root(
+        DecisionTree.Node(
+            1,
+            0.0,
+            DecisionTree.Leaf(2.0, [2.0]),
+            DecisionTree.Leaf(0.0, [0.0]),
+        ),
+        1,
+        [1.0],
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, -1 <= x[1:1] <= 5)
+    y, _ = MathOptAI.add_predictor(model, predictor, x; atol = 0.0)
+    @objective(model, Max, only(y))
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    # Because tree is x <= 0 - atol ==> 2 : 0, HiGHS will choose x = 0, y = 2,
+    # but the  tree will choose x = 0, y = 0.
+    @test ≈(value.(x), [0.0]; atol = 1e-6)
+    @test ≈(objective_value(model), 2.0; atol = 1e-6)
+    @test ≈(DecisionTree.apply_tree(predictor, value.(x)), 0.0; atol = 1e-5)
+    return
+end
+
 end  # module
 
 TestDecisionTreeExt.runtests()

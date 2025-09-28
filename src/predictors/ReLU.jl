@@ -62,7 +62,7 @@ ReducedSpace(ReLU())
 struct ReLU <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_ReLU")
+    y = add_variables(model, predictor, x, length(x), "moai_ReLU")
     cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     append!(cons, JuMP.@constraint(model, y .== max.(0, x)))
     return y, Formulation(predictor, y, cons)

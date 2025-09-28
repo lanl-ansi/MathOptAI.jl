@@ -68,10 +68,10 @@ ReducedSpace(SoftMax())
 struct SoftMax <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftMax")
+    y = add_variables(model, predictor, x, length(x), "moai_SoftMax")
     cons = Any[]
     _set_bounds_if_finite.(Ref(cons), y, 0, 1)
-    denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
+    denom = only(add_variables(model, predictor, x, 1, "moai_SoftMax_denom"))
     JuMP.set_lower_bound(denom, 0)
     push!(cons, JuMP.LowerBoundRef(denom))
     push!(cons, JuMP.@constraint(model, denom == sum(exp.(x))))
@@ -84,7 +84,7 @@ function add_predictor(
     predictor::ReducedSpace{SoftMax},
     x::Vector,
 )
-    denom = JuMP.@variable(model, base_name = "moai_SoftMax_denom")
+    denom = only(add_variables(model, predictor, x, 1, "moai_SoftMax_denom"))
     JuMP.set_lower_bound(denom, 0)
     d_con = JuMP.@constraint(model, denom == sum(exp.(x)))
     constraints = Any[JuMP.LowerBoundRef(denom); d_con]

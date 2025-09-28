@@ -70,7 +70,7 @@ function add_predictor(
     x::Vector,
 )
     β = predictor.beta
-    y = JuMP.@variable(model, [1:length(x)], base_name = "moai_SoftPlus")
+    y = add_variables(model, predictor, x, length(x), "moai_SoftPlus")
     cons = _set_direct_bounds(xi -> log(1 + exp(β * xi)) / β, 0, nothing, x, y)
     append!(cons, JuMP.@constraint(model, y .== log.(1 .+ exp.(β .* x)) ./ β))
     return y, Formulation(predictor, y, cons)

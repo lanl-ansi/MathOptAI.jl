@@ -73,14 +73,14 @@ function add_predictor(
     x::Vector,
 )
     m = length(x)
-    y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
+    y = add_variables(model, predictor, x, m, "moai_ReLU")
     cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     formulation = Formulation(predictor, Any[], cons)
     append!(formulation.variables, y)
     for i in 1:m
         lb, ub = _get_variable_bounds(x[i])
-        z = JuMP.@variable(model, binary = true)
-        JuMP.set_name(z, "moai_z[$i]")
+        z = only(add_variables(model, predictor, x, 1, "moai_z[$i]"))
+        JuMP.set_binary(z)
         push!(formulation.variables, z)
         push!(formulation.constraints, JuMP.BinaryRef(z))
         c = JuMP.@constraint(model, y[i] >= x[i])

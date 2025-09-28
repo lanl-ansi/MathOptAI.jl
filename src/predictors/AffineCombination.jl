@@ -120,10 +120,12 @@ function add_predictor(
         model,
         sum(w * z for (w, (z, _)) in zip(predictor.weights, p)),
     )
-    y = JuMP.@variable(
+    y = add_variables(
         model,
-        [1:length(lhs)],
-        base_name = "moai_AffineCombination",
+        predictor,
+        x,
+        length(lhs),
+        "moai_AffineCombination",
     )
     c = JuMP.@constraint(model, lhs .+ predictor.constant .== y)
     layers = vcat(Formulation(predictor, y, c), last.(p))

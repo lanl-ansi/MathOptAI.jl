@@ -100,14 +100,18 @@ function add_predictor(
     x::Vector,
 )
     paths = _tree_to_paths(predictor)
-    z = JuMP.@variable(
+    z = add_variables(
         model,
-        [1:length(paths)],
-        binary = true,
-        base_name = "moai_BinaryDecisionTree_z",
+        predictor,
+        x,
+        length(paths),
+        "moai_BinaryDecisionTree_z",
     )
+    JuMP.set_binary.(z)
     c = JuMP.@constraint(model, sum(z) == 1)
-    y = JuMP.@variable(model, base_name = "moai_BinaryDecisionTree_value")
+    y = only(
+        add_variables(model, predictor, x, 1, "moai_BinaryDecisionTree_value"),
+    )
     y_expr = JuMP.AffExpr(0.0)
     formulation = Formulation(predictor, Any[y; z], Any[c])
     for (zi, (leaf, path)) in zip(z, paths)

@@ -4,6 +4,41 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
+"""
+    add_variables(
+        model::JuMP.AbstractModel,
+        predictor::AbstractPredictor,
+        x::Vector,
+        n::Int,
+        base_name::String,
+    )::Vector
+
+This function is a hook for JuMP extensions to interact with MathOptAI.
+
+The default method is:
+```julia
+function add_variables(
+    model::JuMP.AbstractModel,
+    predictor::AbstractPredictor,
+    x::Vector,
+    n::Int,
+    base_name::String,
+)
+    return JuMP.@variable(model, [1:n], base_name = base_name)
+end
+```
+Implement this method for subtypes of `model` or `x` as needed.
+"""
+function add_variables(
+    model::JuMP.AbstractModel,
+    predictor::AbstractPredictor,
+    x::Vector,
+    n::Int,
+    base_name::String,
+)
+    return JuMP.@variable(model, [1:n], base_name = base_name)
+end
+
 function _get_variable_bounds(x::JuMP.GenericVariableRef{T}) where {T}
     lb, ub = typemin(T), typemax(T)
     if JuMP.has_upper_bound(x)

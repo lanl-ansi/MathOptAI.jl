@@ -86,9 +86,9 @@ function add_predictor(
 )
     m = length(x)
     bounds = _get_variable_bounds.(x)
-    y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
+    y = add_variables(model, predictor, x, m, "moai_ReLU")
     cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
-    z = JuMP.@variable(model, [1:m], base_name = "moai_z")
+    z = add_variables(model, predictor, x, m, "moai_z")
     _set_bounds_if_finite.(Ref(cons), z, 0, max.(0, -first.(bounds)))
     append!(cons, JuMP.@constraint(model, x .== y - z))
     if predictor.relaxation_parameter === nothing

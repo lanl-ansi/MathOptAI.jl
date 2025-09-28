@@ -68,10 +68,10 @@ function add_predictor(
 )
     m = length(x)
     bounds = _get_variable_bounds.(x)
-    y = JuMP.@variable(model, [i in 1:m], base_name = "moai_ReLU")
+    y = add_variables(model, predictor, x, m, "moai_ReLU")
     cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
-    z = JuMP.@variable(model, [1:m], lower_bound = 0, base_name = "moai_z")
-    _set_bounds_if_finite.(Ref(cons), z, nothing, -first.(bounds))
+    z = add_variables(model, predictor, x, m, "moai_z")
+    _set_bounds_if_finite.(Ref(cons), z, 0, -first.(bounds))
     append!(cons, JuMP.@constraint(model, x .== y - z))
     formulation = Formulation(predictor, Any[y; z], cons)
     for i in 1:m

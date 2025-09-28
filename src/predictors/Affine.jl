@@ -98,7 +98,7 @@ end
 function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
     _check_dimension(predictor, x)
     m = size(predictor.A, 1)
-    y = JuMP.@variable(model, [1:m], base_name = "moai_Affine")
+    y = add_variables(model, predictor, x, m, "moai_Affine")
     bounds = _get_variable_bounds.(x)
     cons = Any[]
     for i in 1:size(predictor.A, 1)

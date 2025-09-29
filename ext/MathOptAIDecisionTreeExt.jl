@@ -52,7 +52,7 @@ julia> y, _ = MathOptAI.add_predictor(model, tree, x);
 
 julia> y
 1-element Vector{VariableRef}:
- moai_BinaryDecisionTree_value]1]
+ moai_BinaryDecisionTree_value[1]
 
 julia> MathOptAI.build_predictor(tree)
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]

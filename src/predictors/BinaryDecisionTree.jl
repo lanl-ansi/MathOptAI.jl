@@ -41,12 +41,12 @@ julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 
 julia> y
 1-element Vector{VariableRef}:
- moai_BinaryDecisionTree_value
+ moai_BinaryDecisionTree_value[1]
 
 julia> formulation
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ variables [4]
-│ ├ moai_BinaryDecisionTree_value
+│ ├ moai_BinaryDecisionTree_value[1]
 │ ├ moai_BinaryDecisionTree_z[1]
 │ ├ moai_BinaryDecisionTree_z[2]
 │ └ moai_BinaryDecisionTree_z[3]
@@ -57,7 +57,7 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.999999}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
-  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
+  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
 ```
 """
 struct BinaryDecisionTree{K,V} <: AbstractPredictor

@@ -43,7 +43,7 @@ function MathOptAI.add_variables(
 end
 
 function test_extension()
-    predictor = MathOptAI.Pileline(
+    predictor = MathOptAI.Pipeline(
         MathOptAI.Affine(Float64[1 2 3; 4 5 6]),
         MathOptAI.ReLU(),
     )

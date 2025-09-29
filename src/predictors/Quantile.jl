@@ -55,7 +55,7 @@ function add_predictor(
     x::Vector,
 )
     M, N = length(x), length(predictor.quantiles)
-    y = only(add_variables(model, predictor, x, N, "moai_quantile"))
+    y = add_variables(model, predictor, x, N, "moai_quantile")
     quantile(q, x...) = Distributions.quantile(predictor.distribution(x...), q)
     cons = Any[]
     for (qi, yi) in zip(predictor.quantiles, y)

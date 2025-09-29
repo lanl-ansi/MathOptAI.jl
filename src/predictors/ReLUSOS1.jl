@@ -46,12 +46,14 @@ ReLUSOS1()
 │ ├ moai_ReLU[2]
 │ ├ moai_z[1]
 │ └ moai_z[2]
-└ constraints [10]
+└ constraints [12]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
   ├ moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] ≥ 0
   ├ moai_z[1] ≤ 1
+  ├ moai_z[2] ≥ 0
   ├ moai_z[2] ≤ 1
   ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
   ├ x[2] - moai_ReLU[2] + moai_z[2] = 0

@@ -54,10 +54,10 @@ ReLUBigM(100.0)
   ├ moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] ≤ 2
   ├ moai_z[1] binary
+  ├ moai_z[2] binary
   ├ -x[1] + moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] - moai_z[1] ≤ 0
   ├ -x[1] + moai_ReLU[1] + 3 moai_z[1] ≤ 3
-  ├ moai_z[2] binary
   ├ -x[2] + moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] - 2 moai_z[2] ≤ 0
   └ -x[2] + moai_ReLU[2] + 3 moai_z[2] ≤ 3

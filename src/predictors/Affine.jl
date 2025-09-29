@@ -99,7 +99,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
     _check_dimension(predictor, x)
     m = size(predictor.A, 1)
     y = add_variables(model, predictor, x, m, "moai_Affine")
-    bounds = _get_variable_bounds.(x)
+    bounds = get_variable_bounds.(x)
     cons = Any[]
     for i in 1:size(predictor.A, 1)
         y_lb, y_ub = predictor.b[i], predictor.b[i]
@@ -109,7 +109,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
             y_ub += a_ij * ifelse(a_ij >= 0, ub, lb)
             y_lb += a_ij * ifelse(a_ij >= 0, lb, ub)
         end
-        _set_bounds_if_finite(cons, y[i], y_lb, y_ub)
+        set_variable_bounds(cons, y[i], y_lb, y_ub; optional = true)
     end
     append!(cons, JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y))
     return y, Formulation(predictor, y, cons)

@@ -49,15 +49,15 @@ ReLUSOS1()
 └ constraints [12]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
-  ├ moai_ReLU[2] ≥ 0
-  ├ moai_ReLU[2] ≤ 2
   ├ moai_z[1] ≥ 0
   ├ moai_z[1] ≤ 1
+  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
   ├ moai_z[2] ≥ 0
   ├ moai_z[2] ≤ 1
-  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
   ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
-  ├ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
   └ [moai_ReLU[2], moai_z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
 ```
 """
@@ -69,16 +69,19 @@ function add_predictor(
     x::Vector,
 )
     m = length(x)
-    bounds = _get_variable_bounds.(x)
+    cons = Any[]
     y = add_variables(model, predictor, x, m, "moai_ReLU")
-    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
     z = add_variables(model, predictor, x, m, "moai_z")
-    _set_bounds_if_finite.(Ref(cons), z, 0, -first.(bounds))
-    append!(cons, JuMP.@constraint(model, x .== y - z))
-    formulation = Formulation(predictor, Any[y; z], cons)
     for i in 1:m
-        c = JuMP.@constraint(model, [y[i], z[i]] in MOI.SOS1([1.0, 2.0]))
-        push!(formulation.constraints, c)
+        l, u = get_variable_bounds(x[i])
+        lb = coalesce(max(0, l), 0)
+        set_variable_bounds(cons, y[i], lb, max(0, u); optional = false)
+        set_variable_bounds(cons, z[i], 0, max(0, -l); optional = false)
+        push!(cons, JuMP.@constraint(model, x[i] == y[i] - z[i]))
+        push!(
+            cons,
+            JuMP.@constraint(model, [y[i], z[i]] in MOI.SOS1([1.0, 2.0])),
+        )
     end
-    return y, formulation
+    return y, Formulation(predictor, Any[y; z], cons)
 end

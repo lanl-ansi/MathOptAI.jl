@@ -279,7 +279,7 @@ function Base.show(io::IO, predictor::ReducedSpace)
     return print(io, "ReducedSpace(", predictor.predictor, ")")
 end
 
-include("utilities.jl")
+include("extension.jl")
 
 for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
     if endswith(file, ".jl")

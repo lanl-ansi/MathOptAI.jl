@@ -178,10 +178,10 @@ function test_ReLU_bounds()
         MathOptAI.ReLUQuadratic(),
         MathOptAI.ReLUSOS1(),
     )
-        for lb in values, ub in values
-            if lb > ub
-                continue
-            end
+    for lb in values, ub in values
+        if lb > ub
+            continue
+        end
             model = Model()
             @variable(model, lb <= x <= ub)
             y, _ = MathOptAI.add_predictor(model, f, [x])
@@ -528,10 +528,10 @@ end
 
 function test_fallback_bound_methods()
     fake_variable = "x"
-    l, u = MathOptAI._get_variable_bounds(fake_variable)
-    @test (l, u) == (-Inf, Inf)
+    l, u = MathOptAI.get_variable_bounds(fake_variable)
+    @test ismissing(l) && ismissing(u)
     cons = Any[]
-    @test MathOptAI._set_bounds_if_finite(cons, fake_variable, l, u) === nothing
+    @test MathOptAI.set_variable_bounds(cons, fake_variable, l, u; optional = true) === nothing
     return
 end
 

@@ -40,9 +40,9 @@ Tanh()
 └ constraints [6]
   ├ moai_Tanh[1] ≥ -0.7615941559557649
   ├ moai_Tanh[1] ≤ 0.7615941559557649
+  ├ moai_Tanh[1] - tanh(x[1]) = 0
   ├ moai_Tanh[2] ≥ -0.7615941559557649
   ├ moai_Tanh[2] ≤ 0.9640275800758169
-  ├ moai_Tanh[1] - tanh(x[1]) = 0
   └ moai_Tanh[2] - tanh(x[2]) = 0
 
 julia> y, formulation =
@@ -63,8 +63,12 @@ struct Tanh <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = add_variables(model, predictor, x, length(x), "moai_Tanh")
-    cons = _set_direct_bounds(tanh, -1, 1, x, y)
-    append!(cons, JuMP.@constraint(model, y .== tanh.(x)))
+    cons = Any[]
+    for i in 1:length(x)
+        l, u = coalesce.(tanh.(get_variable_bounds(x[i])), (-1, 1))
+        set_variable_bounds(cons, y[i], l, u; optional = true)
+        push!(cons, JuMP.@constraint(model, y[i] == tanh(x[i])))
+    end
     return y, Formulation(predictor, y, cons)
 end
 

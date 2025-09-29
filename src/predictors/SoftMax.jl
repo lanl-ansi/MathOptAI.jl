@@ -39,13 +39,13 @@ SoftMax()
 │ ├ moai_SoftMax[1]
 │ └ moai_SoftMax[2]
 └ constraints [8]
-  ├ moai_SoftMax[1] ≥ 0
-  ├ moai_SoftMax[1] ≤ 1
-  ├ moai_SoftMax[2] ≥ 0
-  ├ moai_SoftMax[2] ≤ 1
   ├ moai_SoftMax_denom[1] ≥ 0
   ├ moai_SoftMax_denom[1] - (0.0 + exp(x[2]) + exp(x[1])) = 0
+  ├ moai_SoftMax[1] ≥ 0
+  ├ moai_SoftMax[1] ≤ 1
   ├ moai_SoftMax[1] - (exp(x[1]) / moai_SoftMax_denom[1]) = 0
+  ├ moai_SoftMax[2] ≥ 0
+  ├ moai_SoftMax[2] ≤ 1
   └ moai_SoftMax[2] - (exp(x[2]) / moai_SoftMax_denom[1]) = 0
 
 julia> y, formulation =
@@ -68,14 +68,15 @@ ReducedSpace(SoftMax())
 struct SoftMax <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
-    y = add_variables(model, predictor, x, length(x), "moai_SoftMax")
     cons = Any[]
-    _set_bounds_if_finite.(Ref(cons), y, 0, 1)
+    y = add_variables(model, predictor, x, length(x), "moai_SoftMax")
     denom = only(add_variables(model, predictor, x, 1, "moai_SoftMax_denom"))
-    JuMP.set_lower_bound(denom, 0)
-    push!(cons, JuMP.LowerBoundRef(denom))
+    set_variable_bounds(cons, denom, 0, missing; optional = true)
     push!(cons, JuMP.@constraint(model, denom == sum(exp.(x))))
-    append!(cons, JuMP.@constraint(model, y .== exp.(x) ./ denom))
+    for i in 1:length(x)
+        set_variable_bounds(cons, y[i], 0, 1; optional = true)
+        push!(cons, JuMP.@constraint(model, y[i] == exp(x[i]) / denom))
+    end
     return y, Formulation(predictor, [denom; y], cons)
 end
 
@@ -84,9 +85,9 @@ function add_predictor(
     predictor::ReducedSpace{SoftMax},
     x::Vector,
 )
+    cons = Any[]
     denom = only(add_variables(model, predictor, x, 1, "moai_SoftMax_denom"))
-    JuMP.set_lower_bound(denom, 0)
-    d_con = JuMP.@constraint(model, denom == sum(exp.(x)))
-    constraints = Any[JuMP.LowerBoundRef(denom); d_con]
-    return exp.(x) ./ denom, Formulation(predictor, [denom], constraints)
+    set_variable_bounds(cons, denom, 0, missing; optional = true)
+    push!(cons, JuMP.@constraint(model, denom == sum(exp.(x))))
+    return exp.(x) ./ denom, Formulation(predictor, [denom], cons)
 end

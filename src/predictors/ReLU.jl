@@ -40,9 +40,9 @@ ReLU()
 └ constraints [6]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[1] - max(0.0, x[1]) = 0
   ├ moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] ≤ 2
-  ├ moai_ReLU[1] - max(0.0, x[1]) = 0
   └ moai_ReLU[2] - max(0.0, x[2]) = 0
 
 julia> y, formulation =
@@ -63,8 +63,13 @@ struct ReLU <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     y = add_variables(model, predictor, x, length(x), "moai_ReLU")
-    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
-    append!(cons, JuMP.@constraint(model, y .== max.(0, x)))
+    cons = Any[]
+    for i in 1:length(x)
+        l, u = get_variable_bounds(x[i])
+        l = coalesce(max(0, l), 0)
+        set_variable_bounds(cons, y[i], l, max(0, u); optional = true)
+        push!(cons, JuMP.@constraint(model, y[i] == max(0, x[i])))
+    end
     return y, Formulation(predictor, y, cons)
 end
 

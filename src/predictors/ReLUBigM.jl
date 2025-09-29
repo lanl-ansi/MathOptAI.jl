@@ -51,13 +51,13 @@ ReLUBigM(100.0)
 └ constraints [12]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
-  ├ moai_ReLU[2] ≥ 0
-  ├ moai_ReLU[2] ≤ 2
   ├ moai_z[1] binary
-  ├ moai_z[2] binary
   ├ -x[1] + moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] - moai_z[1] ≤ 0
   ├ -x[1] + moai_ReLU[1] + 3 moai_z[1] ≤ 3
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[2] binary
   ├ -x[2] + moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] - 2 moai_z[2] ≤ 0
   └ -x[2] + moai_ReLU[2] + 3 moai_z[2] ≤ 3
@@ -74,22 +74,19 @@ function add_predictor(
 )
     m = length(x)
     y = add_variables(model, predictor, x, m, "moai_ReLU")
-    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
-    formulation = Formulation(predictor, Any[], cons)
-    append!(formulation.variables, y)
     z = add_variables(model, predictor, x, m, "moai_z")
     JuMP.set_binary.(z)
-    append!(formulation.variables, z)
-    append!(formulation.constraints, JuMP.BinaryRef.(z))
+    cons = Any[]
     for i in 1:m
-        lb, ub = _get_variable_bounds(x[i])
-        c = JuMP.@constraint(model, y[i] >= x[i])
-        push!(formulation.constraints, c)
-        c = JuMP.@constraint(model, y[i] <= min(ub, predictor.M) * z[i])
-        push!(formulation.constraints, c)
-        L = min(max(0.0, -lb), predictor.M)
-        c = JuMP.@constraint(model, y[i] <= x[i] + L * (1 - z[i]))
-        push!(formulation.constraints, c)
+        l, u = get_variable_bounds(x[i])
+        lb = coalesce(max(0, l), 0)
+        set_variable_bounds(cons, y[i], lb, max(0, u); optional = false)
+        push!(cons, JuMP.BinaryRef(z[i]))
+        push!(cons, JuMP.@constraint(model, y[i] >= x[i]))
+        U = coalesce(min(predictor.M, u), predictor.M)
+        push!(cons, JuMP.@constraint(model, y[i] <= U * z[i]))
+        L = coalesce(min(predictor.M, max(-l, 0)), predictor.M)
+        push!(cons, JuMP.@constraint(model, y[i] <= x[i] + L * (1 - z[i])))
     end
-    return y, formulation
+    return y, Formulation(predictor, Any[y; z], cons)
 end

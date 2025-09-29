@@ -40,9 +40,9 @@ Sigmoid()
 └ constraints [6]
   ├ moai_Sigmoid[1] ≥ 0.2689414213699951
   ├ moai_Sigmoid[1] ≤ 0.7310585786300049
+  ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
   ├ moai_Sigmoid[2] ≥ 0.2689414213699951
   ├ moai_Sigmoid[2] ≤ 0.8807970779778823
-  ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
   └ moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
 
 julia> y, formulation =
@@ -63,8 +63,13 @@ struct Sigmoid <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = add_variables(model, predictor, x, length(x), "moai_Sigmoid")
-    cons = _set_direct_bounds(x -> 1 / (1 + exp(-x)), 0, 1, x, y)
-    append!(cons, JuMP.@constraint(model, y .== 1 ./ (1 .+ exp.(-x))))
+    cons = Any[]
+    f(x) = 1 / (1 + exp(-x))
+    for i in 1:length(x)
+        l, u = coalesce.(f.(get_variable_bounds(x[i])), (0, 1))
+        set_variable_bounds(cons, y[i], l, u; optional = true)
+        push!(cons, JuMP.@constraint(model, y[i] == f(x[i])))
+    end
     return y, Formulation(predictor, y, cons)
 end
 

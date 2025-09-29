@@ -40,9 +40,9 @@ SoftPlus(2.0)
 └ constraints [6]
   ├ moai_SoftPlus[1] ≥ 0.0634640055214863
   ├ moai_SoftPlus[1] ≤ 1.0634640055214863
+  ├ moai_SoftPlus[1] - (log(1.0 + exp(2 x[1])) / 2.0) = 0
   ├ moai_SoftPlus[2] ≥ 0.0634640055214863
   ├ moai_SoftPlus[2] ≤ 2.0090749639589047
-  ├ moai_SoftPlus[1] - (log(1.0 + exp(2 x[1])) / 2.0) = 0
   └ moai_SoftPlus[2] - (log(1.0 + exp(2 x[2])) / 2.0) = 0
 
 julia> y, formulation =
@@ -69,10 +69,14 @@ function add_predictor(
     predictor::SoftPlus,
     x::Vector,
 )
-    β = predictor.beta
     y = add_variables(model, predictor, x, length(x), "moai_SoftPlus")
-    cons = _set_direct_bounds(xi -> log(1 + exp(β * xi)) / β, 0, nothing, x, y)
-    append!(cons, JuMP.@constraint(model, y .== log.(1 .+ exp.(β .* x)) ./ β))
+    cons = Any[]
+    f(x) = log(1 + exp(predictor.beta * x)) / predictor.beta
+    for i in 1:length(x)
+        l, u = f.(get_variable_bounds(x[i]))
+        set_variable_bounds(cons, y[i], coalesce(l, 0), u; optional = true)
+        push!(cons, JuMP.@constraint(model, y[i] == f(x[i])))
+    end
     return y, Formulation(predictor, y, cons)
 end
 

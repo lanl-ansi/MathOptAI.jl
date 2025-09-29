@@ -122,7 +122,7 @@ function set_variable_bounds(
     l::Any,
     u::Any;
     kwargs...,
-) where {T<:Real}
+)
     if !ismissing(l) && l > typemin(JuMP.value_type(typeof(x)))
         JuMP.set_lower_bound(x, l)
         push!(cons, JuMP.LowerBoundRef(x))

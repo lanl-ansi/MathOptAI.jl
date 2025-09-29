@@ -44,7 +44,7 @@ end
 
 function test_extension()
     predictor = MathOptAI.Pipeline(
-        MathOptAI.Affine(Float64[1 2 3; 4 5 6]),
+        MathOptAI.Affine(Float64[1 2; 3 4; 5 6]),
         MathOptAI.ReLU(),
     )
     model = InfiniteOpt.InfiniteModel()

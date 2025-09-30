@@ -57,15 +57,15 @@ ReLUQuadratic(nothing)
 └ constraints [12]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
-  ├ moai_ReLU[2] ≥ 0
-  ├ moai_ReLU[2] ≤ 2
   ├ moai_z[1] ≥ 0
   ├ moai_z[1] ≤ 1
+  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ moai_ReLU[1]*moai_z[1] = 0
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
   ├ moai_z[2] ≥ 0
   ├ moai_z[2] ≤ 1
-  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
   ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
-  ├ moai_ReLU[1]*moai_z[1] = 0
   └ moai_ReLU[2]*moai_z[2] = 0
 ```
 """
@@ -84,18 +84,21 @@ function add_predictor(
     predictor::ReLUQuadratic,
     x::Vector,
 )
-    m = length(x)
-    bounds = _get_variable_bounds.(x)
-    y = JuMP.@variable(model, [1:m], base_name = "moai_ReLU")
-    cons = _set_direct_bounds(x -> max(0, x), 0, nothing, x, y)
-    z = JuMP.@variable(model, [1:m], base_name = "moai_z")
-    _set_bounds_if_finite.(Ref(cons), z, 0, max.(0, -first.(bounds)))
-    append!(cons, JuMP.@constraint(model, x .== y - z))
-    if predictor.relaxation_parameter === nothing
-        append!(cons, JuMP.@constraint(model, y .* z .== 0))
-    else
-        ϵ = predictor.relaxation_parameter
-        append!(cons, JuMP.@constraint(model, y .* z .<= ϵ))
+    y = add_variables(model, x, length(x), "moai_ReLU")
+    z = add_variables(model, x, length(x), "moai_z")
+    ϵ = predictor.relaxation_parameter
+    cons = Any[]
+    for i in 1:length(x)
+        l, u = get_variable_bounds(x[i])
+        lb = coalesce(max(0, l), 0)
+        set_variable_bounds(cons, y[i], lb, max(0, u); optional = false)
+        set_variable_bounds(cons, z[i], 0, max(0, -l); optional = false)
+        push!(cons, JuMP.@constraint(model, x[i] == y[i] - z[i]))
+        if ϵ === nothing
+            push!(cons, JuMP.@constraint(model, y[i] * z[i] == 0))
+        else
+            push!(cons, JuMP.@constraint(model, y[i] * z[i] <= ϵ))
+        end
     end
     return y, Formulation(predictor, Any[y; z], cons)
 end

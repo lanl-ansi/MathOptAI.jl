@@ -180,3 +180,11 @@ Modules = [Base.get_extension(MathOptAI, :MathOptAIPythonCallExt)]
 ```@autodocs
 Modules = [Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt)]
 ```
+
+## Extensions
+
+```@docs
+add_variables
+get_variable_bounds
+set_variable_bounds
+```

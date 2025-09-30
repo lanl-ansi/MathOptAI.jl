@@ -527,11 +527,17 @@ function test_Scale_constructor()
 end
 
 function test_fallback_bound_methods()
-    fake_variable = "x"
-    l, u = MathOptAI._get_variable_bounds(fake_variable)
-    @test (l, u) == (-Inf, Inf)
-    cons = Any[]
-    @test MathOptAI._set_bounds_if_finite(cons, fake_variable, l, u) === nothing
+    l, u = MathOptAI.get_variable_bounds("x")
+    @test ismissing(l) && ismissing(u)
+    optional = true
+    @test MathOptAI.set_variable_bounds(Any[], "x", l, u; optional) === nothing
+    @test MathOptAI.set_variable_bounds(Any[], "x", 0, 1; optional) === nothing
+    optional = false
+    @test MathOptAI.set_variable_bounds(Any[], "x", l, u; optional) === nothing
+    @test_throws(
+        ErrorException("You must implement this method."),
+        MathOptAI.set_variable_bounds(Any[], "x", 0, 1; optional)
+    )
     return
 end
 

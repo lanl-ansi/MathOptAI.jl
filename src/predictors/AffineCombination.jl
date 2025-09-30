@@ -63,10 +63,10 @@ AffineCombination
 ├ variables [1]
 │ └ moai_AffineCombination[1]
 └ constraints [1]
-  └ 0.5 moai_BinaryDecisionTree_value + 0.5 moai_BinaryDecisionTree_value - moai_AffineCombination[1] = 0
+  └ 0.5 moai_BinaryDecisionTree_value[1] + 0.5 moai_BinaryDecisionTree_value[1] - moai_AffineCombination[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ variables [4]
-│ ├ moai_BinaryDecisionTree_value
+│ ├ moai_BinaryDecisionTree_value[1]
 │ ├ moai_BinaryDecisionTree_z[1]
 │ ├ moai_BinaryDecisionTree_z[2]
 │ └ moai_BinaryDecisionTree_z[3]
@@ -77,10 +77,10 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.999999}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 1}
-  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
+  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ variables [4]
-│ ├ moai_BinaryDecisionTree_value
+│ ├ moai_BinaryDecisionTree_value[1]
 │ ├ moai_BinaryDecisionTree_z[1]
 │ ├ moai_BinaryDecisionTree_z[2]
 │ └ moai_BinaryDecisionTree_z[3]
@@ -91,7 +91,7 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≤ 0.899999}
   ├ moai_BinaryDecisionTree_z[2] --> {x[1] ≥ -0.1}
   ├ moai_BinaryDecisionTree_z[3] --> {x[1] ≥ 0.9}
-  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0
+  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
 ```
 """
 struct AffineCombination <: AbstractPredictor
@@ -120,11 +120,7 @@ function add_predictor(
         model,
         sum(w * z for (w, (z, _)) in zip(predictor.weights, p)),
     )
-    y = JuMP.@variable(
-        model,
-        [1:length(lhs)],
-        base_name = "moai_AffineCombination",
-    )
+    y = add_variables(model, x, length(lhs), "moai_AffineCombination")
     c = JuMP.@constraint(model, lhs .+ predictor.constant .== y)
     layers = vcat(Formulation(predictor, y, c), last.(p))
     return y, PipelineFormulation(predictor, layers)

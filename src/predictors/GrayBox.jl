@@ -91,7 +91,7 @@ Base.show(io::IO, ::GrayBox) = print(io, "GrayBox")
 
 function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
     op, _ = add_predictor(model, ReducedSpace(predictor), x)
-    y = JuMP.@variable(model, [1:length(op)], base_name = "moai_GrayBox")
+    y = add_variables(model, x, length(op), "moai_GrayBox")
     cons = JuMP.@constraint(model, op .== y)
     return y, Formulation(predictor, y, cons)
 end

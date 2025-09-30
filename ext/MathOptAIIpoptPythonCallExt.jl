@@ -22,7 +22,7 @@ function MathOptAI.add_predictor(
         predictor.device,
         predictor.hessian,
     )
-    y = JuMP.@variable(model, [1:set.output_dimension])
+    y = MathOptAI.add_variables(model, x, set.output_dimension, "moai_Pytorch")
     con = JuMP.@constraint(model, [x; y] in set)
     return y, MathOptAI.Formulation(predictor, y, [con])
 end

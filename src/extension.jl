@@ -7,7 +7,6 @@
 """
     add_variables(
         model::JuMP.AbstractModel,
-        predictor::AbstractPredictor,
         x::Vector,
         n::Int,
         base_name::String,
@@ -19,13 +18,12 @@ Add a vector of `n` variables to `model` with the base name `base_name`.
 
 This function is a hook for JuMP extensions to interact with MathOptAI.
 
-Implement this method for subtypes of `model`, `predictor`,  and `x` as needed.
+Implement this method for subtypes of `model`  and `x` as needed.
 
 The default method is:
 ```julia
 function add_variables(
     model::JuMP.AbstractModel,
-    predictor::AbstractPredictor,
     x::Vector,
     n::Int,
     base_name::String,
@@ -36,7 +34,6 @@ end
 """
 function add_variables(
     model::JuMP.AbstractModel,
-    predictor::AbstractPredictor,
     x::Vector,
     n::Int,
     base_name::String,

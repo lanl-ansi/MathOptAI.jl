@@ -73,8 +73,8 @@ function add_predictor(
     x::Vector,
 )
     m = length(x)
-    y = add_variables(model, predictor, x, m, "moai_ReLU")
-    z = add_variables(model, predictor, x, m, "moai_z")
+    y = add_variables(model, x, m, "moai_ReLU")
+    z = add_variables(model, x, m, "moai_z")
     JuMP.set_binary.(z)
     cons = Any[]
     for i in 1:m

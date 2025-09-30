@@ -69,8 +69,8 @@ struct SoftMax <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
     cons = Any[]
-    y = add_variables(model, predictor, x, length(x), "moai_SoftMax")
-    denom = only(add_variables(model, predictor, x, 1, "moai_SoftMax_denom"))
+    y = add_variables(model, x, length(x), "moai_SoftMax")
+    denom = only(add_variables(model, x, 1, "moai_SoftMax_denom"))
     set_variable_bounds(cons, denom, 0, missing; optional = true)
     push!(cons, JuMP.@constraint(model, denom == sum(exp.(x))))
     for i in 1:length(x)
@@ -86,7 +86,7 @@ function add_predictor(
     x::Vector,
 )
     cons = Any[]
-    denom = only(add_variables(model, predictor, x, 1, "moai_SoftMax_denom"))
+    denom = only(add_variables(model, x, 1, "moai_SoftMax_denom"))
     set_variable_bounds(cons, denom, 0, missing; optional = true)
     push!(cons, JuMP.@constraint(model, denom == sum(exp.(x))))
     return exp.(x) ./ denom, Formulation(predictor, [denom], cons)

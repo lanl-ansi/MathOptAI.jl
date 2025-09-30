@@ -62,7 +62,7 @@ ReducedSpace(ReLU())
 struct ReLU <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
-    y = add_variables(model, predictor, x, length(x), "moai_ReLU")
+    y = add_variables(model, x, length(x), "moai_ReLU")
     cons = Any[]
     for i in 1:length(x)
         l, u = get_variable_bounds(x[i])

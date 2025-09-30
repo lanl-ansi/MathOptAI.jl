@@ -25,7 +25,6 @@ end
 
 function MathOptAI.add_variables(
     model::JuMP.AbstractModel,
-    predictor::MathOptAI.AbstractPredictor,
     x::Vector{<:InfiniteOpt.GeneralVariableRef},
     n::Int,
     base_name::String,

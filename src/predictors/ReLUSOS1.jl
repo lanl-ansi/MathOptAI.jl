@@ -70,8 +70,8 @@ function add_predictor(
 )
     m = length(x)
     cons = Any[]
-    y = add_variables(model, predictor, x, m, "moai_ReLU")
-    z = add_variables(model, predictor, x, m, "moai_z")
+    y = add_variables(model, x, m, "moai_ReLU")
+    z = add_variables(model, x, m, "moai_z")
     for i in 1:m
         l, u = get_variable_bounds(x[i])
         lb = coalesce(max(0, l), 0)

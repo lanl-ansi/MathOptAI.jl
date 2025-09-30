@@ -69,7 +69,7 @@ function add_predictor(
     predictor::SoftPlus,
     x::Vector,
 )
-    y = add_variables(model, predictor, x, length(x), "moai_SoftPlus")
+    y = add_variables(model, x, length(x), "moai_SoftPlus")
     cons = Any[]
     f(x) = log(1 + exp(predictor.beta * x)) / predictor.beta
     for i in 1:length(x)

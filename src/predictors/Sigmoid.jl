@@ -62,7 +62,7 @@ ReducedSpace(Sigmoid())
 struct Sigmoid <: AbstractPredictor end
 
 function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
-    y = add_variables(model, predictor, x, length(x), "moai_Sigmoid")
+    y = add_variables(model, x, length(x), "moai_Sigmoid")
     cons = Any[]
     f(x) = 1 / (1 + exp(-x))
     for i in 1:length(x)

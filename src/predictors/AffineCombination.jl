@@ -120,13 +120,7 @@ function add_predictor(
         model,
         sum(w * z for (w, (z, _)) in zip(predictor.weights, p)),
     )
-    y = add_variables(
-        model,
-        predictor,
-        x,
-        length(lhs),
-        "moai_AffineCombination",
-    )
+    y = add_variables(model, x, length(lhs), "moai_AffineCombination")
     c = JuMP.@constraint(model, lhs .+ predictor.constant .== y)
     layers = vcat(Formulation(predictor, y, c), last.(p))
     return y, PipelineFormulation(predictor, layers)

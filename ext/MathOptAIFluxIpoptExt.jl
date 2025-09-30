@@ -17,7 +17,13 @@ function MathOptAI.add_predictor(
     x::Vector,
 )
     set = _build_set(predictor.predictor, length(x), predictor.hessian)
-    y = JuMP.@variable(model, [1:set.output_dimension])
+    y = MathOptAI.add_variables(
+        model,
+        predictor,
+        x,
+        set.output_dimension,
+        "moai_Flux",
+    )
     con = JuMP.@constraint(model, [x; y] in set)
     return y, MathOptAI.Formulation(predictor, y, [con])
 end

@@ -65,9 +65,8 @@ function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     y = add_variables(model, x, length(x), "moai_ReLU")
     cons = Any[]
     for i in 1:length(x)
-        l, u = get_variable_bounds(x[i])
-        l = coalesce(max(0, l), 0)
-        set_variable_bounds(cons, y[i], l, max(0, u); optional = true)
+        l, u = max.(0, get_variable_bounds(x[i]))
+        set_variable_bounds(cons, y[i], coalesce(l, 0), u; optional = true)
         push!(cons, JuMP.@constraint(model, y[i] == max(0, x[i])))
     end
     return y, Formulation(predictor, y, cons)

@@ -68,11 +68,10 @@ function add_predictor(
     predictor::ReLUSOS1,
     x::Vector,
 )
-    m = length(x)
     cons = Any[]
-    y = add_variables(model, x, m, "moai_ReLU")
-    z = add_variables(model, x, m, "moai_z")
-    for i in 1:m
+    y = add_variables(model, x, length(x), "moai_ReLU")
+    z = add_variables(model, x, length(x), "moai_z")
+    for i in 1:length(x)
         l, u = get_variable_bounds(x[i])
         lb = coalesce(max(0, l), 0)
         set_variable_bounds(cons, y[i], lb, max(0, u); optional = false)

@@ -72,12 +72,11 @@ function add_predictor(
     predictor::ReLUBigM,
     x::Vector,
 )
-    m = length(x)
-    y = add_variables(model, x, m, "moai_ReLU")
-    z = add_variables(model, x, m, "moai_z")
+    y = add_variables(model, x, length(x), "moai_ReLU")
+    z = add_variables(model, x, length(x), "moai_z")
     JuMP.set_binary.(z)
     cons = Any[]
-    for i in 1:m
+    for i in 1:length(x)
         l, u = get_variable_bounds(x[i])
         lb = coalesce(max(0, l), 0)
         set_variable_bounds(cons, y[i], lb, max(0, u); optional = false)

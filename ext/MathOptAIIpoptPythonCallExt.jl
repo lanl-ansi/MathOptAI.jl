@@ -38,7 +38,7 @@ function _build_set(
     hessian::Bool,
 )
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(filename; weights_only = false)
+    torch_model = torch.load(filename; weights_only = false, map_location = "cpu")
     torch_model = torch_model.to(device)
     y = torch_model(torch.zeros(input_dimension; device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))

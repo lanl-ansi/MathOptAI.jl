@@ -640,6 +640,35 @@ function test_vector_nonlinear_oracle_sigmoid_2()
     return
 end
 
+function test_gelu()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_GELU.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(3, 16),
+            torch.nn.GELU(),
+            torch.nn.Linear(16, 2),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i = 1:3] == i)
+    torch_model = MathOptAI.PytorchModel(filename)
+    y, _ = MathOptAI.add_predictor(model, torch_model, x)
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test isapprox(value.(y), _evaluate_model(filename, value.(x)); atol = 1e-4)
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

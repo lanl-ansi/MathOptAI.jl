@@ -7,14 +7,7 @@
 """
     VectorNonlinearOracle(x)
 
-A wrapper struct for creating an `Ipopt.VectorNonlinearOracle`.
-
-!!! warning
-    To use [`VectorNonlinearOracle`](@ref), your code must load the `Ipopt`
-    package.
-    ```julia
-    import Ipopt
-    ```
+A wrapper struct for creating an `MOI.VectorNonlinearOracle`.
 """
 struct VectorNonlinearOracle{P} <: AbstractPredictor
     predictor::P

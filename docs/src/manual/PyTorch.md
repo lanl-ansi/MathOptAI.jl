@@ -117,7 +117,7 @@ y
 formulation
 ```
 
-## VectorNonlinearOracle
+## [VectorNonlinearOracle](@id pytorch-vector-nonlinear-oracle)
 
 Use the `vector_nonlinear_oracle = true` keyword to embed the network as a
 vector nonlinear operator:

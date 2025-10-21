@@ -104,7 +104,6 @@ end
 
 function test_Quantile()
     model = Model(Ipopt.Optimizer)
-    set_silent(model)
     @variable(model, 1 <= x <= 2)
     predictor = MathOptAI.Quantile([0.1, 0.9]) do x
         return Distributions.Normal(x, 3 - x)

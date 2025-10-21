@@ -31,6 +31,7 @@ The following predictors are supported. See their docstrings for details:
 | [`SoftMax`](@ref)  |  $f(x) = \frac{e^x}{\sum e^{x_i}}$     | $M \rightarrow M$   |
 | [`SoftPlus`](@ref) |  $f(x) = \frac{1}{\beta} \log(1 + e^{\beta x})$ | $M \rightarrow M$ |
 | [`Tanh`](@ref)     |  $f(x) = \tanh.(x)$                    | $M \rightarrow M$   |
+| [`VectorNonlinearOracle`](@ref) |  $f(x)$                   | $M \rightarrow M$   |
 
 Note that some predictors, such as the ReLU ones, offer multiple formulations of
 the same mathematical relationship. The ''right'' choice is solver- and

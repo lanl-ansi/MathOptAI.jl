@@ -559,6 +559,66 @@ function test_Scale_DimensionMismatch()
     return
 end
 
+function test_GELU()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.GELU(), x)
+    @test length(y) == 2
+    @test num_variables(model) == 4
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
+    @objective(model, Min, sum(y))
+    X = [-1.0, 2.0]
+    fix.(x, X)
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ MathOptAI._gelu.(X)
+    return
+end
+
+function test_GELU_bounds()
+    values = [-Inf, -1, 0, 2, Inf]
+    for lb in values, ub in values
+        if lb == Inf || ub == -Inf || lb > ub
+            continue
+        end
+        model = Model()
+        @variable(model, lb <= x <= ub)
+        y, _ = MathOptAI.add_predictor(model, MathOptAI.GELU(), [x])
+        if lb >= 0.0
+            @test lower_bound.(y) == [MathOptAI._gelu(lb)]
+        else
+            @test lower_bound.(y) == [-0.17]
+        end
+        if ub == Inf
+            @test !any(has_upper_bound.(y))
+        elseif ub >= 0.0
+            @test upper_bound.(y) == [MathOptAI._gelu(ub)]
+        else
+            @test upper_bound.(y) == [0.0]
+        end
+    end
+    return
+end
+
+function test_ReducedSpace_GELU()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    predictor = MathOptAI.ReducedSpace(MathOptAI.GELU())
+    y, formulation = MathOptAI.add_predictor(model, predictor, x)
+    @test length(y) == 2
+    @test num_variables(model) == 2
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
+    @objective(model, Min, sum(y))
+    X = [-1.0, 2.0]
+    fix.(x, X)
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ MathOptAI._gelu.(X)
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

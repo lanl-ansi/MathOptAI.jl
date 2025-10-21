@@ -26,6 +26,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
 ## Supported layers
 
+ * `nn.GELU`
  * `nn.Linear`
  * `nn.ReLU`
  * `nn.Sequential`
@@ -121,6 +122,8 @@ function _predictor(nn, layer, config)
         end
         bias = PythonCall.pyconvert(Vector{Float64}, layer.bias.tolist())
         return MathOptAI.Affine(Matrix(weight), bias)
+    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.GELU))
+        return get(config, :GELU, MathOptAI.GELU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.ReLU))
         return get(config, :ReLU, MathOptAI.ReLU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))

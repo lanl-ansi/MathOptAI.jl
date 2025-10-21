@@ -51,6 +51,11 @@ AffineCombination
 BinaryDecisionTree
 ```
 
+## `GELU`
+```@docs
+GELU
+```
+
 ## `GrayBox`
 ```@docs
 GrayBox

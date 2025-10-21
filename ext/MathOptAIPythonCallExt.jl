@@ -114,7 +114,7 @@ function MathOptAI.build_predictor(
     torch_model = torch.load(
         predictor.filename;
         weights_only = false,
-        map_location = "cpu",
+        map_location = device,
     )
     return _predictor(nn, torch_model, config)
 end
@@ -155,9 +155,8 @@ function MathOptAI.GrayBox(
     torch_model = torch.load(
         predictor.filename;
         weights_only = false,
-        map_location = "cpu",
+        map_location = device,
     )
-    torch_model = torch_model.to(device)
     J = torch.func.jacrev(torch_model)
     H = torch.func.hessian(torch_model)
     function output_size(x::Vector)
@@ -210,8 +209,8 @@ function _build_set(
     hessian::Bool,
 )
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(filename; weights_only = false)
-    torch_model = torch_model.to(device)
+    torch_model =
+        torch.load(filename; weights_only = false, map_location = device)
     y = torch_model(torch.zeros(input_dimension; device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     # We model the function as:

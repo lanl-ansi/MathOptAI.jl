@@ -76,6 +76,7 @@ function add_predictor(
     for i in 1:length(x)
         l, u = predictor.(get_variable_bounds(x[i]))
         set_variable_bounds(cons, y[i], coalesce(l, 0), u; optional = true)
+        set_variable_start(y[i], predictor(get_variable_start(x[i])))
         push!(cons, JuMP.@constraint(model, y[i] == predictor(x[i])))
     end
     return y, Formulation(predictor, y, cons)

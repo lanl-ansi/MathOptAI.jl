@@ -130,3 +130,53 @@ function set_variable_bounds(
     end
     return
 end
+
+"""
+    get_variable_start(x::JuMP.AbstractVariableRef)
+
+Get the primal starting value of `x`, or return `missing` if one is not set.
+
+The return value of this function is propogated through the various
+[`AbstractPredictor`](@ref)s, and the primal start of new output variables is
+set using [`set_variable_start`](@ref).
+
+## Extensions
+
+This function is a hook for JuMP extensions to interact with MathOptAI.
+
+Implement this method for subtypes of `x` as needed.
+"""
+get_variable_start(::Any) = missing
+
+function get_variable_start(x::JuMP.GenericVariableRef)
+    return something(JuMP.start_value(x), missing)
+end
+
+function get_variable_start(x::JuMP.AbstractJuMPScalar)
+    return JuMP.value(get_variable_start, x)
+end
+
+get_variable_start(x::Real) = x
+
+"""
+    set_variable_start(x::JuMP.AbstractVariableRef, start::Any)
+
+Set the primal starting value of `x` to `start`, or do nothing if `start` is
+`missing`.
+
+The input value `start` of this function is computed by propogating the primal
+start of the input variables (obtained with [`get_variable_start`](@ref))
+through the various [`AbstractPredictor`](@ref)s.
+
+## Extensions
+
+This function is a hook for JuMP extensions to interact with MathOptAI.
+
+Implement this method for subtypes of `x` and `start` as needed.
+"""
+set_variable_start(::Any, ::Missing) = nothing
+
+function set_variable_start(x::Any, start::Any)
+    JuMP.set_start_value(x, start)
+    return
+end

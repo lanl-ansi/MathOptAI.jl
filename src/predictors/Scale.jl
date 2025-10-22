@@ -109,6 +109,10 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
         y_ub += scale * ifelse(scale >= 0, ub, lb)
         y_lb += scale * ifelse(scale >= 0, lb, ub)
         set_variable_bounds(cons, y[i], y_lb, y_ub; optional = true)
+        set_variable_start(
+            y[i],
+            scale * get_variable_start(x[i]) + predictor.bias[i],
+        )
     end
     append!(cons, JuMP.@constraint(model, predictor(x) .== y))
     return y, Formulation(predictor, y, cons)

@@ -127,7 +127,7 @@ function _predictor(nn, layer, config)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.ReLU))
         return get(config, :ReLU, MathOptAI.ReLU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))
-        layers = [_predictor(nn, child, config) for child in layer.children()]
+        layers = [_predictor(nn, child, config) for child in layer]
         return MathOptAI.Pipeline(layers)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sigmoid))
         return get(config, :Sigmoid, MathOptAI.Sigmoid())

@@ -669,6 +669,34 @@ function test_gelu()
     return
 end
 
+function test_pr_207()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_#207.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        activation = torch.nn.ReLU()
+        model = torch.nn.Sequential(
+            torch.nn.Linear(2, 3),
+            activation,
+            torch.nn.Linear(3, 4),
+            activation,
+            torch.nn.Linear(4, 1),
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model()
+    @variable(model, x[1:2])
+    torch_model = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(model, torch_model, x)
+    @test length(formulation.layers) == 5
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 7
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

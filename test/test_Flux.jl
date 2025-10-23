@@ -333,7 +333,7 @@ function test_vector_nonlinear_oracle_sigmoid()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[i = 1:3] == i)
+    @variable(model, x[i in 1:3] == i)
     y, formulation =
         MathOptAI.add_predictor(model, chain, x; vector_nonlinear_oracle = true)
     optimize!(model)
@@ -346,7 +346,7 @@ function test_vector_nonlinear_oracle_sigmoid_2()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[i = 1:3] == i)
+    @variable(model, x[i in 1:3] == i)
     @constraint(model, x[1] * x[2]^1.23 <= 4)
     y, formulation = MathOptAI.add_predictor(
         model,
@@ -364,7 +364,7 @@ end
 function test_vector_nonlinear_oracle_sigmoid_reduced_space_error()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model()
-    @variable(model, x[i = 1:3] == i)
+    @variable(model, x[i in 1:3] == i)
     @test_throws(
         ErrorException(
             "cannot construct reduced-space formulation of VectorNonlinearOracle",

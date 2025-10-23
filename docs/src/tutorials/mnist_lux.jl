@@ -145,7 +145,7 @@ Plots.plot(plots...; size = (1200, 600), layout = (2, 4))
 x, y = only(data_loader(test_data; batchsize = length(test_data)))
 y_model, _ = chain(x, parameters, state)
 losses = Lux.CrossEntropyLoss(; agg = identity)(y_model, y)
-indices = sortperm(losses; dims = 2)[[1:4; end-3:end]]
+indices = sortperm(losses; dims = 2)[[1:4; (end-3):end]]
 plots = [plot_image(predictor, test_data[i].features) for i in indices]
 Plots.plot(plots...; size = (1200, 600), layout = (2, 4))
 

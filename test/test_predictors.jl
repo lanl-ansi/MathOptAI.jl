@@ -572,7 +572,7 @@ function test_GELU()
     fix.(x, X)
     optimize!(model)
     @assert is_solved_and_feasible(model)
-    @test value.(y) ≈ MathOptAI._gelu.(X)
+    @test value.(y) ≈ MathOptAI.GELU().(X)
     return
 end
 
@@ -586,14 +586,14 @@ function test_GELU_bounds()
         @variable(model, lb <= x <= ub)
         y, _ = MathOptAI.add_predictor(model, MathOptAI.GELU(), [x])
         if lb >= 0.0
-            @test lower_bound.(y) == [MathOptAI._gelu(lb)]
+            @test lower_bound.(y) == [MathOptAI.GELU()(lb)]
         else
             @test lower_bound.(y) == [-0.17]
         end
         if ub == Inf
             @test !any(has_upper_bound.(y))
         elseif ub >= 0.0
-            @test upper_bound.(y) == [MathOptAI._gelu(ub)]
+            @test upper_bound.(y) == [MathOptAI.GELU()(ub)]
         else
             @test upper_bound.(y) == [0.0]
         end
@@ -615,7 +615,7 @@ function test_ReducedSpace_GELU()
     fix.(x, X)
     optimize!(model)
     @assert is_solved_and_feasible(model)
-    @test value.(y) ≈ MathOptAI._gelu.(X)
+    @test value.(y) ≈ MathOptAI.GELU().(X)
     return
 end
 

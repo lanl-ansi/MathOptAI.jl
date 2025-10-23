@@ -61,14 +61,15 @@ ReducedSpace(Sigmoid())
 """
 struct Sigmoid <: AbstractPredictor end
 
+(::Sigmoid)(x) = 1 / (1 + exp(-x))
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = add_variables(model, x, length(x), "moai_Sigmoid")
     cons = Any[]
-    f(x) = 1 / (1 + exp(-x))
     for i in 1:length(x)
-        l, u = coalesce.(f.(get_variable_bounds(x[i])), (0, 1))
+        l, u = coalesce.(predictor.(get_variable_bounds(x[i])), (0, 1))
         set_variable_bounds(cons, y[i], l, u; optional = true)
-        push!(cons, JuMP.@constraint(model, y[i] == f(x[i])))
+        push!(cons, JuMP.@constraint(model, y[i] == predictor(x[i])))
     end
     return y, Formulation(predictor, y, cons)
 end
@@ -78,5 +79,5 @@ function add_predictor(
     predictor::ReducedSpace{Sigmoid},
     x::Vector,
 )
-    return 1 ./ (1 .+ exp.(-x)), Formulation(predictor)
+    return predictor.predictor.(x), Formulation(predictor)
 end

@@ -95,6 +95,11 @@ function _check_dimension(predictor::Affine, x::Vector)
     return
 end
 
+function (predictor::Affine)(x::Vector)
+    _check_dimension(predictor, x)
+    return predictor.A * x .+ predictor.b
+end
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
     _check_dimension(predictor, x)
     m = size(predictor.A, 1)
@@ -111,7 +116,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Affine, x::Vector)
         end
         set_variable_bounds(cons, y[i], y_lb, y_ub; optional = true)
     end
-    append!(cons, JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y))
+    append!(cons, JuMP.@constraint(model, predictor(x) .== y))
     return y, Formulation(predictor, y, cons)
 end
 
@@ -120,8 +125,5 @@ function add_predictor(
     predictor::ReducedSpace{<:Affine},
     x::Vector,
 )
-    _check_dimension(predictor.predictor, x)
-    A, b = predictor.predictor.A, predictor.predictor.b
-    y = JuMP.@expression(model, A * x .+ b)
-    return y, Formulation(predictor)
+    return predictor.predictor(x), Formulation(predictor)
 end

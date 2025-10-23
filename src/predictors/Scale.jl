@@ -92,6 +92,11 @@ function _check_dimension(predictor::Scale, x::Vector)
     return
 end
 
+function (predictor::Scale)(x::Vector)
+    _check_dimension(predictor, x)
+    return predictor.scale .* x .+ predictor.bias
+end
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
     _check_dimension(predictor, x)
     m = length(predictor.scale)
@@ -105,10 +110,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
         y_lb += scale * ifelse(scale >= 0, lb, ub)
         set_variable_bounds(cons, y[i], y_lb, y_ub; optional = true)
     end
-    append!(
-        cons,
-        JuMP.@constraint(model, predictor.scale .* x .+ predictor.bias .== y),
-    )
+    append!(cons, JuMP.@constraint(model, predictor(x) .== y))
     return y, Formulation(predictor, y, cons)
 end
 
@@ -117,8 +119,5 @@ function add_predictor(
     predictor::ReducedSpace{<:Scale},
     x::Vector,
 )
-    _check_dimension(predictor.predictor, x)
-    scale, bias = predictor.predictor.scale, predictor.predictor.bias
-    y = JuMP.@expression(model, scale .* x .+ bias)
-    return y, Formulation(predictor)
+    return predictor.predictor(x), Formulation(predictor)
 end

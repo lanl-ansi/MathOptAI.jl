@@ -135,4 +135,4 @@ count(evaluate_df.merit_sol .> 1e-5)
 
 # The average merit scholarship was worth just under \$1,000:
 
-1_000 * Statistics.mean(evaluate_df.merit_sol[evaluate_df.merit_sol.>1e-5])
+1_000 * Statistics.mean(evaluate_df.merit_sol[evaluate_df.merit_sol .> 1e-5])

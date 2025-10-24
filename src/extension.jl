@@ -180,3 +180,21 @@ function set_variable_start(x::Any, start::Any)
     JuMP.set_start_value(x, start)
     return
 end
+
+function set_variable_start(
+    predictor::Union{Affine,Scale,SoftMax},
+    x::Vector,
+    y::Vector,
+)
+    set_variable_start.(y, predictor(get_variable_start.(x)))
+    return
+end
+
+function set_variable_start(
+    predictor::Union{GELU,ReLU,Sigmoid,SoftPlus,Tanh},
+    x::Vector,
+    y::Vector,
+)
+    set_variable_start.(y, predictor.(get_variable_start.(x)))
+    return
+end

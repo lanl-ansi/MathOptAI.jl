@@ -69,9 +69,9 @@ function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     for i in 1:length(x)
         l, u = predictor.(get_variable_bounds(x[i]))
         set_variable_bounds(cons, y[i], coalesce(l, 0), u; optional = true)
-        set_variable_start(y[i], predictor(get_variable_start(x[i])))
         push!(cons, JuMP.@constraint(model, y[i] == predictor(x[i])))
     end
+    set_variable_start(predictor, x, y)
     return y, Formulation(predictor, y, cons)
 end
 

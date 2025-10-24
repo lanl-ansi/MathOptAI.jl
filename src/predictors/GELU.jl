@@ -59,9 +59,9 @@ function add_predictor(model::JuMP.AbstractModel, predictor::GELU, x::Vector)
         y_l = ismissing(x_l) ? -0.17 : (x_l >= 0 ? predictor(x_l) : -0.17)
         y_u = ismissing(x_u) ? missing : (x_u >= 0 ? predictor(x_u) : 0.0)
         set_variable_bounds(cons, y[i], y_l, y_u; optional = true)
-        set_variable_start(y[i], predictor(get_variable_start(x[i])))
         push!(cons, JuMP.@constraint(model, y[i] == predictor(x[i])))
     end
+    set_variable_start(predictor, x, y)
     return y, Formulation(predictor, y, cons)
 end
 

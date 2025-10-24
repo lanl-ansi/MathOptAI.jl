@@ -49,18 +49,18 @@ GELU()
 """
 struct GELU <: AbstractPredictor end
 
-_gelu(x) = 0.5 * x * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
+(::GELU)(x) = 0.5 * x * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
 
 function add_predictor(model::JuMP.AbstractModel, predictor::GELU, x::Vector)
     y = add_variables(model, x, length(x), "moai_GELU")
     cons = Any[]
     for i in 1:length(x)
         x_l, x_u = get_variable_bounds(x[i])
-        y_l = ismissing(x_l) ? -0.17 : (x_l >= 0 ? _gelu(x_l) : -0.17)
-        y_u = ismissing(x_u) ? missing : (x_u >= 0 ? _gelu(x_u) : 0.0)
+        y_l = ismissing(x_l) ? -0.17 : (x_l >= 0 ? predictor(x_l) : -0.17)
+        y_u = ismissing(x_u) ? missing : (x_u >= 0 ? predictor(x_u) : 0.0)
         set_variable_bounds(cons, y[i], y_l, y_u; optional = true)
     end
-    append!(cons, JuMP.@constraint(model, y .== _gelu.(x)))
+    append!(cons, JuMP.@constraint(model, y .== predictor.(x)))
     return y, Formulation(predictor, y, cons)
 end
 
@@ -69,5 +69,5 @@ function add_predictor(
     predictor::ReducedSpace{GELU},
     x::Vector,
 )
-    return _gelu.(x), Formulation(predictor)
+    return predictor.predictor.(x), Formulation(predictor)
 end

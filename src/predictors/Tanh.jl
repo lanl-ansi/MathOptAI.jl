@@ -61,13 +61,15 @@ ReducedSpace(Tanh())
 """
 struct Tanh <: AbstractPredictor end
 
+(::Tanh)(x) = tanh(x)
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = add_variables(model, x, length(x), "moai_Tanh")
     cons = Any[]
     for i in 1:length(x)
-        l, u = coalesce.(tanh.(get_variable_bounds(x[i])), (-1, 1))
+        l, u = coalesce.(predictor.(get_variable_bounds(x[i])), (-1, 1))
         set_variable_bounds(cons, y[i], l, u; optional = true)
-        push!(cons, JuMP.@constraint(model, y[i] == tanh(x[i])))
+        push!(cons, JuMP.@constraint(model, y[i] == predictor(x[i])))
     end
     return y, Formulation(predictor, y, cons)
 end
@@ -77,5 +79,5 @@ function add_predictor(
     predictor::ReducedSpace{Tanh},
     x::Vector,
 )
-    return tanh.(x), Formulation(predictor)
+    return predictor.predictor.(x), Formulation(predictor)
 end

@@ -111,6 +111,7 @@ function add_predictor(model::JuMP.AbstractModel, predictor::Scale, x::Vector)
         set_variable_bounds(cons, y[i], y_lb, y_ub; optional = true)
     end
     append!(cons, JuMP.@constraint(model, predictor(x) .== y))
+    set_variable_start(predictor, x, y)
     return y, Formulation(predictor, y, cons)
 end
 

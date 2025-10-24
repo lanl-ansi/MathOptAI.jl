@@ -279,13 +279,13 @@ function Base.show(io::IO, predictor::ReducedSpace)
     return print(io, "ReducedSpace(", predictor.predictor, ")")
 end
 
-include("extension.jl")
-
 for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
     if endswith(file, ".jl")
         include(file)
     end
 end
+
+include("extension.jl")
 
 for sym in names(@__MODULE__; all = true)
     if !Base.isidentifier(sym) || sym in (:eval, :include)

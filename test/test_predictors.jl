@@ -619,6 +619,59 @@ function test_ReducedSpace_GELU()
     return
 end
 
+function test_start_values()
+    A = [sin(i + j) for i in 1:3, j in 1:3]
+    b = [cos(i) for i in 1:3]
+    _compare(::Nothing, ::Nothing) = true
+    _compare(x, y) = ≈(x, y)
+    _compare(x::AbstractVector, y::AbstractVector) = all(_compare.(x, y))
+    layers = Any[
+        MathOptAI.Affine(A, b)=>(x->A*x .+ b),
+        MathOptAI.GELU()=>(x->@.(0.5*x*(1+tanh(sqrt(2/pi)*(x+0.044715*x^3))))),
+        MathOptAI.ReLU()=>(x->max.(0, x)),
+        MathOptAI.Scale(b, -b)=>(x->b .* x .- b),
+        MathOptAI.Sigmoid()=>(x->1 ./ (1 .+ exp.(-x))),
+        MathOptAI.SoftMax()=>(x->exp.(x) ./ sum(exp.(x))),
+        MathOptAI.SoftPlus(; beta = 2.0)=>(x->0.5 .* log.(1 .+ exp.(2 .* x))),
+        MathOptAI.Tanh()=>(x->tanh.(x)),
+    ]
+    for (layer, fn) in layers
+        model = Model()
+        x0 = [-0.5, 0.0, 1.1]
+        @variable(model, x[i in 1:3], start = x0[i])
+        y, _ = MathOptAI.add_predictor(model, layer, x)
+        @test _compare(start_value.(y), fn(x0))
+        y, _ = MathOptAI.add_predictor(model, layer, 2.0 .* x .+ 3.0)
+        @test _compare(start_value.(y), fn(2.0 .* x0 .+ 3.0))
+    end
+    for (layer, fn) in layers
+        model = Model()
+        x0 = [0.5, nothing, -1.1]
+        @variable(model, x[i in 1:3], start = x0[i])
+        y, _ = MathOptAI.add_predictor(model, layer, x)
+        xm = something.(x0, missing)
+        @test _compare(start_value.(y), coalesce.(fn(xm), nothing))
+        y, _ = MathOptAI.add_predictor(model, layer, 2.0 .* x .+ 3.0)
+        xm = something.(2.0 .* xm .+ 3.0, missing)
+        @test _compare(start_value.(y), coalesce.(fn(xm), nothing))
+    end
+    return
+end
+
+function test_start_values_constant()
+    model = Model()
+    @variable(model, x, start = 2)
+    y, _ = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), Any[x, 1.0])
+    @test start_value.(y) ≈ 1 ./ (1 .+ exp.([-2, -1]))
+    return
+end
+
+function test_start_values_missing()
+    # A fallback for types that we don't know about, like InfiniteOpt extensions
+    @test MathOptAI.get_variable_start(:a) === missing
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

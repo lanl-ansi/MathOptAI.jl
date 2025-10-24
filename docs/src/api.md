@@ -192,4 +192,6 @@ Modules = [Base.get_extension(MathOptAI, :MathOptAIStatsModelsExt)]
 add_variables
 get_variable_bounds
 set_variable_bounds
+get_variable_start
+set_variable_start
 ```

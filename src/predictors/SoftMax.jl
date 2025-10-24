@@ -67,16 +67,22 @@ ReducedSpace(SoftMax())
 """
 struct SoftMax <: AbstractPredictor end
 
+(::SoftMax)(x::Vector) = exp.(x) ./ sum(exp.(x))
+
 function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
     cons = Any[]
     y = add_variables(model, x, length(x), "moai_SoftMax")
     denom = only(add_variables(model, x, 1, "moai_SoftMax_denom"))
     set_variable_bounds(cons, denom, 0, missing; optional = true)
     push!(cons, JuMP.@constraint(model, denom == sum(exp.(x))))
+    exp_x_start = exp.(get_variable_start.(x))
+    denom_start = sum(exp_x_start)
+    set_variable_start(denom, denom_start)
     for i in 1:length(x)
         set_variable_bounds(cons, y[i], 0, 1; optional = true)
         push!(cons, JuMP.@constraint(model, y[i] == exp(x[i]) / denom))
     end
+    set_variable_start(predictor, x, y)
     return y, Formulation(predictor, [denom; y], cons)
 end
 

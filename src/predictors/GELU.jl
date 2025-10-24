@@ -41,9 +41,9 @@ GELU()
 └ constraints [6]
   ├ moai_GELU[1] ≥ -0.17
   ├ moai_GELU[1] ≤ 0.8411919906082768
+  ├ moai_GELU[1] - ((0.5 x[1]) * (1.0 + tanh(0.7978845608028654 * (x[1] + (0.044715 * (x[1] ^ 3.0)))))) = 0
   ├ moai_GELU[2] ≥ -0.17
   ├ moai_GELU[2] ≤ 1.954597694087775
-  ├ moai_GELU[1] - ((0.5 x[1]) * (1.0 + tanh(0.7978845608028654 * (x[1] + (0.044715 * (x[1] ^ 3.0)))))) = 0
   └ moai_GELU[2] - ((0.5 x[2]) * (1.0 + tanh(0.7978845608028654 * (x[2] + (0.044715 * (x[2] ^ 3.0)))))) = 0
 ```
 """
@@ -59,8 +59,9 @@ function add_predictor(model::JuMP.AbstractModel, predictor::GELU, x::Vector)
         y_l = ismissing(x_l) ? -0.17 : (x_l >= 0 ? predictor(x_l) : -0.17)
         y_u = ismissing(x_u) ? missing : (x_u >= 0 ? predictor(x_u) : 0.0)
         set_variable_bounds(cons, y[i], y_l, y_u; optional = true)
+        push!(cons, JuMP.@constraint(model, y[i] == predictor(x[i])))
     end
-    append!(cons, JuMP.@constraint(model, y .== predictor.(x)))
+    set_variable_start(predictor, x, y)
     return y, Formulation(predictor, y, cons)
 end
 

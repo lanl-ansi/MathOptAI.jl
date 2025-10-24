@@ -67,7 +67,7 @@ ReducedSpace(SoftMax())
 """
 struct SoftMax <: AbstractPredictor end
 
-(::SoftMax)(x::Vector) = exp.(x) ./ sum(exp.(exp.(x)))
+(::SoftMax)(x::Vector) = exp.(x) ./ sum(exp.(x))
 
 function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
     cons = Any[]

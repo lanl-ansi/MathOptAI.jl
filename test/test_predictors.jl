@@ -623,7 +623,7 @@ function test_start_values()
     A = [sin(i + j) for i in 1:3, j in 1:3]
     b = [cos(i) for i in 1:3]
     _compare(::Nothing, ::Nothing) = true
-    _compare(x, y) = (@show(x, y); ≈(x, y))
+    _compare(x, y) = ≈(x, y)
     _compare(x::AbstractVector, y::AbstractVector) = all(_compare.(x, y))
     layers = Any[
         MathOptAI.Affine(A, b)=>(x->A*x .+ b),

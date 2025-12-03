@@ -131,3 +131,15 @@ function add_predictor(
     y = JuMP.@expression(model, A * x .+ b)
     return y, Formulation(predictor)
 end
+
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Affine{<:JuMP.AbstractJuMPScalar},
+    x::Vector,
+)
+    _check_dimension(predictor, x)
+    m = size(predictor.A, 1)
+    y = add_variables(model, x, m, "moai_Affine")
+    cons = JuMP.@constraint(model, predictor.A * x .+ predictor.b .== y)
+    return y, Formulation(predictor, y, cons)
+end

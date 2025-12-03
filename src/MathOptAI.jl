@@ -286,6 +286,7 @@ for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
 end
 
 include("extension.jl")
+include("replace_weights_with_variables.jl")
 
 for sym in names(@__MODULE__; all = true)
     if !Base.isidentifier(sym) || sym in (:eval, :include)

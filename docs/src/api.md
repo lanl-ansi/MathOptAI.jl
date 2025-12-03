@@ -195,3 +195,8 @@ set_variable_bounds
 get_variable_start
 set_variable_start
 ```
+
+## `replace_weights_as_variables`
+```@docs
+replace_weights_as_variables
+```

@@ -672,28 +672,6 @@ function test_start_values_missing()
     return
 end
 
-function test_AffineAsVariable()
-    model = Model();
-    @variable(model, 0 <= x[i in 1:2] <= i);
-    f = MathOptAI.AffineAsVariable([2.0 3.0], [4.0])
-    @test sprint(show, f) == "AffineAsVariable(A, b) [input: 2, output: 1]"
-    y, formulation = MathOptAI.add_predictor(model, f, x);
-    @test length(y) == 1
-    @test length(formulation.variables) == 5
-    A = reshape(formulation.variables[2:3], 1, 2)
-    b = formulation.variables[4:4]
-    @test occursin(
-        sprint(show, only(A * x .- y .+ b)),
-        sprint(show, only(formulation.constraints)),
-    )
-    @test_throws(
-        DimensionMismatch,
-        MathOptAI.AffineAsVariable([2.0 3.0], [4.0, 4.0]),
-    )
-    @test_throws DimensionMismatch MathOptAI.add_predictor(model, f, x[1:1])
-    return
-end
-
 end  # module
 
 TestPredictors.runtests()

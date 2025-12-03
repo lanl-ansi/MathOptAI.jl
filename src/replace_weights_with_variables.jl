@@ -65,9 +65,7 @@ function replace_weights_with_variables(
     model::JuMP.AbstractModel,
     predictor::Pipeline,
 )
-    return Pipeline(
-        [replace_weights_with_variables(model, l) for l in predictor.layers],
-    )
+    return Pipeline(replace_weights_with_variables.(model, predictor.layers))
 end
 
 # Scale
@@ -81,4 +79,3 @@ function replace_weights_with_variables(
     bias = JuMP.@variable(model, [i in 1:m], start = predictor.bias[i])
     return Scale(scale, bias)
 end
-

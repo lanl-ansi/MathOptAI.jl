@@ -196,7 +196,7 @@ get_variable_start
 set_variable_start
 ```
 
-## `replace_weights_as_variables`
+## `replace_weights_with_variables`
 ```@docs
-replace_weights_as_variables
+replace_weights_with_variables
 ```

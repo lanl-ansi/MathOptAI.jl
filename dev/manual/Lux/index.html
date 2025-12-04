@@ -9,8 +9,8 @@
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ -2.6573588848114014 x[1] - moai_Affine[1] = 0.8919591903686523
-  └ -1.5536104440689087 x[1] - moai_Affine[2] = 0.12156844139099121
+  ├ -1.3338863849639893 x[1] - moai_Affine[1] = -0.9021604061126709
+  └ 2.0485405921936035 x[1] - moai_Affine[2] = -0.11363959312438965
 MathOptAI.ReLU()
 ├ variables [2]
 │ ├ moai_ReLU[1]
@@ -23,14 +23,15 @@ MathOptAI.ReLU()
 Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
-└ constraints [1]
-  └ -0.3486176133155823 moai_ReLU[1] + 1.222478985786438 moai_ReLU[2] - moai_Affine[1] = 0.08629348129034042</code></pre><h2 id="Reduced-space"><a class="docs-heading-anchor" href="#Reduced-space">Reduced-space</a><a id="Reduced-space-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-space" title="Permalink"></a></h2><p>Use the <code>reduced_space = true</code> keyword to formulate a reduced-space model:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, Lux, MathOptAI, Random</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rng = Random.MersenneTwister();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 2, Lux.relu), Lux.Dense(2 =&gt; 1))</code><code class="nohighlight hljs ansi" style="display:block;">Chain(
+└ constraints [2]
+  ├ moai_Affine[1] ≥ -0.054024334996938705
+  └ 0.1717245876789093 moai_ReLU[1] + 1.058485746383667 moai_ReLU[2] - moai_Affine[1] = 0.054024334996938705</code></pre><h2 id="Reduced-space"><a class="docs-heading-anchor" href="#Reduced-space">Reduced-space</a><a id="Reduced-space-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-space" title="Permalink"></a></h2><p>Use the <code>reduced_space = true</code> keyword to formulate a reduced-space model:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, Lux, MathOptAI, Random</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rng = Random.MersenneTwister();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 2, Lux.relu), Lux.Dense(2 =&gt; 1))</code><code class="nohighlight hljs ansi" style="display:block;">Chain(
     layer_1 = Dense(1 =&gt; 2, relu),                <span class="sgr90"># 4 parameters</span>
     layer_2 = Dense(2 =&gt; 1),                      <span class="sgr90"># 3 parameters</span>
 ) <span class="sgr90">        # Total: </span>7 parameters,
 <span class="sgr90">          #        plus </span>0 states.</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; parameters, state = Lux.setup(rng, chain);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; predictor = (chain, parameters, state);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; model = Model();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; @variable(model, x[1:1]);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y, formulation =
            MathOptAI.add_predictor(model, predictor, x; reduced_space = true);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y</code><code class="nohighlight hljs ansi" style="display:block;">1-element Vector{JuMP.NonlinearExpr}:
- ((+(0.0) + (1.1587647199630737 * max(0.0, 3.0490102767944336 x[1] - 0.7610263824462891))) + (0.707409143447876 * max(0.0, 1.0447118282318115 x[1] - 0.11741113662719727))) + 0.45813438296318054</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">ReducedSpace(Affine(A, b) [input: 1, output: 2])
+ ((+(0.0) + (-1.1920976638793945 * max(0.0, -1.4929864406585693 x[1] - 0.44788074493408203))) + (1.1889151334762573 * max(0.0, -0.9676316976547241 x[1] + 0.04248619079589844))) + 0.4767211377620697</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">ReducedSpace(Affine(A, b) [input: 1, output: 2])
 ├ variables [0]
 └ constraints [0]
 ReducedSpace(MathOptAI.ReLU())
@@ -53,8 +54,8 @@ ReducedSpace(Affine(A, b) [input: 2, output: 1])
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ -0.6443471908569336 x[1] - moai_Affine[1] = 0.7954552173614502
-  └ 2.214782238006592 x[1] - moai_Affine[2] = 0.10265731811523438
+  ├ -2.187089443206787 x[1] - moai_Affine[1] = -0.22388076782226562
+  └ 1.4951618909835815 x[1] - moai_Affine[2] = -0.24057579040527344
 MathOptAI.ReLUSOS1()
 ├ variables [4]
 │ ├ moai_ReLU[1]
@@ -73,6 +74,5 @@ MathOptAI.ReLUSOS1()
 Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
-└ constraints [2]
-  ├ moai_Affine[1] ≥ -0.3345131278038025
-  └ 0.861436665058136 moai_ReLU[1] + 0.7969130277633667 moai_ReLU[2] - moai_Affine[1] = 0.3345131278038025</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../GLM/">« GLM.jl</a><a class="docs-footer-nextpage" href="../PyTorch/">PyTorch »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Thursday 4 December 2025 21:44">Thursday 4 December 2025</span>. Using Julia version 1.12.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+└ constraints [1]
+  └ -1.0594761371612549 moai_ReLU[1] + 0.5378100275993347 moai_ReLU[2] - moai_Affine[1] = 0.4548061490058899</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../GLM/">« GLM.jl</a><a class="docs-footer-nextpage" href="../PyTorch/">PyTorch »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.16.1 on <span class="colophon-date" title="Thursday 4 December 2025 23:34">Thursday 4 December 2025</span>. Using Julia version 1.12.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

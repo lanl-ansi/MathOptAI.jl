@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>API Reference · MathOptAI.jl</title><meta name="title" content="API Reference · MathOptAI.jl"/><meta property="og:title" content="API Reference · MathOptAI.jl"/><meta property="twitter:title" content="API Reference · MathOptAI.jl"/><meta name="description" content="Documentation for MathOptAI.jl."/><meta property="og:description" content="Documentation for MathOptAI.jl."/><meta property="twitter:description" content="Documentation for MathOptAI.jl."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../">MathOptAI.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">MathOptAI.jl</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Manual</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../manual/predictors/">Predictors</a></li><li><a class="tocitem" href="../manual/AbstractGPs/">AbstractGPs.jl</a></li><li><a class="tocitem" href="../manual/DecisionTree/">DecisionTree.jl</a></li><li><a class="tocitem" href="../manual/Flux/">Flux.jl</a></li><li><a class="tocitem" href="../manual/GLM/">GLM.jl</a></li><li><a class="tocitem" href="../manual/Lux/">Lux.jl</a></li><li><a class="tocitem" href="../manual/PyTorch/">PyTorch</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../tutorials/student_enrollment/">Logistic regression with GLM.jl</a></li><li><a class="tocitem" href="../tutorials/decision_trees/">Classification problems with DecisionTree.jl</a></li><li><a class="tocitem" href="../tutorials/mnist/">Adversarial machine learning with Flux.jl</a></li><li><a class="tocitem" href="../tutorials/mnist_lux/">Adversarial machine learning with Lux.jl</a></li><li><a class="tocitem" href="../tutorials/pytorch/">Function fitting with PyTorch</a></li><li><a class="tocitem" href="../tutorials/gaussian/">Function fitting with AbstractGPs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Developers</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../developers/design_principles/">Design principles</a></li></ul></li><li class="is-active"><a class="tocitem" href>API Reference</a><ul class="internal"><li><a class="tocitem" href="#AbstractPredictor"><span><code>AbstractPredictor</code></span></a></li><li><a class="tocitem" href="#add_predictor"><span><code>add_predictor</code></span></a></li><li><a class="tocitem" href="#build_predictor"><span><code>build_predictor</code></span></a></li><li><a class="tocitem" href="#Affine"><span><code>Affine</code></span></a></li><li><a class="tocitem" href="#BinaryDecisionTree"><span><code>BinaryDecisionTree</code></span></a></li><li><a class="tocitem" href="#GrayBox"><span><code>GrayBox</code></span></a></li><li><a class="tocitem" href="#Pipeline"><span><code>Pipeline</code></span></a></li><li><a class="tocitem" href="#PytorchModel"><span><code>PytorchModel</code></span></a></li><li><a class="tocitem" href="#Quantile"><span><code>Quantile</code></span></a></li><li><a class="tocitem" href="#ReducedSpace"><span><code>ReducedSpace</code></span></a></li><li><a class="tocitem" href="#ReLU"><span><code>ReLU</code></span></a></li><li><a class="tocitem" href="#ReLUBigM"><span><code>ReLUBigM</code></span></a></li><li><a class="tocitem" href="#ReLUQuadratic"><span><code>ReLUQuadratic</code></span></a></li><li><a class="tocitem" href="#ReLUSOS1"><span><code>ReLUSOS1</code></span></a></li><li><a class="tocitem" href="#Scale"><span><code>Scale</code></span></a></li><li><a class="tocitem" href="#Sigmoid"><span><code>Sigmoid</code></span></a></li><li><a class="tocitem" href="#SoftMax"><span><code>SoftMax</code></span></a></li><li><a class="tocitem" href="#SoftPlus"><span><code>SoftPlus</code></span></a></li><li><a class="tocitem" href="#Tanh"><span><code>Tanh</code></span></a></li><li><a class="tocitem" href="#AbstractFormulation"><span><code>AbstractFormulation</code></span></a></li><li><a class="tocitem" href="#Formulation"><span><code>Formulation</code></span></a></li><li><a class="tocitem" href="#PipelineFormulation"><span><code>PipelineFormulation</code></span></a></li><li><a class="tocitem" href="#Extensions"><span>Extensions</span></a></li></ul></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>API Reference</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>API Reference</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/lanl-ansi/MathOptAI.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/main/docs/src/api.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="API-Reference"><a class="docs-heading-anchor" href="#API-Reference">API Reference</a><a id="API-Reference-1"></a><a class="docs-heading-anchor-permalink" href="#API-Reference" title="Permalink"></a></h1><p>This page lists the public API of <code>MathOptAI</code>.</p><div class="admonition is-info"><header class="admonition-header">Info</header><div class="admonition-body"><p>This page is an unstructured list of the MathOptAI API. For a more structured overview, read the Manual or Tutorial parts of this documentation.</p></div></div><p>Load all of the public the API into the current scope with:</p><pre><code class="language-julia hljs">using MathOptAI</code></pre><p>Alternatively, load only the module with:</p><pre><code class="language-julia hljs">import MathOptAI</code></pre><p>and then prefix all calls with <code>MathOptAI.</code> to create <code>MathOptAI.&lt;NAME&gt;</code>.</p><h2 id="AbstractPredictor"><a class="docs-heading-anchor" href="#AbstractPredictor"><code>AbstractPredictor</code></a><a id="AbstractPredictor-1"></a><a class="docs-heading-anchor-permalink" href="#AbstractPredictor" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.AbstractPredictor" href="#MathOptAI.AbstractPredictor"><code>MathOptAI.AbstractPredictor</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">abstract type AbstractPredictor end</code></pre><p>An abstract type representing different types of prediction models.</p><p><strong>Methods</strong></p><p>All subtypes must implement:</p><ul><li><a href="#add_predictor"><code>add_predictor</code></a></li><li><a href="#build_predictor"><code>build_predictor</code></a></li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L13-L24">source</a></section></article><h2 id="add_predictor"><a class="docs-heading-anchor" href="#add_predictor"><code>add_predictor</code></a><a id="add_predictor-1"></a><a class="docs-heading-anchor-permalink" href="#add_predictor" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor" href="#MathOptAI.add_predictor"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Function</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::AbstractPredictor,
+    x::Vector,
+)::Vector</code></pre><p>Return a <code>Vector</code> representing <code>y</code> such that <code>y = predictor(x)</code>.</p><p>The element type of <code>x</code> is deliberately unspecified. The vector <code>x</code> may contain any mix of scalar constants, JuMP decision variables, and scalar JuMP functions like <code>AffExpr</code>, <code>QuadExpr</code>, or <code>NonlinearExpr</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; f = MathOptAI.Affine([2.0, 3.0])
+Affine(A, b) [input: 2, output: 1]
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_Affine[1]
+
+julia&gt; formulation
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 2 x[1] + 3 x[2] - moai_Affine[1] = 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L114-L152">source</a></section></article><h2 id="build_predictor"><a class="docs-heading-anchor" href="#build_predictor"><code>build_predictor</code></a><a id="build_predictor-1"></a><a class="docs-heading-anchor-permalink" href="#build_predictor" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{MathOptAI.AbstractPredictor}" href="#MathOptAI.build_predictor-Tuple{MathOptAI.AbstractPredictor}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">build_predictor(extension; kwargs...)::AbstractPredictor</code></pre><p>A uniform interface to convert various extension types to an <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>.</p><p>See the various extension docstrings for details.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L204-L211">source</a></section></article><h2 id="Affine"><a class="docs-heading-anchor" href="#Affine"><code>Affine</code></a><a id="Affine-1"></a><a class="docs-heading-anchor-permalink" href="#Affine" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Affine" href="#MathOptAI.Affine"><code>MathOptAI.Affine</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Affine(
+    A::Matrix{T},
+    b::Vector{T} = zeros(T, size(A, 1)),
+) where {T} &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = A x + b\]</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, 0 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.Affine([2.0 3.0], [4.0])
+Affine(A, b) [input: 2, output: 1]
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_Affine[1]
+
+julia&gt; formulation
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [3]
+  ├ moai_Affine[1] ≥ 4
+  ├ moai_Affine[1] ≤ 12
+  └ 2 x[1] + 3 x[2] - moai_Affine[1] = -4
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+1-element Vector{AffExpr}:
+ 2 x[1] + 3 x[2] + 4
+
+julia&gt; formulation
+ReducedSpace(Affine(A, b) [input: 2, output: 1])
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/Affine.jl#L7-L57">source</a></section></article><h2 id="BinaryDecisionTree"><a class="docs-heading-anchor" href="#BinaryDecisionTree"><code>BinaryDecisionTree</code></a><a id="BinaryDecisionTree-1"></a><a class="docs-heading-anchor-permalink" href="#BinaryDecisionTree" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.BinaryDecisionTree" href="#MathOptAI.BinaryDecisionTree"><code>MathOptAI.BinaryDecisionTree</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">BinaryDecisionTree{K,V}(
+    feat_id::Int,
+    feat_value::K,
+    lhs::Union{V,BinaryDecisionTree{K,V}},
+    rhs::Union{V,BinaryDecisionTree{K,V}},
+)</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents a binary decision tree.</p><ul><li>If <code>x[feat_id] &lt;= feat_value</code>, then return <code>lhs</code></li><li>If <code>x[feat_id] &gt; feat_value</code>, then return <code>rhs</code></li></ul><p><strong>Example</strong></p><p>To represent the tree <code>x[1] &lt;= 0.0 ? -1 : (x[1] &lt;= 1.0 ? 0 : 1)</code>, do:</p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:1]);
+
+julia&gt; f = MathOptAI.BinaryDecisionTree{Float64,Int}(
+           1,
+           0.0,
+           -1,
+           MathOptAI.BinaryDecisionTree{Float64,Int}(1, 1.0, 0, 1),
+       )
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_BinaryDecisionTree_value
+
+julia&gt; formulation
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+├ variables [4]
+│ ├ moai_BinaryDecisionTree_value
+│ ├ moai_BinaryDecisionTree_z[1]
+│ ├ moai_BinaryDecisionTree_z[2]
+│ └ moai_BinaryDecisionTree_z[3]
+└ constraints [7]
+  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 1}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 1}
+  └ moai_BinaryDecisionTree_z[1] - moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value = 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/BinaryDecisionTree.jl#L7-L61">source</a></section></article><h2 id="GrayBox"><a class="docs-heading-anchor" href="#GrayBox"><code>GrayBox</code></a><a id="GrayBox-1"></a><a class="docs-heading-anchor-permalink" href="#GrayBox" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.GrayBox" href="#MathOptAI.GrayBox"><code>MathOptAI.GrayBox</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">GrayBox(
+    output_size::Function,
+    callback::Function;
+    has_hessian::Bool = false,
+) &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = f(x)\]</p><p>as a user-defined nonlinear operator.</p><p><strong>Arguments</strong></p><ul><li><code>output_size(x::Vector):Int</code>: given an input vector <code>x</code>, return the dimension of the output vector</li><li><code>callback(x::Vector)::NamedTuple -&gt; (;value, jacobian[, hessian])</code>: given an input vector <code>x</code>, return a <code>NamedTuple</code> that computes the primal value and Jacobian of the output value with respect to the input. <code>jacobian[j, i]</code> is the partial derivative of <code>value[j]</code> with respect to <code>x[i]</code>.</li><li><code>has_hessian</code>: if <code>true</code>, the <code>callback</code> additionally contains a field <code>hessian</code>, which is an <code>N × N × M</code> matrix, where <code>hessian[i, j, k]</code> is the partial derivative of <code>value[k]</code> with respect to <code>x[i]</code> and <code>x[j]</code>.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; f = MathOptAI.GrayBox(
+           x -&gt; 2,
+           x -&gt; (value = x.^2, jacobian = [2 * x[1] 0.0; 0.0 2 * x[2]]),
+       );
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_GrayBox[1]
+ moai_GrayBox[2]
+
+julia&gt; formulation
+GrayBox
+├ variables [2]
+│ ├ moai_GrayBox[1]
+│ └ moai_GrayBox[2]
+└ constraints [2]
+  ├ op_##330(x[1], x[2]) - moai_GrayBox[1] = 0
+  └ op_##331(x[1], x[2]) - moai_GrayBox[2] = 0
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ op_##332(x[1], x[2])
+ op_##333(x[1], x[2])
+
+julia&gt; formulation
+ReducedSpace(GrayBox)
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/GrayBox.jl#L7-L75">source</a></section></article><h2 id="Pipeline"><a class="docs-heading-anchor" href="#Pipeline"><code>Pipeline</code></a><a id="Pipeline-1"></a><a class="docs-heading-anchor-permalink" href="#Pipeline" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Pipeline" href="#MathOptAI.Pipeline"><code>MathOptAI.Pipeline</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Pipeline(layers::Vector{AbstractPredictor}) &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = (l_1 \circ \ldots \circ l_N)(x)\]</p><p>where <span>$l_i$</span> are a list of other <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; f = MathOptAI.Pipeline(
+           MathOptAI.Affine([1.0 2.0], [0.0]),
+           MathOptAI.ReLUQuadratic(),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 2, output: 1]
+ * ReLUQuadratic()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_ReLU[1]
+
+julia&gt; formulation
+Affine(A, b) [input: 2, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ x[1] + 2 x[2] - moai_Affine[1] = 0
+ReLUQuadratic()
+├ variables [2]
+│ ├ moai_ReLU[1]
+│ └ moai_z[1]
+└ constraints [4]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_z[1] ≥ 0
+  ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
+  └ moai_ReLU[1]*moai_z[1] = 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/Pipeline.jl#L7-L55">source</a></section></article><h2 id="PytorchModel"><a class="docs-heading-anchor" href="#PytorchModel"><code>PytorchModel</code></a><a id="PytorchModel-1"></a><a class="docs-heading-anchor-permalink" href="#PytorchModel" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.PytorchModel" href="#MathOptAI.PytorchModel"><code>MathOptAI.PytorchModel</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">PytorchModel(filename::String)</code></pre><p>A wrapper struct for loading a PyTorch model.</p><p>The only supported file extension is <code>.pt</code>, where the <code>.pt</code> file has been created using <code>torch.save(model, filename)</code>.</p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>To use <a href="#PytorchModel"><code>PytorchModel</code></a>, your code must load the <code>PythonCall</code> package:</p><pre><code class="language-julia hljs">import PythonCall</code></pre></div></div><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MathOptAI
+
+julia&gt; using PythonCall  #  This line is important!
+
+julia&gt; predictor = PytorchModel(&quot;model.pt&quot;);</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/PytorchModel.jl#L7-L30">source</a></section></article><h2 id="Quantile"><a class="docs-heading-anchor" href="#Quantile"><code>Quantile</code></a><a id="Quantile-1"></a><a class="docs-heading-anchor-permalink" href="#Quantile" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Quantile" href="#MathOptAI.Quantile"><code>MathOptAI.Quantile</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Quantile{D}(distribution::D, quantiles::Vector{Float64}) where {D}</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the <code>quantiles</code> of <code>distribution</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, Distributions, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, 1 &lt;= x &lt;= 2);
+
+julia&gt; predictor = MathOptAI.Quantile([0.1, 0.9]) do x
+           return Distributions.Normal(x, 3 - x)
+       end
+Quantile(_, [0.1, 0.9])
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, predictor, [x]);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_quantile[1]
+ moai_quantile[2]
+
+julia&gt; formulation
+Quantile(_, [0.1, 0.9])
+├ variables [2]
+│ ├ moai_quantile[1]
+│ └ moai_quantile[2]
+└ constraints [2]
+  ├ moai_quantile[1] - op_quantile_0.1(x) = 0
+  └ moai_quantile[2] - op_quantile_0.9(x) = 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/Quantile.jl#L7-L42">source</a></section></article><h2 id="ReducedSpace"><a class="docs-heading-anchor" href="#ReducedSpace"><code>ReducedSpace</code></a><a id="ReducedSpace-1"></a><a class="docs-heading-anchor-permalink" href="#ReducedSpace" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.ReducedSpace" href="#MathOptAI.ReducedSpace"><code>MathOptAI.ReducedSpace</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">ReducedSpace(predictor::AbstractPredictor)</code></pre><p>A wrapper type for other predictors that implement a reduced-space formulation.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; predictor = MathOptAI.ReducedSpace(MathOptAI.ReLU());
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, predictor, x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ max(0.0, x[1])
+ max(0.0, x[2])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L214-L237">source</a></section></article><h2 id="ReLU"><a class="docs-heading-anchor" href="#ReLU"><code>ReLU</code></a><a id="ReLU-1"></a><a class="docs-heading-anchor-permalink" href="#ReLU" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.ReLU" href="#MathOptAI.ReLU"><code>MathOptAI.ReLU</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">ReLU() &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \max\{0, x\}\]</p><p>as a non-smooth nonlinear constraint.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -1 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.ReLU()
+ReLU()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_ReLU[1]
+ moai_ReLU[2]
+
+julia&gt; formulation
+ReLU()
+├ variables [2]
+│ ├ moai_ReLU[1]
+│ └ moai_ReLU[2]
+└ constraints [6]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_ReLU[1] - max(0.0, x[1]) = 0
+  └ moai_ReLU[2] - max(0.0, x[2]) = 0
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ max(0.0, x[1])
+ max(0.0, x[2])
+
+julia&gt; formulation
+ReducedSpace(ReLU())
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/ReLU.jl#L7-L61">source</a></section></article><h2 id="ReLUBigM"><a class="docs-heading-anchor" href="#ReLUBigM"><code>ReLUBigM</code></a><a id="ReLUBigM-1"></a><a class="docs-heading-anchor-permalink" href="#ReLUBigM" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.ReLUBigM" href="#MathOptAI.ReLUBigM"><code>MathOptAI.ReLUBigM</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">ReLUBigM(M::Float64) &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \max\{0, x\}\]</p><p>via the big-M MIP reformulation:</p><p class="math-container">\[\begin{aligned}
+y \ge 0            \\
+y \ge x            \\
+y \le M z          \\
+y \le x + M(1 - z) \\
+z \in\{0, 1\}
+\end{aligned}\]</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -3 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.ReLUBigM(100.0)
+ReLUBigM(100.0)
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_ReLU[1]
+ moai_ReLU[2]
+
+julia&gt; formulation
+ReLUBigM(100.0)
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ moai_z[1]
+│ └ moai_z[2]
+└ constraints [12]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] binary
+  ├ -x[1] + moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] - moai_z[1] ≤ 0
+  ├ -x[1] + moai_ReLU[1] + 3 moai_z[1] ≤ 3
+  ├ moai_z[2] binary
+  ├ -x[2] + moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] - 2 moai_z[2] ≤ 0
+  └ -x[2] + moai_ReLU[2] + 3 moai_z[2] ≤ 3</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/ReLU.jl#L79-L137">source</a></section></article><h2 id="ReLUQuadratic"><a class="docs-heading-anchor" href="#ReLUQuadratic"><code>ReLUQuadratic</code></a><a id="ReLUQuadratic-1"></a><a class="docs-heading-anchor-permalink" href="#ReLUQuadratic" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.ReLUQuadratic" href="#MathOptAI.ReLUQuadratic"><code>MathOptAI.ReLUQuadratic</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">ReLUQuadratic() &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \max\{0, x\}\]</p><p>by the reformulation:</p><p class="math-container">\[\begin{aligned}
+x = y - z \\
+y \cdot z = 0 \\
+y, z \ge 0
+\end{aligned}\]</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -1 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.ReLUQuadratic()
+ReLUQuadratic()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_ReLU[1]
+ moai_ReLU[2]
+
+julia&gt; formulation
+ReLUQuadratic()
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ moai_z[1]
+│ └ moai_z[2]
+└ constraints [12]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] ≥ 0
+  ├ moai_z[1] ≤ 1
+  ├ moai_z[2] ≥ 0
+  ├ moai_z[2] ≤ 1
+  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
+  ├ moai_ReLU[1]*moai_z[1] = 0
+  └ moai_ReLU[2]*moai_z[2] = 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/ReLU.jl#L246-L302">source</a></section></article><h2 id="ReLUSOS1"><a class="docs-heading-anchor" href="#ReLUSOS1"><code>ReLUSOS1</code></a><a id="ReLUSOS1-1"></a><a class="docs-heading-anchor-permalink" href="#ReLUSOS1" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.ReLUSOS1" href="#MathOptAI.ReLUSOS1"><code>MathOptAI.ReLUSOS1</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">ReLUSOS1() &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \max\{0, x\}\]</p><p>by the reformulation:</p><p class="math-container">\[\begin{aligned}
+x = y - z           \\
+[y, z] \in SOS1    \\
+y, z \ge 0
+\end{aligned}\]</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -1 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.ReLUSOS1()
+ReLUSOS1()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_ReLU[1]
+ moai_ReLU[2]
+
+julia&gt; formulation
+ReLUSOS1()
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ moai_z[1]
+│ └ moai_z[2]
+└ constraints [10]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_ReLU[1] ≤ 1
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_ReLU[2] ≤ 2
+  ├ moai_z[1] ≤ 1
+  ├ moai_z[2] ≤ 1
+  ├ x[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ x[2] - moai_ReLU[2] + moai_z[2] = 0
+  ├ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+  └ [moai_ReLU[2], moai_z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/ReLU.jl#L169-L223">source</a></section></article><h2 id="Scale"><a class="docs-heading-anchor" href="#Scale"><code>Scale</code></a><a id="Scale-1"></a><a class="docs-heading-anchor-permalink" href="#Scale" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Scale" href="#MathOptAI.Scale"><code>MathOptAI.Scale</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Scale(
+    scale::Vector{T},
+    bias::Vector{T},
+) where {T} &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = Diag(scale)x + bias\]</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, 0 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
+Scale(scale, bias)
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_Scale[1]
+ moai_Scale[2]
+
+julia&gt; formulation
+Scale(scale, bias)
+├ variables [2]
+│ ├ moai_Scale[1]
+│ └ moai_Scale[2]
+└ constraints [6]
+  ├ moai_Scale[1] ≥ 4
+  ├ moai_Scale[1] ≤ 6
+  ├ moai_Scale[2] ≥ 5
+  ├ moai_Scale[2] ≤ 11
+  ├ 2 x[1] - moai_Scale[1] = -4
+  └ 3 x[2] - moai_Scale[2] = -5
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{AffExpr}:
+ 2 x[1] + 4
+ 3 x[2] + 5
+
+julia&gt; formulation
+ReducedSpace(Scale(scale, bias))
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/Scale.jl#L7-L63">source</a></section></article><h2 id="Sigmoid"><a class="docs-heading-anchor" href="#Sigmoid"><code>Sigmoid</code></a><a id="Sigmoid-1"></a><a class="docs-heading-anchor-permalink" href="#Sigmoid" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Sigmoid" href="#MathOptAI.Sigmoid"><code>MathOptAI.Sigmoid</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Sigmoid() &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \frac{1}{1 + e^{-x}}\]</p><p>as a smooth nonlinear constraint.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -1 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.Sigmoid()
+Sigmoid()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_Sigmoid[1]
+ moai_Sigmoid[2]
+
+julia&gt; formulation
+Sigmoid()
+├ variables [2]
+│ ├ moai_Sigmoid[1]
+│ └ moai_Sigmoid[2]
+└ constraints [6]
+  ├ moai_Sigmoid[1] ≥ 0.2689414213699951
+  ├ moai_Sigmoid[1] ≤ 0.7310585786300049
+  ├ moai_Sigmoid[2] ≥ 0.2689414213699951
+  ├ moai_Sigmoid[2] ≤ 0.8807970779778823
+  ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
+  └ moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ 1.0 / (1.0 + exp(-x[1]))
+ 1.0 / (1.0 + exp(-x[2]))
+
+julia&gt; formulation
+ReducedSpace(Sigmoid())
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/Sigmoid.jl#L7-L61">source</a></section></article><h2 id="SoftMax"><a class="docs-heading-anchor" href="#SoftMax"><code>SoftMax</code></a><a id="SoftMax-1"></a><a class="docs-heading-anchor-permalink" href="#SoftMax" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.SoftMax" href="#MathOptAI.SoftMax"><code>MathOptAI.SoftMax</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">SoftMax() &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \frac{e^{x}}{||e^{x}||_1}\]</p><p>as a smooth nonlinear constraint.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; f = MathOptAI.SoftMax()
+SoftMax()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_SoftMax[1]
+ moai_SoftMax[2]
+
+julia&gt; formulation
+SoftMax()
+├ variables [3]
+│ ├ moai_SoftMax_denom
+│ ├ moai_SoftMax[1]
+│ └ moai_SoftMax[2]
+└ constraints [8]
+  ├ moai_SoftMax[1] ≥ 0
+  ├ moai_SoftMax[1] ≤ 1
+  ├ moai_SoftMax[2] ≥ 0
+  ├ moai_SoftMax[2] ≤ 1
+  ├ moai_SoftMax_denom ≥ 0
+  ├ moai_SoftMax_denom - (0.0 + exp(x[2]) + exp(x[1])) = 0
+  ├ moai_SoftMax[1] - (exp(x[1]) / moai_SoftMax_denom) = 0
+  └ moai_SoftMax[2] - (exp(x[2]) / moai_SoftMax_denom) = 0
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ exp(x[1]) / moai_SoftMax_denom
+ exp(x[2]) / moai_SoftMax_denom
+
+julia&gt; formulation
+ReducedSpace(SoftMax())
+├ variables [1]
+│ └ moai_SoftMax_denom
+└ constraints [2]
+  ├ moai_SoftMax_denom ≥ 0
+  └ moai_SoftMax_denom - (0.0 + exp(x[2]) + exp(x[1])) = 0</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/SoftMax.jl#L7-L67">source</a></section></article><h2 id="SoftPlus"><a class="docs-heading-anchor" href="#SoftPlus"><code>SoftPlus</code></a><a id="SoftPlus-1"></a><a class="docs-heading-anchor-permalink" href="#SoftPlus" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.SoftPlus" href="#MathOptAI.SoftPlus"><code>MathOptAI.SoftPlus</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">SoftPlus(; beta = 1.0) &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \frac{1}{\beta} \log(1 + e^{\beta x})\]</p><p>as a smooth nonlinear constraint.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -1 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.SoftPlus(; beta = 2.0)
+SoftPlus(2.0)
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_SoftPlus[1]
+ moai_SoftPlus[2]
+
+julia&gt; formulation
+SoftPlus(2.0)
+├ variables [2]
+│ ├ moai_SoftPlus[1]
+│ └ moai_SoftPlus[2]
+└ constraints [6]
+  ├ moai_SoftPlus[1] ≥ 0.0634640055214863
+  ├ moai_SoftPlus[1] ≤ 1.0634640055214863
+  ├ moai_SoftPlus[2] ≥ 0.0634640055214863
+  ├ moai_SoftPlus[2] ≤ 2.0090749639589047
+  ├ moai_SoftPlus[1] - (log(1.0 + exp(2 x[1])) / 2.0) = 0
+  └ moai_SoftPlus[2] - (log(1.0 + exp(2 x[2])) / 2.0) = 0
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ log(1.0 + exp(2 x[1])) / 2.0
+ log(1.0 + exp(2 x[2])) / 2.0
+
+julia&gt; formulation
+ReducedSpace(SoftPlus(2.0))
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/SoftPlus.jl#L7-L61">source</a></section></article><h2 id="Tanh"><a class="docs-heading-anchor" href="#Tanh"><code>Tanh</code></a><a id="Tanh-1"></a><a class="docs-heading-anchor-permalink" href="#Tanh" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Tanh" href="#MathOptAI.Tanh"><code>MathOptAI.Tanh</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">Tanh() &lt;: AbstractPredictor</code></pre><p>An <a href="#AbstractPredictor"><code>AbstractPredictor</code></a> that represents the relationship:</p><p class="math-container">\[y = \tanh(x)\]</p><p>as a smooth nonlinear constraint.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, -1 &lt;= x[i in 1:2] &lt;= i);
+
+julia&gt; f = MathOptAI.Tanh()
+Tanh()
+
+julia&gt; y, formulation = MathOptAI.add_predictor(model, f, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_Tanh[1]
+ moai_Tanh[2]
+
+julia&gt; formulation
+Tanh()
+├ variables [2]
+│ ├ moai_Tanh[1]
+│ └ moai_Tanh[2]
+└ constraints [6]
+  ├ moai_Tanh[1] ≥ -0.7615941559557649
+  ├ moai_Tanh[1] ≤ 0.7615941559557649
+  ├ moai_Tanh[2] ≥ -0.7615941559557649
+  ├ moai_Tanh[2] ≤ 0.9640275800758169
+  ├ moai_Tanh[1] - tanh(x[1]) = 0
+  └ moai_Tanh[2] - tanh(x[2]) = 0
+
+julia&gt; y, formulation =
+           MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
+
+julia&gt; y
+2-element Vector{NonlinearExpr}:
+ tanh(x[1])
+ tanh(x[2])
+
+julia&gt; formulation
+ReducedSpace(Tanh())
+├ variables [0]
+└ constraints [0]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/predictors/Tanh.jl#L7-L61">source</a></section></article><h2 id="AbstractFormulation"><a class="docs-heading-anchor" href="#AbstractFormulation"><code>AbstractFormulation</code></a><a id="AbstractFormulation-1"></a><a class="docs-heading-anchor-permalink" href="#AbstractFormulation" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.AbstractFormulation" href="#MathOptAI.AbstractFormulation"><code>MathOptAI.AbstractFormulation</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">abstract type AbstractFormulation end</code></pre><p>An abstract type representing different formulations.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L27-L31">source</a></section></article><h2 id="Formulation"><a class="docs-heading-anchor" href="#Formulation"><code>Formulation</code></a><a id="Formulation-1"></a><a class="docs-heading-anchor-permalink" href="#Formulation" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.Formulation" href="#MathOptAI.Formulation"><code>MathOptAI.Formulation</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">struct Formulation{P&lt;:AbstractPredictor} &lt;: AbstractFormulation
+    predictor::P
+    variables::Vector{Any}
+    constraints::Vector{Any}
+end</code></pre><p><strong>Fields</strong></p><ul><li><code>predictor</code>: the predictor object used to build the formulation</li><li><code>variables</code>: a vector of new decision variables added to the model</li><li><code>constraints</code>: a vector of new constraints added to the model</li></ul><p>Check the docstring of the predictor for an explanation of the formulation and the order of the elements in <code>.variables</code> and <code>.constraints</code>.</p></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L34-L49">source</a></section></article><h2 id="PipelineFormulation"><a class="docs-heading-anchor" href="#PipelineFormulation"><code>PipelineFormulation</code></a><a id="PipelineFormulation-1"></a><a class="docs-heading-anchor-permalink" href="#PipelineFormulation" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.PipelineFormulation" href="#MathOptAI.PipelineFormulation"><code>MathOptAI.PipelineFormulation</code></a> — <span class="docstring-category">Type</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">struct PipelineFormulation{P&lt;:AbstractPredictor} &lt;: AbstractFormulation
+    predictor::P
+    layers::Vector{Any}
+end</code></pre><p><strong>Fields</strong></p><ul><li><code>predictor</code>: the predictor object used to build the formulation</li><li><code>layers</code>: the formulation associated with each of the layers in the pipeline</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/src/MathOptAI.jl#L87-L97">source</a></section></article><h2 id="Extensions"><a class="docs-heading-anchor" href="#Extensions">Extensions</a><a id="Extensions-1"></a><a class="docs-heading-anchor-permalink" href="#Extensions" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, MathOptAI.Quantile{&lt;:AbstractGPs.PosteriorGP}, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, MathOptAI.Quantile{&lt;:AbstractGPs.PosteriorGP}, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::MathOptAI.Quantile{&lt;:AbstractGPs.PosteriorGP},
+    x::Vector,
+)</code></pre><p>Add the quantiles of a trained Gaussian Process from AbstractGPs.jl to <code>model</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI, AbstractGPs
+
+julia&gt; x_data = 2π .* (0.0:0.1:1.0);
+
+julia&gt; y_data = sin.(x_data);
+
+julia&gt; fx = AbstractGPs.GP(AbstractGPs.Matern32Kernel())(x_data, 0.1);
+
+julia&gt; p_fx = AbstractGPs.posterior(fx, y_data);
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, 1 &lt;= x[1:1] &lt;= 6, start = 3);
+
+julia&gt; predictor = MathOptAI.Quantile(p_fx, [0.1, 0.9]);
+
+julia&gt; y, _ = MathOptAI.add_predictor(model, predictor, x);
+
+julia&gt; y
+2-element Vector{VariableRef}:
+ moai_quantile[1]
+ moai_quantile[2]
+
+julia&gt; @objective(model, Max, y[2] - y[1])
+moai_quantile[2] - moai_quantile[1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIAbstractGPsExt.jl#L14-L52">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, Union{DecisionTree.DecisionTreeClassifier, DecisionTree.Root}, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, Union{DecisionTree.DecisionTreeClassifier, DecisionTree.Root}, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Union{DecisionTree.Root,DecisionTree.DecisionTreeClassifier},
+    x::Vector,
+)</code></pre><p>Add a binary decision tree from DecisionTree.jl to <code>model</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, MathOptAI, DecisionTree
+
+julia&gt; truth(x::Vector) = x[1] &lt;= 0.5 ? -2 : (x[2] &lt;= 0.3 ? 3 : 4)
+truth (generic function with 1 method)
+
+julia&gt; features = abs.(sin.((1:10) .* (3:4)&#39;));
+
+julia&gt; size(features)
+(10, 2)
+
+julia&gt; labels = truth.(Vector.(eachrow(features)));
+
+julia&gt; predictor = DecisionTree.build_tree(labels, features)
+Decision Tree
+Leaves: 3
+Depth:  2
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, 0 &lt;= x[1:2] &lt;= 1);
+
+julia&gt; y, _ = MathOptAI.add_predictor(model, predictor, x);
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_BinaryDecisionTree_value</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIDecisionTreeExt.jl#L13-L52">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{DecisionTree.Root}" href="#MathOptAI.build_predictor-Tuple{DecisionTree.Root}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.build_predictor(predictor::DecisionTree.Root)</code></pre><p>Convert a binary decision tree from DecisionTree.jl to a <a href="#BinaryDecisionTree"><code>BinaryDecisionTree</code></a>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using MathOptAI, DecisionTree
+
+julia&gt; truth(x::Vector) = x[1] &lt;= 0.5 ? -2 : (x[2] &lt;= 0.3 ? 3 : 4)
+truth (generic function with 1 method)
+
+julia&gt; features = abs.(sin.((1:10) .* (3:4)&#39;));
+
+julia&gt; size(features)
+(10, 2)
+
+julia&gt; labels = truth.(Vector.(eachrow(features)));
+
+julia&gt; tree = DecisionTree.build_tree(labels, features)
+Decision Tree
+Leaves: 3
+Depth:  2
+
+julia&gt; predictor = MathOptAI.build_predictor(tree)
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIDecisionTreeExt.jl#L62-L91">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, Flux.Chain, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, Flux.Chain, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Flux.Chain,
+    x::Vector;
+    config::Dict = Dict{Any,Any}(),
+    reduced_space::Bool = false,
+    gray_box::Bool = false,
+)</code></pre><p>Add a trained neural network from Flux.jl to <code>model</code>.</p><p><strong>Supported layers</strong></p><ul><li><code>Flux.Dense</code></li><li><code>Flux.Scale</code></li><li><code>Flux.softmax</code></li></ul><p><strong>Supported activation functions</strong></p><ul><li><code>Flux.relu</code></li><li><code>Flux.sigmoid</code></li><li><code>Flux.softplus</code></li><li><code>Flux.tanh</code></li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>config</code>: a dictionary that maps supported <code>Flux</code> activation functions to <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s that control how the activation functions are reformulated. For example, <code>Flux.sigmoid =&gt; MathOptAI.Sigmoid()</code> or <code>Flux.relu =&gt; MathOptAI.QuadraticReLU()</code>.</li><li><code>gray_box</code>: if <code>true</code>, the neural network is added as a user-defined nonlinear operator, with gradients provided by <code>Flux.withjacobian</code>.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, Flux, MathOptAI
+
+julia&gt; chain = Flux.Chain(Flux.Dense(1 =&gt; 16, Flux.relu), Flux.Dense(16 =&gt; 1));
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:1]);
+
+julia&gt; y, _ = MathOptAI.add_predictor(
+           model,
+           chain,
+           x;
+           config = Dict(Flux.relu =&gt; MathOptAI.ReLU()),
+       );
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_Affine[1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIFluxExt.jl#L13-L69">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{Flux.Chain}" href="#MathOptAI.build_predictor-Tuple{Flux.Chain}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.build_predictor(
+    predictor::Flux.Chain;
+    config::Dict = Dict{Any,Any}(),
+    gray_box::Bool = false,
+    gray_box_hessian::Bool = false,
+)</code></pre><p>Convert a trained neural network from Flux.jl to a <a href="#Pipeline"><code>Pipeline</code></a>.</p><p><strong>Supported layers</strong></p><ul><li><code>Flux.Dense</code></li><li><code>Flux.Scale</code></li><li><code>Flux.softmax</code></li></ul><p><strong>Supported activation functions</strong></p><ul><li><code>Flux.relu</code></li><li><code>Flux.sigmoid</code></li><li><code>Flux.softplus</code></li><li><code>Flux.tanh</code></li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>config</code>: a dictionary that maps supported <code>Flux</code> activation functions to <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s that control how the activation functions are reformulated. For example, <code>Flux.sigmoid =&gt; MathOptAI.Sigmoid()</code> or <code>Flux.relu =&gt; MathOptAI.QuadraticReLU()</code>.</li><li><code>gray_box</code>: if <code>true</code>, the neural network is added as a user-defined nonlinear operator, with gradients provided by <code>Flux.withjacobian</code>.</li><li><code>gray_box_hessian</code>: if <code>true</code>, the gray box additionally computes the Hessian of the output using <code>Flux.hessian</code>.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using Flux, MathOptAI
+
+julia&gt; chain = Flux.Chain(Flux.Dense(1 =&gt; 16, Flux.relu), Flux.Dense(16 =&gt; 1));
+
+julia&gt; MathOptAI.build_predictor(
+           chain;
+           config = Dict(Flux.relu =&gt; MathOptAI.ReLU()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLU()
+ * Affine(A, b) [input: 16, output: 1]
+
+julia&gt; MathOptAI.build_predictor(
+           chain;
+           config = Dict(Flux.relu =&gt; MathOptAI.ReLUQuadratic()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLUQuadratic()
+ * Affine(A, b) [input: 16, output: 1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIFluxExt.jl#L85-L144">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}}, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}}, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::GLM.GeneralizedLinearModel{
+        GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
+    },
+    x::Vector;
+    sigmoid::AbstractPredictor = MathOptAI.Sigmoid(),
+    reduced_space::Bool = false,
+)</code></pre><p>Add a trained logistic regression model from GLM.jl to <code>model</code>.</p><p><strong>Keyword arguments</strong></p><ul><li><code>sigmoid</code>: the predictor to use for the sigmoid layer.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using GLM, JuMP, MathOptAI
+
+julia&gt; X, Y = rand(10, 2), rand(Bool, 10);
+
+julia&gt; predictor = GLM.glm(X, Y, GLM.Bernoulli());
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; y, _ = MathOptAI.add_predictor(
+           model,
+           predictor,
+           x;
+           sigmoid = MathOptAI.Sigmoid(),
+       );
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_Sigmoid[1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIGLMExt.jl#L78-L119">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, GLM.LinearModel, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, GLM.LinearModel, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::GLM.LinearModel,
+    x::Vector;
+    reduced_space::Bool = false,
+)</code></pre><p>Add a trained linear model from GLM.jl to <code>model</code>.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using GLM, JuMP, MathOptAI
+
+julia&gt; X, Y = rand(10, 2), rand(10);
+
+julia&gt; predictor = GLM.lm(X, Y);
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:2]);
+
+julia&gt; y, _ = MathOptAI.add_predictor(model, predictor, x);
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_Affine[1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIGLMExt.jl#L13-L42">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}}}" href="#MathOptAI.build_predictor-Tuple{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}}}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.build_predictor(
+    predictor::GLM.GeneralizedLinearModel{
+        GLM.GlmResp{Vector{Float64},GLM.Bernoulli{Float64},GLM.LogitLink},
+    };
+    sigmoid::MathOptAI.AbstractPredictor = MathOptAI.Sigmoid(),
+)</code></pre><p>Convert a trained logistic model from GLM.jl to a <a href="#Pipeline"><code>Pipeline</code></a> layer.</p><p><strong>Keyword arguments</strong></p><ul><li><code>sigmoid</code>: the predictor to use for the sigmoid layer.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using GLM, MathOptAI
+
+julia&gt; X, Y = rand(10, 2), rand(Bool, 10);
+
+julia&gt; model = GLM.glm(X, Y, GLM.Bernoulli());
+
+julia&gt; predictor = MathOptAI.build_predictor(model)
+Pipeline with layers:
+ * Affine(A, b) [input: 2, output: 1]
+ * Sigmoid()</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIGLMExt.jl#L136-L164">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{GLM.LinearModel}" href="#MathOptAI.build_predictor-Tuple{GLM.LinearModel}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.build_predictor(predictor::GLM.LinearModel)</code></pre><p>Convert a trained linear model from GLM.jl to an <a href="#Affine"><code>Affine</code></a> layer.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using GLM, MathOptAI
+
+julia&gt; X, Y = rand(10, 2), rand(10);
+
+julia&gt; model = GLM.lm(X, Y);
+
+julia&gt; predictor = MathOptAI.build_predictor(model)
+Affine(A, b) [input: 2, output: 1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIGLMExt.jl#L56-L73">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, Tuple{Lux.Chain, NamedTuple, NamedTuple}, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, Tuple{Lux.Chain, NamedTuple, NamedTuple}, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Tuple{&lt;:Lux.Chain,&lt;:NamedTuple,&lt;:NamedTuple},
+    x::Vector;
+    config::Dict = Dict{Any,Any}(),
+    reduced_space::Bool = false,
+)</code></pre><p>Add a trained neural network from Lux.jl to <code>model</code>.</p><p><strong>Supported layers</strong></p><ul><li><code>Lux.Dense</code></li><li><code>Lux.Scale</code></li></ul><p><strong>Supported activation functions</strong></p><ul><li><code>Lux.relu</code></li><li><code>Lux.sigmoid</code></li><li><code>Lux.softplus</code></li><li><code>Lux.softmax</code></li><li><code>Lux.tanh</code></li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>config</code>: a dictionary that maps supported <code>Lux</code> activation functions to <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s that control how the activation functions are reformulated. For example, <code>Lux.sigmoid =&gt; MathOptAI.Sigmoid()</code> or <code>Lux.relu =&gt; MathOptAI.QuadraticReLU()</code>.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using JuMP, Lux, MathOptAI, Random
+
+julia&gt; rng = Random.MersenneTwister();
+
+julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 16, Lux.relu), Lux.Dense(16 =&gt; 1))
+Chain(
+    layer_1 = Dense(1 =&gt; 16, relu),     # 32 parameters
+    layer_2 = Dense(16 =&gt; 1),           # 17 parameters
+)         # Total: 49 parameters,
+          #        plus 0 states.
+
+julia&gt; parameters, state = Lux.setup(rng, chain);
+
+julia&gt; predictor = (chain, parameters, state);
+
+julia&gt; model = Model();
+
+julia&gt; @variable(model, x[1:1]);
+
+julia&gt; y, _ = MathOptAI.add_predictor(
+           model,
+           predictor,
+           x;
+           config = Dict(Lux.relu =&gt; MathOptAI.ReLU()),
+       );
+
+julia&gt; y
+1-element Vector{VariableRef}:
+ moai_Affine[1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAILuxExt.jl#L13-L77">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{Tuple{Lux.Chain, NamedTuple, NamedTuple}}" href="#MathOptAI.build_predictor-Tuple{Tuple{Lux.Chain, NamedTuple, NamedTuple}}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.build_predictor(
+    predictor::Tuple{&lt;:Lux.Chain,&lt;:NamedTuple,&lt;:NamedTuple};
+    config::Dict = Dict{Any,Any}(),
+)</code></pre><p>Convert a trained neural network from Lux.jl to a <a href="#Pipeline"><code>Pipeline</code></a>.</p><p><strong>Supported layers</strong></p><ul><li><code>Lux.Dense</code></li><li><code>Lux.Scale</code></li></ul><p><strong>Supported activation functions</strong></p><ul><li><code>Lux.relu</code></li><li><code>Lux.sigmoid</code></li><li><code>Lux.softplus</code></li><li><code>Lux.softmax</code></li><li><code>Lux.tanh</code></li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>config</code>: a dictionary that maps supported <code>Lux</code> activation functions to <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s that control how the activation functions are reformulated. For example, <code>Lux.sigmoid =&gt; MathOptAI.Sigmoid()</code> or <code>Lux.relu =&gt; MathOptAI.QuadraticReLU()</code>.</li></ul><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using Lux, MathOptAI, Random
+
+julia&gt; rng = Random.MersenneTwister();
+
+julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 16, Lux.relu), Lux.Dense(16 =&gt; 1))
+Chain(
+    layer_1 = Dense(1 =&gt; 16, relu),     # 32 parameters
+    layer_2 = Dense(16 =&gt; 1),           # 17 parameters
+)         # Total: 49 parameters,
+          #        plus 0 states.
+
+julia&gt; parameters, state = Lux.setup(rng, chain);
+
+julia&gt; predictor = MathOptAI.build_predictor(
+           (chain, parameters, state);
+           config = Dict(Lux.relu =&gt; MathOptAI.ReLU()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLU()
+ * Affine(A, b) [input: 16, output: 1]
+
+julia&gt; MathOptAI.build_predictor(
+           (chain, parameters, state);
+           config = Dict(Lux.relu =&gt; MathOptAI.ReLUQuadratic()),
+       )
+Pipeline with layers:
+ * Affine(A, b) [input: 1, output: 16]
+ * ReLUQuadratic()
+ * Affine(A, b) [input: 16, output: 1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAILuxExt.jl#L92-L154">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, MathOptAI.PytorchModel, Vector}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, MathOptAI.PytorchModel, Vector}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::MathOptAI.PytorchModel,
+    x::Vector;
+    config::Dict = Dict{Any,Any}(),
+    reduced_space::Bool = false,
+    gray_box::Bool = false,
+    gray_box_hessian::Bool = false,
+    gray_box_device::String = &quot;cpu&quot;,
+)</code></pre><p>Add a trained neural network from PyTorch via PythonCall.jl to <code>model</code>.</p><p><strong>Supported layers</strong></p><ul><li><code>nn.Linear</code></li><li><code>nn.ReLU</code></li><li><code>nn.Sequential</code></li><li><code>nn.Sigmoid</code></li><li><code>nn.Softmax</code></li><li><code>nn.Softplus</code></li><li><code>nn.Tanh</code></li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>config</code>: a dictionary that maps <code>Symbol</code>s to <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s that control how the activation functions are reformulated. For example, <code>:Sigmoid =&gt; MathOptAI.Sigmoid()</code> or <code>:ReLU =&gt; MathOptAI.QuadraticReLU()</code>. The supported Symbols are <code>:ReLU</code>, <code>:Sigmoid</code>, <code>:SoftMax</code>, <code>:SoftPlus</code>, and <code>:Tanh</code>.</li><li><code>gray_box</code>: if <code>true</code>, the neural network is added as a user-defined nonlinear operator, with gradients provided by <code>torch.func.jacrev</code>.</li><li><code>gray_box_hessian</code>: if <code>true</code>, the gray box additionally computes the Hessian of the output using <code>torch.func.hessian</code>.</li><li><code>gray_box_device</code>: device used to construct PyTorch tensors, e.g. <code>&quot;cuda&quot;</code> to run on an Nvidia GPU.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIPythonCallExt.jl#L13-L50">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.build_predictor-Tuple{MathOptAI.PytorchModel}" href="#MathOptAI.build_predictor-Tuple{MathOptAI.PytorchModel}"><code>MathOptAI.build_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.build_predictor(
+    predictor::MathOptAI.PytorchModel;
+    config::Dict = Dict{Any,Any}(),
+    gray_box::Bool = false,
+    gray_box_hessian::Bool = false,
+    gray_box_device::String = &quot;cpu&quot;,
+)</code></pre><p>Convert a trained neural network from PyTorch via PythonCall.jl to a <a href="#Pipeline"><code>Pipeline</code></a>.</p><p><strong>Supported layers</strong></p><ul><li><code>nn.Linear</code></li><li><code>nn.ReLU</code></li><li><code>nn.Sequential</code></li><li><code>nn.Sigmoid</code></li><li><code>nn.Softmax</code></li><li><code>nn.Softplus</code></li><li><code>nn.Tanh</code></li></ul><p><strong>Keyword arguments</strong></p><ul><li><code>config</code>: a dictionary that maps <code>Symbol</code>s to <a href="#AbstractPredictor"><code>AbstractPredictor</code></a>s that control how the activation functions are reformulated. For example, <code>:Sigmoid =&gt; MathOptAI.Sigmoid()</code> or <code>:ReLU =&gt; MathOptAI.QuadraticReLU()</code>. The supported Symbols are <code>:ReLU</code>, <code>:Sigmoid</code>, <code>:SoftMax</code>, <code>:SoftPlus</code>, and <code>:Tanh</code>.</li><li><code>gray_box</code>: if <code>true</code>, the neural network is added as a user-defined nonlinear operator, with gradients provided by <code>torch.func.jacrev</code>.</li><li><code>gray_box_hessian</code>: if <code>true</code>, the gray box additionally computes the Hessian of the output using <code>torch.func.hessian</code>.</li><li><code>gray_box_device</code>: device used to construct PyTorch tensors, e.g. <code>&quot;cuda&quot;</code> to run on an Nvidia GPU.</li></ul></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIPythonCallExt.jl#L66-L101">source</a></section></article><article class="docstring"><header><a class="docstring-article-toggle-button fa-solid fa-chevron-down" href="javascript:;" title="Collapse docstring"></a><a class="docstring-binding" id="MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, StatsModels.TableRegressionModel, DataFrames.DataFrame}" href="#MathOptAI.add_predictor-Tuple{JuMP.AbstractModel, StatsModels.TableRegressionModel, DataFrames.DataFrame}"><code>MathOptAI.add_predictor</code></a> — <span class="docstring-category">Method</span><span class="is-flex-grow-1 docstring-article-toggle-button" title="Collapse docstring"></span></header><section><div><pre><code class="language-julia hljs">MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::StatsModels.TableRegressionModel,
+    x::DataFrames.DataFrame;
+    kwargs...,
+)</code></pre><p>Add a trained regression model from StatsModels.jl to <code>model</code>, using the DataFrame <code>x</code> as input.</p><p>In most cases, <code>predictor</code> should be a GLM.jl predictor supported by MathOptAI, but trained using <code>@formula</code> and a <code>DataFrame</code> instead of the raw matrix input.</p><p>In general, <code>x</code> may have some columns that are constant (<code>Float64</code>) and some columns that are JuMP decision variables.</p><p><strong>Keyword arguments</strong></p><p>All keyword arguments are passed to the corresponding <a href="#add_predictor"><code>add_predictor</code></a> of the GLM extension.</p><p><strong>Example</strong></p><pre><code class="language-julia-repl hljs">julia&gt; using DataFrames, GLM, JuMP, MathOptAI
+
+julia&gt; train_df = DataFrames.DataFrame(x1 = rand(10), x2 = rand(10));
+
+julia&gt; train_df.y = 1.0 .* train_df.x1 + 2.0 .* train_df.x2 .+ rand(10);
+
+julia&gt; predictor = GLM.lm(GLM.@formula(y ~ x1 + x2), train_df);
+
+julia&gt; model = Model();
+
+julia&gt; test_df = DataFrames.DataFrame(
+           x1 = rand(6),
+           x2 = @variable(model, [1:6]),
+       );
+
+julia&gt; test_df.y, _ = MathOptAI.add_predictor(model, predictor, test_df);
+
+julia&gt; test_df.y
+6-element Vector{VariableRef}:
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]
+ moai_Affine[1]</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/ae67bc83b58c7f3f3c7ad7d9d64e5341b9482fb8/ext/MathOptAIStatsModelsExt.jl#L14-L65">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../developers/design_principles/">« Design principles</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.9.0 on <span class="colophon-date" title="Sunday 30 March 2025 20:48">Sunday 30 March 2025</span>. Using Julia version 1.11.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -16,6 +16,11 @@ are JuMP decision variables.
 This function is useful when you wish to use constrained optimization to train
 small to moderate neural networks.
 
+!!! warning
+    This function is experimental and it may change in any future release. If
+    you use this feature, please open a GitHub issue and let us know your
+    thoughts.
+
 ## Example
 
 ```jldoctest

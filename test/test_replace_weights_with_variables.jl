@@ -34,6 +34,12 @@ function test_Affine()
     p = MathOptAI.replace_weights_with_variables(model, predictor)
     @test all_variables(model) == vcat(vec(p.A), p.b)
     @test start_value.(all_variables(model)) == 1:6
+    y, _ = MathOptAI.add_predictor(model, p, [1.0, 2.0])
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @variable(model, x[1:2])
+    y, _ = MathOptAI.add_predictor(model, p, x)
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @test num_constraints(model, QuadExpr, MOI.EqualTo{Float64}) == 2
     return
 end
 
@@ -56,6 +62,12 @@ function test_Scale()
     p = MathOptAI.replace_weights_with_variables(model, predictor)
     @test all_variables(model) == vcat(vec(p.scale), p.bias)
     @test start_value.(all_variables(model)) == 1:4
+    y, _ = MathOptAI.add_predictor(model, p, [1.0, 2.0])
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @variable(model, x[1:2])
+    y, _ = MathOptAI.add_predictor(model, p, x)
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @test num_constraints(model, QuadExpr, MOI.EqualTo{Float64}) == 2
     return
 end
 

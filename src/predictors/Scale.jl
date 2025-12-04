@@ -122,3 +122,15 @@ function add_predictor(
 )
     return predictor.predictor(x), Formulation(predictor)
 end
+
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Scale{<:JuMP.AbstractJuMPScalar},
+    x::Vector,
+)
+    _check_dimension(predictor, x)
+    m = length(predictor.scale)
+    y = add_variables(model, x, m, "moai_Scale")
+    cons = JuMP.@constraint(model, predictor(x) .== y)
+    return y, Formulation(predictor, y, cons)
+end

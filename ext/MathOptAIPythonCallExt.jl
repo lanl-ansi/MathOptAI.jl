@@ -56,21 +56,6 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
  * `device`: device used to construct PyTorch tensors, for example, `"cuda"`
    to run on an Nvidia GPU.
-
-## Compatibility
-
-The `vector_nonlinear_oracle` feature is experimental. It relies on a private
-API feature of Ipopt.jl that will change in a future release.
-
-If you use this feature, you must pin the version of Ipopt.jl in your
-`Project.toml` to ensure that future updates to Ipopt.jl do not break your
-existing code.
-
-A known good version of Ipopt.jl is v1.8.0. Pin the version using:
-```
-[compat]
-Ipopt = "=1.8.0"
-```
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;

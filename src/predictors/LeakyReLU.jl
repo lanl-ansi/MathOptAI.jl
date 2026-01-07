@@ -18,7 +18,7 @@ or equivalently:
 ```math
 y = \\textsf{negative_slope} \\cdot x + (1 - \\textsf{negative_slope}) \\cdot \\max\\{0, x\\}
 ```
-using `relu` to represent the ``\\max\\{0, x\\}`` term.
+using `relu` to represent the \$\\max\\{0, x\\}\$ term.
 
 ## Example
 

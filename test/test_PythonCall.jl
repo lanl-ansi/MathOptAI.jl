@@ -106,14 +106,14 @@ end
 
 function test_model_unsupported_layer()
     dir = mktempdir()
-    filename = joinpath(dir, "model_LeakyReLU.pt")
+    filename = joinpath(dir, "model_RReLU.pt")
     PythonCall.pyexec(
         """
         import torch
 
         model = torch.nn.Sequential(
             torch.nn.Linear(1, 16),
-            torch.nn.LeakyReLU(),
+            torch.nn.RReLU(),
             torch.nn.Linear(16, 1),
         )
 
@@ -123,7 +123,7 @@ function test_model_unsupported_layer()
         (; filename = filename),
     )
     torch = PythonCall.pyimport("torch")
-    layer = torch.nn.LeakyReLU()
+    layer = torch.nn.RReLU()
     @test_throws(
         ErrorException("unsupported layer: $layer"),
         MathOptAI.build_predictor(MathOptAI.PytorchModel(filename)),

@@ -133,10 +133,9 @@ function _predictor(nn, layer, config)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.GELU))
         return get(config, :GELU, MathOptAI.GELU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.LeakyReLU))
-        return MathOptAI.LeakyReLU(;
-            negative_slope = layer.negative_slope,
-            relu = get(config, :ReLU, MathOptAI.ReLU())
-        )
+        negative_slope = PythonCall.pyconvert(Float64, layer.negative_slope)
+        relu = get(config, :ReLU, MathOptAI.ReLU())
+        return MathOptAI.LeakyReLU(; negative_slope, relu)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.ReLU))
         return get(config, :ReLU, MathOptAI.ReLU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))

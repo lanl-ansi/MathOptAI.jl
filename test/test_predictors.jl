@@ -672,6 +672,64 @@ function test_start_values_missing()
     return
 end
 
+function test_LeakyReLU()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = MathOptAI.LeakyReLU(; negative_slope = 0.01)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
+    @test length(y) == 2
+    @test num_variables(model) == 6
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @objective(model, Min, sum(y))
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [-0.01, 2.0]
+    return
+end
+
+function test_LeakyReLU_reduced_space()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = MathOptAI.LeakyReLU(; negative_slope = 0.2)
+    y, formulation = MathOptAI.add_predictor(model, f, x; reduced_space = true)
+    @test length(y) == 2
+    @test num_variables(model) == 2
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 0
+    @objective(model, Min, sum(y))
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [-0.2, 2.0]
+    return
+end
+
+function test_LeakyReLU_BigM()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = MathOptAI.LeakyReLU(;
+        negative_slope = 0.123,
+        relu = MathOptAI.ReLUBigM(100.0),
+    )
+    y, formulation = MathOptAI.add_predictor(model, f, x)
+    @test length(y) == 2
+    @test num_variables(model) == 8
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @test num_constraints(model, AffExpr, MOI.GreaterThan{Float64}) == 2
+    @test num_constraints(model, AffExpr, MOI.LessThan{Float64}) == 4
+    @objective(model, Min, sum(y))
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [-0.123, 2.0]
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

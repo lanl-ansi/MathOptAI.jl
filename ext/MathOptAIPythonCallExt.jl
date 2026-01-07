@@ -27,6 +27,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 ## Supported layers
 
  * `nn.GELU`
+ * `nn.LeakyReLU`
  * `nn.Linear`
  * `nn.ReLU`
  * `nn.Sequential`
@@ -40,8 +41,15 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
    that control how the activation functions are reformulated. For example,
    `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are `:ReLU`, `:Sigmoid`, `:SoftMax`, `:SoftPlus`, and
-   `:Tanh`.
+   The supported Symbols are:
+    * `:GELU`
+    * `:ReLU`
+    * `:Sigmoid`
+    * `:SoftMax`
+    * `:SoftPlus`
+    * `:Tanh`
+    Note that `:LeakyReLU` is not supported. Use `:ReLU` to control how the
+    inner ReLU is modeled.
 
  * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
    formulation.
@@ -109,6 +117,10 @@ function _predictor(nn, layer, config)
         return MathOptAI.Affine(Matrix(weight), bias)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.GELU))
         return get(config, :GELU, MathOptAI.GELU())
+    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.LeakyReLU))
+        negative_slope = PythonCall.pyconvert(Float64, layer.negative_slope)
+        relu = get(config, :ReLU, MathOptAI.ReLU())
+        return MathOptAI.LeakyReLU(; negative_slope, relu)
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.ReLU))
         return get(config, :ReLU, MathOptAI.ReLU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))

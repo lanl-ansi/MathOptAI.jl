@@ -61,6 +61,11 @@ GELU
 GrayBox
 ```
 
+## `LeakyReLU`
+```@docs
+LeakyReLU
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

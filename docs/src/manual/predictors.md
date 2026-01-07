@@ -23,6 +23,7 @@ The following predictors are supported. See their docstrings for details:
 | [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
 | [`Pipeline`](@ref)              |                      | $M \rightarrow N$ |
 | [`Quantile`](@ref)              | Local nonlinear      | $M \rightarrow N$ |
+| [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |
 | [`ReLU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
 | [`ReLUBigM`](@ref)              | Mixed-integer linear | $M \rightarrow M$ |
 | [`ReLUQuadratic`](@ref)         | Non-convex quadratic | $M \rightarrow M$ |

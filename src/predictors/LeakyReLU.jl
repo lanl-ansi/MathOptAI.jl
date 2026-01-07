@@ -12,16 +12,14 @@
 
 An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-y = \\max\\{0, x\\} + \\textsf{negative_slope} \\cdot \\min\\{0, x\\}
+y = \\max\\{0, x\\} + \\eta \\cdot \\min\\{0, x\\}
 ```
 or equivalently:
 ```math
-y = \\textsf{negative_slope} \\cdot x + (1 - \\textsf{negative_slope}) \\cdot \\max\\{0, x\\}
+y = \\eta \\cdot x + (1 - \\eta) \\cdot \\max\\{0, x\\}
 ```
-using `relu` to represent:
-```math
-\\max\\{0, x\\}.
-```
+where `negative_slope` is \$\\eta\$ and `relu` is used to represent
+\$\\max\\{0, x\\}\$.
 
 ## Example
 

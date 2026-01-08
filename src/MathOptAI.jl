@@ -279,6 +279,20 @@ function Base.show(io::IO, predictor::ReducedSpace)
     return print(io, "ReducedSpace(", predictor.predictor, ")")
 end
 
+struct PaddedArrayView{T} <: AbstractArray{T,3}
+    data::Array{T,3}
+    padding::Tuple{Int,Int}
+end
+
+function Base.getindex(x::PaddedArrayView{T}, i::Int, j::Int, k::Int) where {T}
+    i -= x.padding[1]
+    j -= x.padding[2]
+    if i > 0 && j > 0
+        return x.data[i, j, k]
+    end
+    return zero(T)
+end
+
 for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
     if endswith(file, ".jl")
         include(file)

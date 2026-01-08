@@ -201,6 +201,39 @@ function _build_predictor(
     return
 end
 
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Flux.Conv,
+    config::Dict,
+)
+    p = MathOptAI.Conv2d(layer.weight, layer.bias, layer.pad, layer.stride)
+    push!(predictor.layers, p)
+    _build_predictor(predictor, layer.σ, config)
+    return
+end
+
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Flux.MaxPool,
+    config::Dict,
+)
+    @assert length(layer.k) == 2  # We support only 2D pooling
+    p = MathOptAI.MaxPool2d(layer.k, layer.stride, f.pad[1:2])
+    push!(predictor.layers, p)
+    return
+end
+
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Flux.MeanPool,
+    config::Dict,
+)
+    @assert length(layer.k) == 2  # We support only 2D pooling
+    p = MathOptAI.AvgPool2d(layer.k, layer.stride, f.pad[end-1:end])
+    push!(predictor.layers, p)
+    return
+end
+
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
     predictor::MathOptAI.VectorNonlinearOracle{<:Flux.Chain},

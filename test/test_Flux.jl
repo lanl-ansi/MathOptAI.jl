@@ -462,6 +462,32 @@ function test_MaxPool_against_flux()
     return
 end
 
+function test_flux_large_cnn()
+    cnn = Chain(                            # (16, 16, 1, 1)
+        Conv((5, 5), 1=>6, relu, pad = 2),  # -> (16, 16, 6, 1)
+        MaxPool((2, 2)),                    # -> (8, 8, 6, 1)
+        Conv((5, 5), 6=>16, relu, pad = 2), # -> (8, 8, 16, 1)
+        MaxPool((2, 2)),                    # -> (4, 4, 16, 1)
+        Flux.flatten,                       # -> (256,)
+        Dense(256 => 120, relu),            # -> (120,)
+        Dense(120 => 84, relu),             # -> (84,)
+        Dense(84 => 10),                    # -> (10,)
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:16, j in 1:16] == i + j)
+    y, formulation =
+        MathOptAI.add_predictor(model, cnn, vec(x); input_size = (16, 16))
+    @test length(y) == 10
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test maximum(
+        abs,
+        value(y) - cnn(convert.(Float32, reshape(fix_value.(x), 16, 16, 1, 1))),
+    ) <= 1e-5
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

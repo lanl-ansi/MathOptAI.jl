@@ -79,6 +79,8 @@ struct ReLUQuadratic <: AbstractPredictor
     end
 end
 
+output_size(::ReLUQuadratic, input_size) = input_size
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::ReLUQuadratic,

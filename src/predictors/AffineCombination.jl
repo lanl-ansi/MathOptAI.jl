@@ -109,6 +109,8 @@ function Base.show(io::IO, predictor::AffineCombination)
     return
 end
 
+output_size(f::AffineCombination, input_size) = length(f.constant)
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::AffineCombination,

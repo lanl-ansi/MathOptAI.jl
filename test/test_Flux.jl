@@ -464,9 +464,9 @@ end
 
 function test_flux_large_cnn()
     cnn = Chain(                            # (16, 16, 1, 1)
-        Conv((5, 5), 1=>6, relu, pad = 2),  # -> (16, 16, 6, 1)
+        Conv((5, 5), 1=>6, relu; pad = 2),  # -> (16, 16, 6, 1)
         MaxPool((2, 2)),                    # -> (8, 8, 6, 1)
-        Conv((5, 5), 6=>16, relu, pad = 2), # -> (8, 8, 16, 1)
+        Conv((5, 5), 6=>16, relu; pad = 2), # -> (8, 8, 16, 1)
         MaxPool((2, 2)),                    # -> (4, 4, 16, 1)
         Flux.flatten,                       # -> (256,)
         Dense(256 => 120, relu),            # -> (120,)

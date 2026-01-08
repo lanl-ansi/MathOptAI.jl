@@ -293,6 +293,8 @@ function Base.getindex(x::PaddedArrayView{T}, i::Int, j::Int, k::Int) where {T}
     return zero(T)
 end
 
+output_size(::AbstractPredictor, ::Any) = nothing
+
 for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
     if endswith(file, ".jl")
         include(file)

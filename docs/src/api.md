@@ -56,9 +56,9 @@ AvgPool2d
 BinaryDecisionTree
 ```
 
-## `ConvPool2d`
+## `Conv2d`
 ```@docs
-ConvPool2d
+Conv2d
 ```
 
 ## `GELU`

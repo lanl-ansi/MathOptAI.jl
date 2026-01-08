@@ -289,6 +289,23 @@ end
 
 function _build_predictor(
     predictor::MathOptAI.Pipeline,
+    layer::Flux.MinPool,
+    config::Dict,
+    input_size::Any,
+)
+    input_size_normalized = _normalize_input_size(layer, input_size)
+    p = MathOptAI.MinPool2d(
+        layer.k;
+        input_size = input_size_normalized,
+        padding = layer.pad[1:2],
+        stride = layer.stride,
+    )
+    push!(predictor.layers, p)
+    return MathOptAI.output_size(p, input_size_normalized)
+end
+
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
     layer::Flux.MeanPool,
     config::Dict,
     input_size::Any,

@@ -24,6 +24,7 @@ The following predictors are supported. See their docstrings for details:
 | [`GELU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
 | [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
 | [`MaxPool2d`](@ref)             | Global nonlinear     | $M \rightarrow N$ |
+| [`MinPool2d`](@ref)             | Global nonlinear     | $M \rightarrow N$ |
 | [`Pipeline`](@ref)              |                      | $M \rightarrow N$ |
 | [`Quantile`](@ref)              | Local nonlinear      | $M \rightarrow N$ |
 | [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |

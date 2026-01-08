@@ -86,6 +86,11 @@ LeakyReLU
 MaxPool2d
 ```
 
+## `MinPool2d`
+```@docs
+MinPool2d
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

@@ -21,6 +21,10 @@ All subtypes must implement:
 
  * [`add_predictor`](@ref)
  * [`build_predictor`](@ref)
+
+The following methods are optional, but encouraged:
+
+ * [`output_size`](@ref)
 """
 abstract type AbstractPredictor end
 
@@ -293,6 +297,30 @@ function Base.getindex(x::PaddedArrayView{T}, i::Int, j::Int, k::Int) where {T}
     return zero(T)
 end
 
+"""
+    output_size(predictor::AbstractPredictor, input_size::Nothing)
+    output_size(predictor::AbstractPredictor, input_size::NTuple{N,Int}) where {N}
+
+Return the output size of `predictor` with an input with shape `input_size`.
+
+If `input_size === nothing`, no information about the input is known. This
+function returns an `NTuple{N,Int}` if a static output size based on the
+predictor, otherwise returns `nothing`.
+
+## Example
+
+```jldoctest
+julia> using MathOptAI
+
+julia> output_size(ReLU(), nothing)
+
+julia> output_size(ReLU(), (2,))
+(2,)
+
+julia> output_size(MaxPool2d((3, 3); input_size = (6, 9, 1)), (6, 9, 1))
+(2, 3, 1)
+```
+"""
 output_size(::AbstractPredictor, ::Any) = nothing
 
 for file in readdir(joinpath(@__DIR__, "predictors"); join = true)

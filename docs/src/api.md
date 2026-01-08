@@ -36,6 +36,11 @@ add_predictor
 build_predictor(predictor::AbstractPredictor; kwargs...)
 ```
 
+## `output_size`
+```@docs
+output_size
+```
+
 ## `Affine`
 ```@docs
 Affine

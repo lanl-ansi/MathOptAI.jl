@@ -67,7 +67,7 @@ struct ReLUBigM <: AbstractPredictor
     M::Float64
 end
 
-output_size(::ReLUQuadratic, input_size) = input_size
+output_size(::ReLUBigM, input_size) = input_size
 
 function add_predictor(
     model::JuMP.AbstractModel,

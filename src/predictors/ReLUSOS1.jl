@@ -63,7 +63,7 @@ ReLUSOS1()
 """
 struct ReLUSOS1 <: AbstractPredictor end
 
-output_size(::ReLUQuadratic, input_size) = input_size
+output_size(::ReLUSOS1, input_size) = input_size
 
 function add_predictor(
     model::JuMP.AbstractModel,

@@ -94,6 +94,8 @@ function Base.show(io::IO, predictor::BinaryDecisionTree{K,V}) where {K,V}
     return print(io, "BinaryDecisionTree{$K,$V} [leaves=$leaves, depth=$depth]")
 end
 
+output_size(::BinaryDecisionTree, input_size) = (1,)
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::BinaryDecisionTree,

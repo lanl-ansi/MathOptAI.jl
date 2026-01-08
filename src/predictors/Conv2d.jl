@@ -109,6 +109,16 @@ function (f::Conv2d)(model::JuMP.AbstractModel, x::Vector)
     )
 end
 
+function output_size(f::Conv2d, input_size::NTuple{3,Int})
+    (Hin, Win, C) = f.input_size
+    kH, kW, Cin, Cout = size(f.weight)
+    @assert Cin == C
+    (pH, pW), (sH, sW) = f.padding, f.stride
+    Hout = floor(Int, (Hin + 2 * pH - kH) / sH + 1)
+    Wout = floor(Int, (Win + 2 * pW - kW) / sW + 1)
+    return (Hout, Wout, Cout)
+end
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Conv2d, x::Vector)
     Y = predictor(model, x)
     y = add_variables(model, x, length(Y), "moai_Conv2d")

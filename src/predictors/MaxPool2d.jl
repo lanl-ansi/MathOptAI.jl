@@ -88,6 +88,14 @@ function (f::MaxPool2d)(model::JuMP.AbstractModel, x::Vector)
     )
 end
 
+function output_size(f::MaxPool2d, input_size::NTuple{3,Int})
+    (Hin, Win, C) = f.input_size
+    (kH, kW), (pH, pW), (sH, sW) = f.kernel_size, f.padding, f.stride
+    Hout = floor(Int, (Hin + 2 * pH - kH) / sH + 1)
+    Wout = floor(Int, (Win + 2 * pW - kW) / sW + 1)
+    return (Hout, Wout, C)
+end
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::MaxPool2d,

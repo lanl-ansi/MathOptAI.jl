@@ -176,7 +176,7 @@ function test_end_to_end_Tanh()
 end
 
 function test_unsupported_layer()
-    layer = Flux.Conv((5, 5), 3 => 7)
+    layer = Flux.Bilinear((5, 5) => 7)
     model = Model()
     @variable(model, x[1:2])
     @test_throws(
@@ -393,7 +393,7 @@ function test_AvgPool2d_against_flux()
         (20, 20, 2, (4, 4), 0, (4, 4)),
     ]
         x = rand(Float32, H, W, C, 1);
-        f = MeanPool(kernel; pad, stride)
+        f = Flux.MeanPool(kernel; pad, stride)
         g = MathOptAI.AvgPool2d(
             kernel;
             input_size = size(x)[1:3],
@@ -420,7 +420,7 @@ function test_Conv2d_against_flux()
         (20, 20, 2 => 3, (4, 4), 0, (4, 4)),
     ]
         x = rand(Float32, H, W, first(C), 1);
-        f = Conv(kernel, C, identity; pad, stride)
+        f = Flux.Conv(kernel, C, identity; pad, stride)
         g = MathOptAI.Conv2d(
             f.weight,
             f.bias;
@@ -448,7 +448,7 @@ function test_MaxPool_against_flux()
         (20, 20, 2, (4, 4), 0, (4, 4)),
     ]
         x = rand(Float32, H, W, C, 1);
-        f = MaxPool(kernel; pad, stride)
+        f = Flux.MaxPool(kernel; pad, stride)
         g = MathOptAI.MaxPool2d(
             kernel;
             input_size = size(x)[1:3],

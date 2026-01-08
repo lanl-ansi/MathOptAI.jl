@@ -63,6 +63,8 @@ struct Tanh <: AbstractPredictor end
 
 (::Tanh)(x) = tanh(x)
 
+output_size(::Tanh, input_size) = input_size
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Tanh, x::Vector)
     y = add_variables(model, x, length(x), "moai_Tanh")
     cons = Any[]

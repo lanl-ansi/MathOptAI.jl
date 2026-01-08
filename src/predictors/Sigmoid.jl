@@ -63,6 +63,8 @@ struct Sigmoid <: AbstractPredictor end
 
 (::Sigmoid)(x) = 1 / (1 + exp(-x))
 
+output_size(::Sigmoid, input_size) = input_size
+
 function add_predictor(model::JuMP.AbstractModel, predictor::Sigmoid, x::Vector)
     y = add_variables(model, x, length(x), "moai_Sigmoid")
     cons = Any[]

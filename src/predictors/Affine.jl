@@ -86,6 +86,8 @@ function Base.show(io::IO, p::Affine)
     return print(io, "Affine(A, b) [input: $n, output: $m]")
 end
 
+output_size(predictor::Affine, ::Any) = (size(predictor.A, 1),)
+
 function _check_dimension(predictor::Affine, x::Vector)
     m, n = size(predictor.A, 2), length(x)
     if m != n

@@ -30,6 +30,7 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
  * `Flux.flatten`
  * `Flux.MaxPool`
  * `Flux.MeanPool`
+ * `Flux.MinPool`
  * `Flux.Scale`
  * `Flux.softmax`
 
@@ -59,8 +60,8 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
    `vector_nonlinear_oracle` is used.
 
  * `input_size`: to disambiguate the input and output sizes of matrix inputs,
-   chains containing `Conv`, `MaxPool`, and `MeanPool` layers must specify an
-   initial input size.
+   chains containing `Conv`, `MaxPool`, `MeanPool`, and `MinPool` layers must
+   specify an initial input size.
 
 ## Example
 

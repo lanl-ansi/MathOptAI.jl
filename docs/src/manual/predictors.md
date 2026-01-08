@@ -20,13 +20,13 @@ The following predictors are supported. See their docstrings for details:
 | [`AffineCombination`](@ref)     | Linear               | $M \rightarrow N$ |
 | [`AvgPool2d`](@ref)             | Linear               | $M \rightarrow N$ |
 | [`BinaryDecisionTree`](@ref)    | Mixed-integer linear | $M \rightarrow 1$ |
-| [`ConvPool2d`](@ref)            | Linear               | $M \rightarrow N$ |
+| [`Conv2d`](@ref).               | Linear               | $M \rightarrow N$ |
 | [`GELU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
 | [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
+| [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |
 | [`MaxPool2d`](@ref)             | Global nonlinear     | $M \rightarrow N$ |
 | [`Pipeline`](@ref)              |                      | $M \rightarrow N$ |
 | [`Quantile`](@ref)              | Local nonlinear      | $M \rightarrow N$ |
-| [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |
 | [`ReLU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
 | [`ReLUBigM`](@ref)              | Mixed-integer linear | $M \rightarrow M$ |
 | [`ReLUQuadratic`](@ref)         | Non-convex quadratic | $M \rightarrow M$ |

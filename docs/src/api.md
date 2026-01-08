@@ -46,9 +46,19 @@ Affine
 AffineCombination
 ```
 
+## `AvgPool2d`
+```@docs
+AvgPool2d
+```
+
 ## `BinaryDecisionTree`
 ```@docs
 BinaryDecisionTree
+```
+
+## `ConvPool2d`
+```@docs
+ConvPool2d
 ```
 
 ## `GELU`
@@ -64,6 +74,11 @@ GrayBox
 ## `LeakyReLU`
 ```@docs
 LeakyReLU
+```
+
+## `MaxPool2d`
+```@docs
+MaxPool2d
 ```
 
 ## `Pipeline`

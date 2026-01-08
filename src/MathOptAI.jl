@@ -287,7 +287,7 @@ end
 function Base.getindex(x::PaddedArrayView{T}, i::Int, j::Int, k::Int) where {T}
     i -= x.padding[1]
     j -= x.padding[2]
-    if i > 0 && j > 0
+    if 1 <= i <= size(x.data, 1) && 1 <= j <= size(x.data, 2)
         return x.data[i, j, k]
     end
     return zero(T)

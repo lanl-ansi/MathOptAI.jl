@@ -380,6 +380,88 @@ function test_vector_nonlinear_oracle_sigmoid_reduced_space_error()
     return
 end
 
+function test_AvgPool2d_against_flux()
+    model = Model()
+    for (H, W, C, kernel, pad, stride) in [
+        (16, 16, 1, (5, 5), 0, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 1, (5, 5), 2, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (2, 3), 1, (1, 1)),
+        (3, 5, 2, (2, 3), 1, (1, 1)),
+        (20, 20, 2, (4, 4), 0, (4, 4)),
+    ]
+        x = rand(Float32, H, W, C, 1);
+        f = MeanPool(kernel; pad, stride)
+        g = MathOptAI.AvgPool2d(
+            kernel;
+            input_size = size(x)[1:3],
+            padding = f.pad[1:2],
+            stride = f.stride,
+        )
+        A, B = f(x), g(model, vec(x))
+        @test size(A)[1:3] == size(B)
+        @test maximum(abs, A - B) < 1e-6
+    end
+    return
+end
+
+function test_Conv2d_against_flux()
+    model = Model()
+    for (H, W, C, kernel, pad, stride) in [
+        (16, 16, 1 => 1, (5, 5), 0, (1, 1)),
+        (16, 16, 1 => 1, (5, 5), 1, (1, 1)),
+        (16, 16, 1 => 1, (5, 5), 2, (1, 1)),
+        (16, 16, 1 => 5, (5, 5), 1, (1, 1)),
+        (16, 16, 2 => 2, (5, 5), 1, (1, 1)),
+        (16, 16, 2 => 2, (2, 3), 1, (1, 1)),
+        (3, 5, 2 => 2, (2, 3), 1, (1, 1)),
+        (20, 20, 2 => 3, (4, 4), 0, (4, 4)),
+    ]
+        x = rand(Float32, H, W, first(C), 1);
+        f = Conv(kernel, C, identity; pad, stride)
+        g = MathOptAI.Conv2d(
+            f.weight,
+            f.bias;
+            input_size = size(x)[1:3],
+            padding = f.pad[1:2],
+            stride = f.stride,
+        )
+        A, B = f(x), g(model, vec(x))
+        @test size(A)[1:3] == size(B)
+        @test maximum(abs, A - B) < 1e-6
+    end
+    return
+end
+
+function test_MaxPool_against_flux()
+    model = Model()
+    for (H, W, C, kernel, pad, stride) in [
+        (16, 16, 1, (5, 5), 0, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 1, (5, 5), 2, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (2, 3), 1, (1, 1)),
+        (3, 5, 2, (2, 3), 1, (1, 1)),
+        (20, 20, 2, (4, 4), 0, (4, 4)),
+    ]
+        x = rand(Float32, H, W, C, 1);
+        f = MaxPool(kernel; pad, stride)
+        g = MathOptAI.MaxPool2d(
+            kernel;
+            input_size = size(x)[1:3],
+            padding = f.pad[1:2],
+            stride = f.stride,
+        )
+        A, B = f(x), g(model, vec(x))
+        @test size(A)[1:3] == size(B)
+        @test maximum(abs, A - B) < 1e-6
+    end
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

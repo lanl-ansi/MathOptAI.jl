@@ -30,7 +30,6 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
  * `Flux.flatten`
  * `Flux.MaxPool`
  * `Flux.MeanPool`
- * `Flux.MinPool`
  * `Flux.Scale`
  * `Flux.softmax`
 
@@ -60,8 +59,8 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
    `vector_nonlinear_oracle` is used.
 
  * `input_size`: to disambiguate the input and output sizes of matrix inputs,
-   chains containing `Conv`, `MaxPool`, `MeanPool`, and `MinPool` layers must
-   specify an initial input size.
+   chains containing `Conv`, `MaxPool`, and `MeanPool` layers must specify an
+   initial input size.
 
 ## Example
 
@@ -279,23 +278,6 @@ function _build_predictor(
 )
     input_size_normalized = _normalize_input_size(layer, input_size)
     p = MathOptAI.MaxPool2d(
-        layer.k;
-        input_size = input_size_normalized,
-        padding = layer.pad[1:2],
-        stride = layer.stride,
-    )
-    push!(predictor.layers, p)
-    return MathOptAI.output_size(p, input_size_normalized)
-end
-
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.MinPool,
-    config::Dict,
-    input_size::Any,
-)
-    input_size_normalized = _normalize_input_size(layer, input_size)
-    p = MathOptAI.MinPool2d(
         layer.k;
         input_size = input_size_normalized,
         padding = layer.pad[1:2],

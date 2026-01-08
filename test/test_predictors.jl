@@ -843,34 +843,6 @@ function test_MaxPool2d_reduced_space()
     return
 end
 
-function test_MinPool2d()
-    model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
-    predictor = MathOptAI.MinPool2d((2, 2); input_size = (2, 4, 1))
-    @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
-    y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
-    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
-    optimize!(model)
-    @assert is_solved_and_feasible(model)
-    @test value.(y) ≈ [1, 3]
-    return
-end
-
-function test_MinPool2d_reduced_space()
-    model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
-    predictor = MathOptAI.MinPool2d((2, 2); input_size = (2, 4, 1))
-    y, formulation =
-        MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
-    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
-    optimize!(model)
-    @assert is_solved_and_feasible(model)
-    @test value.(y) ≈ [1, 3]
-    return
-end
-
 end  # module
 
 TestPredictors.runtests()

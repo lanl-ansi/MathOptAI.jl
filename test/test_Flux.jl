@@ -462,33 +462,6 @@ function test_MaxPool_against_flux()
     return
 end
 
-function test_MinPool_against_flux()
-    model = Model()
-    for (H, W, C, kernel, pad, stride) in [
-        (16, 16, 1, (5, 5), 0, (1, 1)),
-        (16, 16, 1, (5, 5), 1, (1, 1)),
-        (16, 16, 1, (5, 5), 2, (1, 1)),
-        (16, 16, 1, (5, 5), 1, (1, 1)),
-        (16, 16, 2, (5, 5), 1, (1, 1)),
-        (16, 16, 2, (2, 3), 1, (1, 1)),
-        (3, 5, 2, (2, 3), 1, (1, 1)),
-        (20, 20, 2, (4, 4), 0, (4, 4)),
-    ]
-        x = rand(Float32, H, W, C, 1);
-        f = Flux.MinPool(kernel; pad, stride)
-        g = MathOptAI.MinPool2d(
-            kernel;
-            input_size = size(x)[1:3],
-            padding = f.pad[1:2],
-            stride = f.stride,
-        )
-        A, B = f(x), g(model, vec(x))
-        @test size(A)[1:3] == size(B)
-        @test maximum(abs, A - B) < 1e-6
-    end
-    return
-end
-
 function test_flux_large_cnn()
     cnn = Flux.Chain(                                 # (16, 16, 1, 1)
         Flux.Conv((5, 5), 1=>6, Flux.relu; pad = 2),  # -> (16, 16, 6, 1)

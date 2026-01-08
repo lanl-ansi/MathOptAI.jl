@@ -467,7 +467,7 @@ function test_flux_large_cnn()
         Flux.Conv((5, 5), 1=>6, Flux.relu; pad = 2),  # -> (16, 16, 6, 1)
         Flux.MaxPool((2, 2)),                         # -> (8, 8, 6, 1)
         Flux.Conv((5, 5), 6=>16, Flux.relu; pad = 2), # -> (8, 8, 16, 1)
-        Flux.MaxPool((2, 2)),                         # -> (4, 4, 16, 1)
+        Flux.MeanPool((2, 2)),                        # -> (4, 4, 16, 1)
         Flux.flatten,                                 # -> (256,)
         Flux.Dense(256 => 120, Flux.relu),            # -> (120,)
         Flux.Dense(120 => 84, Flux.relu),             # -> (84,)
@@ -485,6 +485,34 @@ function test_flux_large_cnn()
         abs,
         value(y) - cnn(convert.(Float32, reshape(fix_value.(x), 16, 16, 1, 1))),
     ) <= 1e-5
+    return
+end
+
+function test_matrix_errors()
+    for layer in Any[
+        Flux.Conv((5, 5), 1=>2, Flux.relu),
+        Flux.MeanPool((2, 2)),
+        Flux.MaxPool((2, 2)),
+    ]
+        cnn = Flux.Chain(layer, Flux.flatten)
+        model = Model()
+        @variable(model, x[i in 1:16, j in 1:16])
+        @test_throws(
+            ErrorException(
+                "You must specifiy the `input_size` kwarg when using a layer of type $(typeof(layer))",
+            ),
+            MathOptAI.add_predictor(model, cnn, vec(x)),
+        )
+    end
+    return
+end
+
+function test_flatten_by_itself()
+    cnn = Flux.Chain(Flux.flatten)
+    model = Model()
+    @variable(model, x[i in 1:16])
+    y, _ = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 16
     return
 end
 

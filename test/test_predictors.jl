@@ -751,6 +751,7 @@ function test_AvgPool2d()
     @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
     predictor = MathOptAI.AvgPool2d((2, 2); input_size = (2, 4, 1))
     @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
+    @test MathOptAI.output_size(predictor, nothing) === nothing
     y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
     @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
     optimize!(model)

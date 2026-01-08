@@ -218,9 +218,6 @@ function _build_predictor(
     config::Dict,
     input_size::Union{Nothing,Tuple{Int}},
 )
-    if input_size !== nothing
-        @assert input_size == (size(layer.weight, 2),)
-    end
     p = MathOptAI.Affine(layer.weight, layer.bias)
     push!(predictor.layers, p)
     input_size = MathOptAI.output_size(p, input_size)
@@ -233,9 +230,6 @@ function _build_predictor(
     config::Dict,
     input_size::Union{Nothing,Tuple{Int}},
 )
-    if input_size !== nothing
-        @assert input_size == (length(layer.scale),)
-    end
     p = MathOptAI.Scale(layer.scale, layer.bias)
     push!(predictor.layers, p)
     input_size = MathOptAI.output_size(p, input_size)
@@ -247,7 +241,6 @@ function _normalize_input_size(layer, ::Nothing)
     return error(msg)
 end
 
-_normalize_input_size(::Any, input_size::NTuple{1,Int}) = (input_size..., 1, 1)
 _normalize_input_size(::Any, input_size::NTuple{2,Int}) = (input_size..., 1)
 _normalize_input_size(::Any, input_size::NTuple{3,Int}) = input_size
 

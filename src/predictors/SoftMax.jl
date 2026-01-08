@@ -69,6 +69,8 @@ struct SoftMax <: AbstractPredictor end
 
 (::SoftMax)(x::Vector) = exp.(x) ./ sum(exp.(x))
 
+output_size(::SoftMax, input_size) = input_size
+
 function add_predictor(model::JuMP.AbstractModel, predictor::SoftMax, x::Vector)
     cons = Any[]
     y = add_variables(model, x, length(x), "moai_SoftMax")

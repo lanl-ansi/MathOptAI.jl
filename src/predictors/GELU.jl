@@ -51,6 +51,8 @@ struct GELU <: AbstractPredictor end
 
 (::GELU)(x) = 0.5 * x * (1 + tanh(sqrt(2 / pi) * (x + 0.044715 * x^3)))
 
+output_size(::GELU, input_size) = input_size
+
 function add_predictor(model::JuMP.AbstractModel, predictor::GELU, x::Vector)
     y = add_variables(model, x, length(x), "moai_GELU")
     cons = Any[]

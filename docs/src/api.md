@@ -36,6 +36,11 @@ add_predictor
 build_predictor(predictor::AbstractPredictor; kwargs...)
 ```
 
+## `output_size`
+```@docs
+output_size
+```
+
 ## `Affine`
 ```@docs
 Affine
@@ -46,9 +51,19 @@ Affine
 AffineCombination
 ```
 
+## `AvgPool2d`
+```@docs
+AvgPool2d
+```
+
 ## `BinaryDecisionTree`
 ```@docs
 BinaryDecisionTree
+```
+
+## `Conv2d`
+```@docs
+Conv2d
 ```
 
 ## `GELU`
@@ -64,6 +79,11 @@ GrayBox
 ## `LeakyReLU`
 ```@docs
 LeakyReLU
+```
+
+## `MaxPool2d`
+```@docs
+MaxPool2d
 ```
 
 ## `Pipeline`

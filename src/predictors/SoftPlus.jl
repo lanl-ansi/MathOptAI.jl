@@ -66,6 +66,8 @@ end
 
 (predictor::SoftPlus)(x) = log(1 + exp(predictor.beta * x)) / predictor.beta
 
+output_size(::SoftPlus, input_size) = input_size
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::SoftPlus,

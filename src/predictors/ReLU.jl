@@ -63,6 +63,8 @@ struct ReLU <: AbstractPredictor end
 
 (::ReLU)(x) = max(0, x)
 
+output_size(::ReLU, input_size) = input_size
+
 function add_predictor(model::JuMP.AbstractModel, predictor::ReLU, x::Vector)
     y = add_variables(model, x, length(x), "moai_ReLU")
     cons = Any[]

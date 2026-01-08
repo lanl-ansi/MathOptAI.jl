@@ -84,6 +84,8 @@ struct LeakyReLU{P} <: AbstractPredictor
     end
 end
 
+output_size(::LeakyReLU, input_size) = input_size
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::LeakyReLU,

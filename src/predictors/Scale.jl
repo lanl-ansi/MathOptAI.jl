@@ -83,6 +83,8 @@ function Base.show(io::IO, ::Scale)
     return print(io, "Scale(scale, bias)")
 end
 
+output_size(predictor::Scale, ::Any) = (length(predictor.scale),)
+
 function _check_dimension(predictor::Scale, x::Vector)
     m, n = length(predictor.scale), length(x)
     if m != n

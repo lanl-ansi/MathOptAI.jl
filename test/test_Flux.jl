@@ -176,7 +176,7 @@ function test_end_to_end_Tanh()
 end
 
 function test_unsupported_layer()
-    layer = Flux.Conv((5, 5), 3 => 7)
+    layer = Flux.Bilinear((5, 5) => 7)
     model = Model()
     @variable(model, x[1:2])
     @test_throws(
@@ -377,6 +377,142 @@ function test_vector_nonlinear_oracle_sigmoid_reduced_space_error()
             vector_nonlinear_oracle = true,
         ),
     )
+    return
+end
+
+function test_AvgPool2d_against_flux()
+    model = Model()
+    for (H, W, C, kernel, pad, stride) in [
+        (16, 16, 1, (5, 5), 0, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 1, (5, 5), 2, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (2, 3), 1, (1, 1)),
+        (3, 5, 2, (2, 3), 1, (1, 1)),
+        (20, 20, 2, (4, 4), 0, (4, 4)),
+    ]
+        x = rand(Float32, H, W, C, 1);
+        f = Flux.MeanPool(kernel; pad, stride)
+        g = MathOptAI.AvgPool2d(
+            kernel;
+            input_size = size(x)[1:3],
+            padding = f.pad[1:2],
+            stride = f.stride,
+        )
+        A, B = f(x), g(model, vec(x))
+        @test size(A)[1:3] == size(B)
+        @test maximum(abs, A - B) < 1e-6
+    end
+    return
+end
+
+function test_Conv2d_against_flux()
+    model = Model()
+    for (H, W, C, kernel, pad, stride) in [
+        (16, 16, 1 => 1, (5, 5), 0, (1, 1)),
+        (16, 16, 1 => 1, (5, 5), 1, (1, 1)),
+        (16, 16, 1 => 1, (5, 5), 2, (1, 1)),
+        (16, 16, 1 => 5, (5, 5), 1, (1, 1)),
+        (16, 16, 2 => 2, (5, 5), 1, (1, 1)),
+        (16, 16, 2 => 2, (2, 3), 1, (1, 1)),
+        (3, 5, 2 => 2, (2, 3), 1, (1, 1)),
+        (20, 20, 2 => 3, (4, 4), 0, (4, 4)),
+    ]
+        x = rand(Float32, H, W, first(C), 1);
+        f = Flux.Conv(kernel, C, identity; pad, stride)
+        g = MathOptAI.Conv2d(
+            f.weight,
+            f.bias;
+            input_size = size(x)[1:3],
+            padding = f.pad[1:2],
+            stride = f.stride,
+        )
+        A, B = f(x), g(model, vec(x))
+        @test size(A)[1:3] == size(B)
+        @test maximum(abs, A - B) < 1e-6
+    end
+    return
+end
+
+function test_MaxPool_against_flux()
+    model = Model()
+    for (H, W, C, kernel, pad, stride) in [
+        (16, 16, 1, (5, 5), 0, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 1, (5, 5), 2, (1, 1)),
+        (16, 16, 1, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (5, 5), 1, (1, 1)),
+        (16, 16, 2, (2, 3), 1, (1, 1)),
+        (3, 5, 2, (2, 3), 1, (1, 1)),
+        (20, 20, 2, (4, 4), 0, (4, 4)),
+    ]
+        x = rand(Float32, H, W, C, 1);
+        f = Flux.MaxPool(kernel; pad, stride)
+        g = MathOptAI.MaxPool2d(
+            kernel;
+            input_size = size(x)[1:3],
+            padding = f.pad[1:2],
+            stride = f.stride,
+        )
+        A, B = f(x), g(model, vec(x))
+        @test size(A)[1:3] == size(B)
+        @test maximum(abs, A - B) < 1e-6
+    end
+    return
+end
+
+function test_flux_large_cnn()
+    cnn = Flux.Chain(                                 # (16, 16, 1, 1)
+        Flux.Conv((5, 5), 1=>6, Flux.relu; pad = 2),  # -> (16, 16, 6, 1)
+        Flux.MaxPool((2, 2)),                         # -> (8, 8, 6, 1)
+        Flux.Conv((5, 5), 6=>16, Flux.relu; pad = 2), # -> (8, 8, 16, 1)
+        Flux.MeanPool((2, 2)),                        # -> (4, 4, 16, 1)
+        Flux.flatten,                                 # -> (256,)
+        Flux.Dense(256 => 120, Flux.relu),            # -> (120,)
+        Flux.Dense(120 => 84, Flux.relu),             # -> (84,)
+        Flux.Dense(84 => 10),                         # -> (10,)
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:16, j in 1:16] == i + j)
+    y, formulation =
+        MathOptAI.add_predictor(model, cnn, vec(x); input_size = (16, 16))
+    @test length(y) == 10
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test maximum(
+        abs,
+        value(y) - cnn(convert.(Float32, reshape(fix_value.(x), 16, 16, 1, 1))),
+    ) <= 1e-5
+    return
+end
+
+function test_matrix_errors()
+    for layer in Any[
+        Flux.Conv((5, 5), 1=>2, Flux.relu),
+        Flux.MeanPool((2, 2)),
+        Flux.MaxPool((2, 2)),
+    ]
+        cnn = Flux.Chain(layer, Flux.flatten)
+        model = Model()
+        @variable(model, x[i in 1:16, j in 1:16])
+        @test_throws(
+            ErrorException(
+                "You must specifiy the `input_size` kwarg when using a layer of type $(typeof(layer))",
+            ),
+            MathOptAI.add_predictor(model, cnn, vec(x)),
+        )
+    end
+    return
+end
+
+function test_flatten_by_itself()
+    cnn = Flux.Chain(Flux.flatten)
+    model = Model()
+    @variable(model, x[i in 1:16])
+    y, _ = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 16
     return
 end
 

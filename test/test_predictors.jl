@@ -27,6 +27,7 @@ function test_Affine()
     model = Model()
     @variable(model, x[1:2])
     f = MathOptAI.Affine([2.0, 3.0])
+    @test MathOptAI.output_size(f, (2,)) == (1,)
     y, formulation = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
     obj = constraint_object(only(cons))
@@ -89,6 +90,7 @@ end
 function test_BinaryDecisionTree()
     rhs = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 1.0, 0, 1)
     f = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 0.0, -1, rhs)
+    @test MathOptAI.output_size(f, (1,)) == (1,)
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, -3 <= x <= 5)
@@ -135,6 +137,7 @@ function test_RandomForest()
     lhs = MathOptAI.BinaryDecisionTree{Float64,Int}(1, -0.1, -1, 0)
     tree_2 = MathOptAI.BinaryDecisionTree{Float64,Int}(1, 0.9, lhs, 1)
     predictor = MathOptAI.AffineCombination([tree_1, tree_2], [0.5, 0.5], [0.0])
+    @test MathOptAI.output_size(predictor, (1,)) == (1,)
     @test sprint(show, predictor) == """
     AffineCombination
     ├ 0.5 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
@@ -158,6 +161,7 @@ function test_ReLU_direct()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReLU()
+    @test MathOptAI.output_size(f, (10,)) == (10,)
     y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 4
@@ -214,6 +218,7 @@ function test_ReLU_BigM()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReLUBigM(100.0)
+    @test MathOptAI.output_size(f, (10,)) == (10,)
     y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
@@ -232,6 +237,7 @@ function test_ReLU_SOS1()
     set_silent(model)
     @variable(model, -2 <= x[1:2] <= 2)
     f = MathOptAI.ReLUSOS1()
+    @test MathOptAI.output_size(f, (10,)) == (10,)
     y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
@@ -265,6 +271,7 @@ function test_ReLU_Quadratic()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.ReLUQuadratic()
+    @test MathOptAI.output_size(f, (10,)) == (10,)
     @test f.relaxation_parameter === nothing
     y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
@@ -304,7 +311,9 @@ function test_Sigmoid()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y, formulation = MathOptAI.add_predictor(model, MathOptAI.Sigmoid(), x)
+    f = MathOptAI.Sigmoid()
+    @test MathOptAI.output_size(f, (10,)) == (10,)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -356,6 +365,7 @@ function test_SoftMax()
     set_silent(model)
     @variable(model, x[1:2])
     y, formulation = MathOptAI.add_predictor(model, MathOptAI.SoftMax(), x)
+    @test MathOptAI.output_size(MathOptAI.SoftMax(), (10,)) == (10,)
     @test length(y) == 2
     @test num_variables(model) == 5
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 3
@@ -391,6 +401,7 @@ function test_SoftPlus()
     set_silent(model)
     @variable(model, x[1:2])
     y, formulation = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
+    @test MathOptAI.output_size(MathOptAI.SoftPlus(), (10,)) == (10,)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -446,6 +457,7 @@ function test_Tanh()
     set_silent(model)
     @variable(model, x[1:2])
     y, formulation = MathOptAI.add_predictor(model, MathOptAI.Tanh(), x)
+    @test MathOptAI.output_size(MathOptAI.Tanh(), (10,)) == (10,)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -501,6 +513,7 @@ function test_Scale()
     model = Model()
     @variable(model, x[1:2])
     f = MathOptAI.Scale([2.0, 3.0], [4.0, 5.0])
+    @test MathOptAI.output_size(MathOptAI.Tanh(), (2,)) == (2,)
     @test sprint(show, f) == "Scale(scale, bias)"
     y, formulation = MathOptAI.add_predictor(model, f, x)
     cons = all_constraints(model; include_variable_in_set_constraints = false)
@@ -564,6 +577,7 @@ function test_GELU()
     set_silent(model)
     @variable(model, x[1:2])
     y, formulation = MathOptAI.add_predictor(model, MathOptAI.GELU(), x)
+    @test MathOptAI.output_size(MathOptAI.GELU(), (10,)) == (10,)
     @test length(y) == 2
     @test num_variables(model) == 4
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -677,6 +691,7 @@ function test_LeakyReLU()
     set_silent(model)
     @variable(model, x[1:2])
     f = MathOptAI.LeakyReLU(; negative_slope = 0.01)
+    @test MathOptAI.output_size(f, (10,)) == (10,)
     y, formulation = MathOptAI.add_predictor(model, f, x)
     @test length(y) == 2
     @test num_variables(model) == 6
@@ -727,6 +742,105 @@ function test_LeakyReLU_BigM()
     optimize!(model)
     @assert is_solved_and_feasible(model)
     @test value.(y) ≈ [-0.123, 2.0]
+    return
+end
+
+function test_AvgPool2d()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    predictor = MathOptAI.AvgPool2d((2, 2); input_size = (2, 4, 1))
+    @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
+    @test MathOptAI.output_size(predictor, nothing) === nothing
+    y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [3.5, 5.5]
+    return
+end
+
+function test_AvgPool2d_reduced_space()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    predictor = MathOptAI.AvgPool2d((2, 2); input_size = (2, 4, 1))
+    y, formulation =
+        MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 0
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [3.5, 5.5]
+    return
+end
+
+function test_Conv2d()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    weight = reshape(sin.(1:8), 2, 2, 1, 2)
+    bias = [1.0, 2.0]
+    predictor = MathOptAI.Conv2d(weight, bias; input_size = (2, 4, 1))
+    @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 3, 2)
+    y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 6
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    z = value(x)
+    y_star = [
+        sum(z[:, i:(i+1)] .* weight[2:-1:1, 2:-1:1, 1, j]) + bias[j] for
+        j in 1:2 for i in 1:3
+    ]
+    @test value.(y) ≈ y_star
+    return
+end
+
+function test_Conv2d_reduced_space()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    weight = reshape(sin.(1:8), 2, 2, 1, 2)
+    bias = [1.0, 2.0]
+    predictor = MathOptAI.Conv2d(weight, bias; input_size = (2, 4, 1))
+    y, formulation =
+        MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 0
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    z = value(x)
+    y_star = [
+        sum(z[:, i:(i+1)] .* weight[2:-1:1, 2:-1:1, 1, j]) + bias[j] for
+        j in 1:2 for i in 1:3
+    ]
+    @test value.(y) ≈ y_star
+    return
+end
+
+function test_MaxPool2d()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    predictor = MathOptAI.MaxPool2d((2, 2); input_size = (2, 4, 1))
+    @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
+    y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [6, 8]
+    return
+end
+
+function test_MaxPool2d_reduced_space()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    predictor = MathOptAI.MaxPool2d((2, 2); input_size = (2, 4, 1))
+    y, formulation =
+        MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [6, 8]
     return
 end
 

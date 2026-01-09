@@ -119,7 +119,7 @@ function MathOptAI.build_predictor(
 end
 
 function _normalize_input_size(p, ::Nothing)
-    return error("You must specifiy the `input_size` kwarg when using an $p")
+    return error("You must specifiy the `input_size` kwarg when using $p")
 end
 
 _normalize_input_size(::Any, input_size::NTuple{2,Int}) = (input_size..., 1)

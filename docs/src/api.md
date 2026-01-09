@@ -86,6 +86,11 @@ LeakyReLU
 MaxPool2d
 ```
 
+## `Permutation`
+```@docs
+Permutation
+```
+
 ## `Pipeline`
 ```@docs
 Pipeline

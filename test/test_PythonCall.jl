@@ -894,6 +894,32 @@ function test_large_cnn()
     return
 end
 
+function test_model_input_size_error()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_input_size_error.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(
+            torch.nn.AvgPool2d((2, 2)),
+            torch.nn.Flatten(0),
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model()
+    @variable(model, x[1:8])
+    @test_throws(
+        ErrorException(
+            "You must specifiy the `input_size` kwarg when using nn.AvgPool2d",
+        ),
+        MathOptAI.add_predictor(model, MathOptAI.PytorchModel(filename), x),
+    )
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

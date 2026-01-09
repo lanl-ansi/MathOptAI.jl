@@ -11,7 +11,13 @@ MathOptAI supports embedding a PyTorch models into JuMP if it is a
 [`nn.Sequential`](https://pytorch.org/docs/stable/generated/torch.nn.Sequential.html)
 composed of:
 
+ * [`nn.AvgPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.AvgPool2d.html)
+ * [`nn.Conv2d`](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+ * [`nn.Flatten`](https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html)
+ * [`nn.GELU`](https://pytorch.org/docs/stable/generated/torch.nn.GELU.html)
+ * [`nn.LeakyReLU`](https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html)
  * [`nn.Linear`](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html)
+ * [`nn.MaxPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html)
  * [`nn.ReLU`](https://pytorch.org/docs/stable/generated/torch.nn.ReLU.html)
  * [`nn.Sigmoid`](https://pytorch.org/docs/stable/generated/torch.nn.Sigmoid.html)
  * [`nn.Softmax`](https://pytorch.org/docs/stable/generated/torch.nn.Softmax.html)

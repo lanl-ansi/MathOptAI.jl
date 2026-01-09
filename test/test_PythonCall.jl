@@ -731,6 +731,195 @@ function test_model_LeakyReLU()
     return
 end
 
+function test_model_AvgPool2d()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_AvgPool2d.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.AvgPool2d((2, 2)),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, vec(x); input_size = (2, 4))
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test value.(y) ≈ [3.5, 5.5]
+    return
+end
+
+function test_Conv2d()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Conv2d.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        conv = torch.nn.Conv2d(1, 2, (2, 2))
+        with torch.no_grad():
+            conv.weight.copy_(
+                torch.arange(8, dtype=conv.weight.dtype).view_as(conv.weight)
+            )
+            conv.bias.copy_(torch.arange(2))
+        model = torch.nn.Sequential(conv)
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, vec(x); input_size = (2, 4))
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    weight = [3.0 2.0; 1.0 0.0;;;; 7.0 6.0; 5.0 4.0]
+    bias = [0.0, 1.0]
+    z = value(x)
+    y_star = [
+        sum(z[:, i:(i+1)] .* weight[2:-1:1, 2:-1:1, 1, j]) + bias[j] for
+        j in 1:2 for i in 1:3
+    ]
+    @test value.(y) ≈ y_star
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor([[[[1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, 8.0]]]])
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    Y = vec(dropdims(y_in; dims = (1, 3))')
+    @test value.(y) ≈ Y
+    return
+end
+
+function test_model_MaxPool2d()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_MaxPool2d.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.MaxPool2d((2, 2)),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation =
+        MathOptAI.add_predictor(model, ml_model, vec(x); input_size = (2, 4))
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [6, 8]
+    return
+end
+
+function test_model_Linear_shaped()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Linear_shaped.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(2, 16),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(16, 3),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:2] == i)
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(model, ml_model, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
+    return
+end
+
+function test_large_cnn()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_large_cnn.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(
+            torch.nn.Conv2d(1, 1, (2, 2), padding = 1),
+            torch.nn.MaxPool2d((2, 2)),
+            torch.nn.Conv2d(1, 1, (2, 2), padding = 1),
+            torch.nn.AvgPool2d((2, 2)),
+            torch.nn.Flatten(0),
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:8, j in 1:12] == i + 8 * (j - 1))
+    cnn = MathOptAI.PytorchModel(filename)
+    y, formulation =
+        MathOptAI.add_predictor(model, cnn, vec(x); input_size = (8, 12))
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor([[fix_value.(x[i, :]) for i in 1:8]])
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
+function test_model_input_size_error()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_input_size_error.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(
+            torch.nn.AvgPool2d((2, 2)),
+            torch.nn.Flatten(0),
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model()
+    @variable(model, x[1:8])
+    @test_throws(
+        ErrorException(
+            "You must specifiy the `input_size` kwarg when using nn.AvgPool2d",
+        ),
+        MathOptAI.add_predictor(model, MathOptAI.PytorchModel(filename), x),
+    )
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

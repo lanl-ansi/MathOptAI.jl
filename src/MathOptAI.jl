@@ -283,6 +283,8 @@ function Base.show(io::IO, predictor::ReducedSpace)
     return print(io, "ReducedSpace(", predictor.predictor, ")")
 end
 
+output_size(p::ReducedSpace, input_size) = output_size(p.predictor, input_size)
+
 struct PaddedArrayView{T} <: AbstractArray{T,3}
     data::Array{T,3}
     padding::Tuple{Int,Int}

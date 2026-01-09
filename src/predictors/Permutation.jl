@@ -22,7 +22,7 @@ julia> model = Model();
 julia> @variable(model, x[1:2]);
 
 julia> f = MathOptAI.Permutation([2, 1])
-MathOptAI.Permutation([2, 1])
+Permutation([2, 1])
 
 julia> y, formulation =
            MathOptAI.add_predictor(model, f, x; reduced_space = true);

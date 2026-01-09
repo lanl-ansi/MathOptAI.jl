@@ -831,6 +831,34 @@ function test_model_MaxPool2d()
     return
 end
 
+function test_model_Linear_shaped()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Linear_shaped.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(2, 16),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(16, 3),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:2] == i)
+    ml_model = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(model, ml_model, x)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test ≈(_evaluate_model(filename, value.(x)), value.(y); atol = 1e-5)
+    return
+end
 
 function test_large_cnn()
     dir = mktempdir()
@@ -839,12 +867,11 @@ function test_large_cnn()
         """
         import torch
         model = torch.nn.Sequential(
-            torch.nn.Conv2d(1, 6, (5, 5), padding = 2),
+            torch.nn.Conv2d(1, 1, (2, 2), padding = 1),
             torch.nn.MaxPool2d((2, 2)),
-            torch.nn.Conv2d(6, 16, (5, 5), padding = 2),
+            torch.nn.Conv2d(1, 1, (2, 2), padding = 1),
             torch.nn.AvgPool2d((2, 2)),
             torch.nn.Flatten(0),
-            torch.nn.Linear(256, 1),
         )
         torch.save(model, filename)
         """,
@@ -853,17 +880,17 @@ function test_large_cnn()
     )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[i in 1:16, j in 1:16] == i + j)
+    @variable(model, x[i in 1:8, j in 1:12] == i + 8 * (j - 1))
     cnn = MathOptAI.PytorchModel(filename)
     y, formulation =
-        MathOptAI.add_predictor(model, cnn, vec(x); input_size = (16, 16))
+        MathOptAI.add_predictor(model, cnn, vec(x); input_size = (8, 12))
     optimize!(model)
     @test is_solved_and_feasible(model)
     torch = PythonCall.pyimport("torch")
     torch_model = torch.load(filename; weights_only = false)
-    input = torch.tensor([[fix_value.(x[i, :]) for i in 1:16]])
+    input = torch.tensor([[fix_value.(x[i, :]) for i in 1:8]])
     y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
-    @test isapprox(only(value(y)), only(y_in); atol = 1e-5)
+    @test maximum(abs, value(y) - y_in) <= 1e-5
     return
 end
 

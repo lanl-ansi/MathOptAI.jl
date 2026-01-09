@@ -135,12 +135,6 @@ function _predictor(nn, layer, config, input_size)
     if Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))
         layers = MathOptAI.AbstractPredictor[]
         for child in layer
-            if Bool(PythonCall.pybuiltins.isinstance(child, nn.Flatten))
-                if input_size !== nothing
-                    input_size = (prod(input_size),)
-                end
-                continue
-            end
             p, input_size = _predictor(nn, child, config, input_size)
             push!(layers, p)
         end
@@ -170,6 +164,11 @@ function _predictor(nn, layer, config, input_size)
             padding = _to_tuple(layer.padding),
             stride = _to_tuple(layer.stride),
         )
+    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Flatten))
+        input_size = _normalize_input_size("nn.Flatten", input_size)
+        col_major_indices = reshape(1:prod(input_size), input_size)
+        p = vec(permutedims(col_major_indices, reverse(1:length(input_size))))
+        MathOptAI.ReducedSpace(MathOptAI.Permutation(p))
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.GELU))
         get(config, :GELU, MathOptAI.GELU())
     elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.LeakyReLU))

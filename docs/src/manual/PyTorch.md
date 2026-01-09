@@ -13,6 +13,7 @@ composed of:
 
  * [`nn.AvgPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.AvgPool2d.html)
  * [`nn.Conv2d`](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
+ * [`nn.Flatten`](https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html)
  * [`nn.GELU`](https://pytorch.org/docs/stable/generated/torch.nn.GELU.html)
  * [`nn.LeakyReLU`](https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html)
  * [`nn.Linear`](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html)

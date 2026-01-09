@@ -29,6 +29,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
  * `nn.AvgPool2d`
  * `nn.Conv2d`
+ * `nn.Flatten`
  * `nn.GELU`
  * `nn.LeakyReLU`
  * `nn.Linear`
@@ -129,10 +130,10 @@ _to_tuple(p::PythonCall.Py) = _to_tuple(PythonCall.pyconvert(Any, p))
 _to_tuple(p::Int) = (p, p)
 _to_tuple(p::Tuple{Int,Int}) = p
 
-_convert(T, p) = PythonCall.pyconvert(T, p.detach().cpu().numpy())
+_is_instance(x, T) = Bool(PythonCall.pybuiltins.isinstance(x, T))
 
 function _predictor(nn, layer, config, input_size)
-    if Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sequential))
+    if _is_instance(layer, nn.Sequential)
         layers = MathOptAI.AbstractPredictor[]
         for child in layer
             p, input_size = _predictor(nn, child, config, input_size)
@@ -140,12 +141,12 @@ function _predictor(nn, layer, config, input_size)
         end
         return MathOptAI.Pipeline(layers), input_size
     end
-    p = if Bool(PythonCall.pybuiltins.isinstance(layer, nn.Linear))
+    p = if _is_instance(layer, nn.Linear)
         MathOptAI.Affine(
-            _convert(Matrix{Float64}, layer.weight),
-            _convert(Vector{Float64}, layer.bias),
+            _pyconvert(Matrix{Float64}, layer.weight),
+            _pyconvert(Vector{Float64}, layer.bias),
         )
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.AvgPool2d))
+    elseif _is_instance(layer, nn.AvgPool2d)
         input_size = _normalize_input_size("nn.AvgPool2d", input_size)
         MathOptAI.AvgPool2d(
             _to_tuple(layer.kernel_size);
@@ -153,29 +154,29 @@ function _predictor(nn, layer, config, input_size)
             padding = _to_tuple(layer.padding),
             stride = _to_tuple(layer.stride),
         )
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Conv2d))
-        w = _convert(Array{Float64,4}, layer.weight)
+    elseif _is_instance(layer, nn.Conv2d)
+        w = _pyconvert(Array{Float64,4}, layer.weight)
         w = reverse(permutedims(w, (3, 4, 2, 1)); dims = (1, 2))
         input_size = _normalize_input_size("nn.MaxPool2d", input_size)
         MathOptAI.Conv2d(
             w,
-            _convert(Vector{Float64}, layer.bias);
+            _pyconvert(Vector{Float64}, layer.bias);
             input_size,
             padding = _to_tuple(layer.padding),
             stride = _to_tuple(layer.stride),
         )
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Flatten))
+    elseif _is_instance(layer, nn.Flatten)
         input_size = _normalize_input_size("nn.Flatten", input_size)
         col_major_indices = reshape(1:prod(input_size), input_size)
         p = vec(permutedims(col_major_indices, reverse(1:length(input_size))))
         MathOptAI.ReducedSpace(MathOptAI.Permutation(p))
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.GELU))
+    elseif _is_instance(layer, nn.GELU)
         get(config, :GELU, MathOptAI.GELU())
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.LeakyReLU))
+    elseif _is_instance(layer, nn.LeakyReLU)
         negative_slope = PythonCall.pyconvert(Float64, layer.negative_slope)
         relu = get(config, :ReLU, MathOptAI.ReLU())
         MathOptAI.LeakyReLU(; negative_slope, relu)
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.MaxPool2d))
+    elseif _is_instance(layer, nn.MaxPool2d)
         input_size = _normalize_input_size("nn.MaxPool2d", input_size)
         MathOptAI.MaxPool2d(
             _to_tuple(layer.kernel_size);
@@ -183,16 +184,16 @@ function _predictor(nn, layer, config, input_size)
             padding = _to_tuple(layer.padding),
             stride = _to_tuple(layer.stride),
         )
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.ReLU))
+    elseif _is_instance(layer, nn.ReLU)
         get(config, :ReLU, MathOptAI.ReLU())
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Sigmoid))
+    elseif _is_instance(layer, nn.Sigmoid)
         get(config, :Sigmoid, MathOptAI.Sigmoid())
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softmax))
+    elseif _is_instance(layer, nn.Softmax)
         get(config, :SoftMax, MathOptAI.SoftMax())
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Softplus))
+    elseif _is_instance(layer, nn.Softplus)
         beta = PythonCall.pyconvert(Float64, layer.beta)
-        get(config, :SoftPlus, MathOptAI.SoftPlus(; beta = beta))
-    elseif Bool(PythonCall.pybuiltins.isinstance(layer, nn.Tanh))
+        get(config, :SoftPlus, MathOptAI.SoftPlus(; beta))
+    elseif _is_instance(layer, nn.Tanh)
         get(config, :Tanh, MathOptAI.Tanh())
     else
         error("unsupported layer: $layer")

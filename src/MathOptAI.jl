@@ -191,6 +191,63 @@ function add_predictor(
 end
 
 """
+    add_predictor(model::JuMP.AbstractModel, predictor, x::Array; kwargs...)
+
+This method is a helper function for adding `predictor` to `model` when the
+input `x` is a multi-dimensional array.
+
+It is equivalent to passing `vec(x)` with the keyword `input_size = size(x)`.
+
+## Example
+
+```jldoctest
+julia> using JuMP, MathOptAI, Flux
+
+julia> model = Model();
+
+julia> @variable(model, x[1:4, 1:4]);
+
+julia> predictor = Flux.Chain(Flux.MaxPool((2, 2)), Flux.flatten);
+
+julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
+
+julia> y
+4-element Vector{VariableRef}:
+ moai_MaxPool2d[1]
+ moai_MaxPool2d[2]
+ moai_MaxPool2d[3]
+ moai_MaxPool2d[4]
+
+julia> formulation
+MaxPool2d((4, 4, 1), (2, 2), (2, 2), (0, 0))
+├ variables [4]
+│ ├ moai_MaxPool2d[1]
+│ ├ moai_MaxPool2d[2]
+│ ├ moai_MaxPool2d[3]
+│ └ moai_MaxPool2d[4]
+└ constraints [4]
+  ├ moai_MaxPool2d[1] - max(max(max(x[1,1], x[2,1]), x[1,2]), x[2,2]) = 0
+  ├ moai_MaxPool2d[2] - max(max(max(x[3,1], x[4,1]), x[3,2]), x[4,2]) = 0
+  ├ moai_MaxPool2d[3] - max(max(max(x[1,3], x[2,3]), x[1,4]), x[2,4]) = 0
+  └ moai_MaxPool2d[4] - max(max(max(x[3,3], x[4,3]), x[3,4]), x[4,4]) = 0
+```
+"""
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor,
+    x::Array;
+    kwargs...,
+)
+    return add_predictor(
+        model,
+        predictor,
+        vec(x);
+        input_size = size(x),
+        kwargs...,
+    )
+end
+
+"""
     build_predictor(extension; kwargs...)::AbstractPredictor
 
 A uniform interface to convert various extension types to an

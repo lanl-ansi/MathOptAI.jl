@@ -476,8 +476,7 @@ function test_flux_large_cnn()
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[i in 1:16, j in 1:16] == i + j)
-    y, formulation =
-        MathOptAI.add_predictor(model, cnn, vec(x); input_size = (16, 16))
+    y, formulation = MathOptAI.add_predictor(model, cnn, x)
     @test length(y) == 10
     optimize!(model)
     assert_is_solved_and_feasible(model)

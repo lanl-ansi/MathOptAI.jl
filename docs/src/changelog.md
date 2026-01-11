@@ -7,7 +7,7 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 0.2.0 (unreleased)
+## Version 0.2.0 (January 14, 2026)
 
 This release contains a number of breaking changes. See below for details on how
 to upgrade from v0.1.19.

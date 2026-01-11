@@ -191,55 +191,6 @@ function add_predictor(
 end
 
 """
-    add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
-
-Return a `Matrix`, representing `y` such that `y[:, i] = predictor(x[:, i])` for
-each column `i`.
-
-## Example
-
-```jldoctest
-julia> using JuMP, MathOptAI
-
-julia> model = Model();
-
-julia> @variable(model, x[1:2, 1:3]);
-
-julia> f = MathOptAI.Affine([2.0, 3.0])
-Affine(A, b) [input: 2, output: 1]
-
-julia> y, formulation = MathOptAI.add_predictor(model, f, x);
-
-julia> y
-1×3 Matrix{VariableRef}:
- moai_Affine[1]  moai_Affine[1]  moai_Affine[1]
-
-julia> formulation
-Affine(A, b) [input: 2, output: 1]
-├ variables [1]
-│ └ moai_Affine[1]
-└ constraints [1]
-  └ 2 x[1,1] + 3 x[2,1] - moai_Affine[1] = 0
-Affine(A, b) [input: 2, output: 1]
-├ variables [1]
-│ └ moai_Affine[1]
-└ constraints [1]
-  └ 2 x[1,2] + 3 x[2,2] - moai_Affine[1] = 0
-Affine(A, b) [input: 2, output: 1]
-├ variables [1]
-│ └ moai_Affine[1]
-└ constraints [1]
-  └ 2 x[1,3] + 3 x[2,3] - moai_Affine[1] = 0
-```
-"""
-function add_predictor(model::JuMP.AbstractModel, predictor, x::Matrix)
-    inner_predictor = build_predictor(predictor)
-    ret = map(j -> add_predictor(model, inner_predictor, x[:, j]), 1:size(x, 2))
-    formulation = PipelineFormulation(inner_predictor, last.(ret))
-    return reduce(hcat, first.(ret)), formulation
-end
-
-"""
     build_predictor(extension; kwargs...)::AbstractPredictor
 
 A uniform interface to convert various extension types to an

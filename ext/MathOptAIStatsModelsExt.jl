@@ -70,11 +70,13 @@ function MathOptAI.add_predictor(
     kwargs...,
 )
     resp = StatsModels.modelcols(StatsModels.MatrixTerm(predictor.mf.f.rhs), df)
-    x = Matrix(resp')
-    y, formulation =
-        MathOptAI.add_predictor(model, predictor.model, x; kwargs...)
-    @assert size(y, 1) == 1
-    return reshape(y, length(y)), formulation
+    p = MathOptAI.build_predictor(predictor.model)
+    ret = [
+        MathOptAI.add_predictor(model, p, collect(row); kwargs...) for
+        row in eachrow(resp)
+    ]
+    formulation = MathOptAI.PipelineFormulation(p, last.(ret))
+    return reduce(vcat, first.(ret)), formulation
 end
 
 end  # module MathOptAIStatsModelsExt

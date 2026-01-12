@@ -120,7 +120,7 @@ struct CustomModel{T<:Flux.Chain}
 end
 (model::CustomModel)(x) = model.chain(x) + x
 struct CustomPredictor <: MathOptAI.AbstractPredictor
-    p::Pipeline
+    p::MathOptAI.Pipeline
 end
 function MathOptAI.build_predictor(model::CustomModel)
     predictor = MathOptAI.build_predictor(model.chain)

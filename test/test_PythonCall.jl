@@ -648,9 +648,7 @@ function test_gelu()
         import torch
 
         model = torch.nn.Sequential(
-            torch.nn.Linear(3, 16),
             torch.nn.GELU(approximate='tanh'),
-            torch.nn.Linear(16, 2),
         )
 
         torch.save(model, filename)

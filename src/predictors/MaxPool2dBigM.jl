@@ -42,12 +42,36 @@ julia> y
 
 julia> formulation
 MaxPool2dBigM((2, 4, 1), (2, 2), (2, 2), (0, 0), 100.0)
-├ variables [2]
+├ variables [10]
 │ ├ moai_MaxPool2d[1]
-│ └ moai_MaxPool2d[2]
-└ constraints [2]
-  ├ moai_MaxPool2d[1] - max(max(max(x[1,1], x[2,1]), x[1,2]), x[2,2]) = 0
-  └ moai_MaxPool2d[2] - max(max(max(x[1,3], x[2,3]), x[1,4]), x[2,4]) = 0
+│ ├ moai_MaxPool2d[2]
+│ ├ moai_z[h=1,w=1,c=1][1]
+│ ├ moai_z[h=1,w=1,c=1][2]
+│ ├ moai_z[h=1,w=1,c=1][3]
+│ ├ moai_z[h=1,w=1,c=1][4]
+│ ├ moai_z[h=1,w=2,c=1][1]
+│ ├ moai_z[h=1,w=2,c=1][2]
+│ ├ moai_z[h=1,w=2,c=1][3]
+│ └ moai_z[h=1,w=2,c=1][4]
+└ constraints [18]
+  ├ -x[1,1] + moai_MaxPool2d[1] ≥ 0
+  ├ -x[1,1] + moai_MaxPool2d[1] - 100 moai_z[h=1,w=1,c=1][1] ≤ 0
+  ├ -x[1,2] + moai_MaxPool2d[1] ≥ 0
+  ├ -x[1,2] + moai_MaxPool2d[1] - 100 moai_z[h=1,w=1,c=1][3] ≤ 0
+  ├ -x[2,1] + moai_MaxPool2d[1] ≥ 0
+  ├ -x[2,1] + moai_MaxPool2d[1] - 100 moai_z[h=1,w=1,c=1][2] ≤ 0
+  ├ -x[2,2] + moai_MaxPool2d[1] ≥ 0
+  ├ -x[2,2] + moai_MaxPool2d[1] - 100 moai_z[h=1,w=1,c=1][4] ≤ 0
+  ├ moai_z[h=1,w=1,c=1][1] + moai_z[h=1,w=1,c=1][2] + moai_z[h=1,w=1,c=1][3] + moai_z[h=1,w=1,c=1][4] = 3
+  ├ -x[1,3] + moai_MaxPool2d[2] ≥ 0
+  ├ -x[1,3] + moai_MaxPool2d[2] - 100 moai_z[h=1,w=2,c=1][1] ≤ 0
+  ├ -x[1,4] + moai_MaxPool2d[2] ≥ 0
+  ├ -x[1,4] + moai_MaxPool2d[2] - 100 moai_z[h=1,w=2,c=1][3] ≤ 0
+  ├ -x[2,3] + moai_MaxPool2d[2] ≥ 0
+  ├ -x[2,3] + moai_MaxPool2d[2] - 100 moai_z[h=1,w=2,c=1][2] ≤ 0
+  ├ -x[2,4] + moai_MaxPool2d[2] ≥ 0
+  ├ -x[2,4] + moai_MaxPool2d[2] - 100 moai_z[h=1,w=2,c=1][4] ≤ 0
+  └ moai_z[h=1,w=2,c=1][1] + moai_z[h=1,w=2,c=1][2] + moai_z[h=1,w=2,c=1][3] + moai_z[h=1,w=2,c=1][4] = 3
 ```
 """
 struct MaxPool2dBigM <: AbstractPredictor

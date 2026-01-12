@@ -101,7 +101,10 @@ function add_predictor(
         for m in 1:kH, n in 1:kW
             x_mn = X[sH*(h-1)+m, sW*(w-1)+n, c]
             push!(cons, JuMP.@constraint(model, y[k] >= x_mn))
-            push!(cons, JuMP.@constraint(model, y[k] <= x_mn + M * z[m+kH*(n - 1)]))
+            push!(
+                cons,
+                JuMP.@constraint(model, y[k] <= x_mn + M * z[m+kH*(n - 1)]),
+            )
         end
         push!(cons, JuMP.@constraint(model, sum(z) == length(z) - 1))
     end

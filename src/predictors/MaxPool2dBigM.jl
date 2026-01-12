@@ -103,7 +103,7 @@ function add_predictor(
             push!(cons, JuMP.@constraint(model, y[k] >= x_mn))
             push!(
                 cons,
-                JuMP.@constraint(model, y[k] <= x_mn + M * z[m+kH*(n - 1)]),
+                JuMP.@constraint(model, y[k] <= x_mn + M * z[m+kH*(n-1)]),
             )
         end
         push!(cons, JuMP.@constraint(model, sum(z) == length(z) - 1))

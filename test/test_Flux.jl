@@ -186,99 +186,6 @@ function test_unsupported_layer()
     return
 end
 
-function test_gray_box_scalar_output()
-    chain = Flux.Chain(Flux.Dense(2 => 16, Flux.relu), Flux.Dense(16 => 1))
-    model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    set_attribute(model, "max_iter", 1)
-    @variable(model, 0 <= x[1:2] <= 1)
-    y, formulation = MathOptAI.add_predictor(
-        model,
-        chain,
-        x;
-        gray_box = true,
-        reduced_space = true,
-    )
-    @objective(model, Max, only(y))
-    optimize!(model)
-    @test termination_status(model) == ITERATION_LIMIT
-    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
-    y, formulation = MathOptAI.add_predictor(model, chain, x; gray_box = true)
-    @test y isa Vector{VariableRef}
-    config = Dict(Flux.relu => MathOptAI.ReLU())
-    @test_throws(
-        ErrorException(
-            "cannot specify the `config` kwarg if `gray_box = true`",
-        ),
-        MathOptAI.add_predictor(model, chain, x; gray_box = true, config),
-    )
-    return
-end
-
-function test_gray_box_scalar_output_hessian()
-    chain = Flux.Chain(Flux.Dense(2 => 16, Flux.relu), Flux.Dense(16 => 1))
-    model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    set_attribute(model, "max_iter", 1)
-    @variable(model, 0 <= x[1:2] <= 1)
-    y, formulation = MathOptAI.add_predictor(
-        model,
-        chain,
-        x;
-        gray_box = true,
-        gray_box_hessian = true,
-        reduced_space = true,
-    )
-    @objective(model, Max, only(y))
-    optimize!(model)
-    @test termination_status(model) == ITERATION_LIMIT
-    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
-    return
-end
-
-function test_gray_box_vector_output()
-    chain = Flux.Chain(Flux.Dense(3 => 16, Flux.relu), Flux.Dense(16 => 2))
-    model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    set_attribute(model, "max_iter", 1)
-    @variable(model, 0 <= x[1:3] <= 1)
-    y, formulation = MathOptAI.add_predictor(
-        model,
-        chain,
-        x;
-        gray_box = true,
-        reduced_space = true,
-    )
-    @test length(y) == 2
-    @objective(model, Max, sum(y))
-    optimize!(model)
-    @test termination_status(model) == ITERATION_LIMIT
-    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
-    return
-end
-
-function test_gray_box_vector_output_hessian()
-    chain = Flux.Chain(Flux.Dense(3 => 16, Flux.relu), Flux.Dense(16 => 2))
-    model = Model(Ipopt.Optimizer)
-    set_silent(model)
-    set_attribute(model, "max_iter", 1)
-    @variable(model, 0 <= x[1:3] <= 1)
-    y, formulation = MathOptAI.add_predictor(
-        model,
-        chain,
-        x;
-        gray_box = true,
-        gray_box_hessian = true,
-        reduced_space = true,
-    )
-    @test length(y) == 2
-    @objective(model, Max, sum(y))
-    optimize!(model)
-    @test termination_status(model) in (LOCALLY_SOLVED, ITERATION_LIMIT)
-    @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-2)
-    return
-end
-
 function test_end_to_end_Softmax()
     chain = Flux.Chain(Flux.Dense(2 => 3), Flux.softmax)
     model = Model(Ipopt.Optimizer)
@@ -304,45 +211,34 @@ function test_unsupported_activation()
     return
 end
 
-function test_vector_nonlinear_oracle_errors()
+function test_gray_box_errors()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     @test_throws(
         ErrorException(
-            "cannot specify `gray_box = true` if `vector_nonlinear_oracle = true`",
-        ),
-        MathOptAI.build_predictor(
-            chain;
-            gray_box = true,
-            vector_nonlinear_oracle = true,
-        ),
-    )
-    @test_throws(
-        ErrorException(
-            "cannot specify the `config` kwarg if `vector_nonlinear_oracle = true`",
+            "cannot specify the `config` kwarg if `gray_box = true`",
         ),
         MathOptAI.build_predictor(
             chain;
             config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
-            vector_nonlinear_oracle = true,
+            gray_box = true,
         ),
     )
     return
 end
 
-function test_vector_nonlinear_oracle_sigmoid()
+function test_gray_box_sigmoid()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[i in 1:3] == i)
-    y, formulation =
-        MathOptAI.add_predictor(model, chain, x; vector_nonlinear_oracle = true)
+    y, formulation = MathOptAI.add_predictor(model, chain, x; gray_box = true)
     optimize!(model)
     assert_is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32.(value.(x))); atol = 1e-4)
     return
 end
 
-function test_vector_nonlinear_oracle_sigmoid_2()
+function test_gray_box_sigmoid_2()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model(Ipopt.Optimizer)
     set_silent(model)
@@ -353,7 +249,7 @@ function test_vector_nonlinear_oracle_sigmoid_2()
         chain,
         x;
         hessian = false,
-        vector_nonlinear_oracle = true,
+        gray_box = true,
     )
     optimize!(model)
     assert_is_solved_and_feasible(model)
@@ -361,20 +257,18 @@ function test_vector_nonlinear_oracle_sigmoid_2()
     return
 end
 
-function test_vector_nonlinear_oracle_sigmoid_reduced_space_error()
+function test_gray_box_sigmoid_reduced_space_error()
     chain = Flux.Chain(Flux.Dense(3 => 16, Flux.sigmoid), Flux.Dense(16 => 2))
     model = Model()
     @variable(model, x[i in 1:3] == i)
     @test_throws(
-        ErrorException(
-            "cannot construct reduced-space formulation of VectorNonlinearOracle",
-        ),
+        ErrorException("cannot construct reduced-space formulation of GrayBox"),
         MathOptAI.add_predictor(
             model,
             chain,
             x;
             reduced_space = true,
-            vector_nonlinear_oracle = true,
+            gray_box = true,
         ),
     )
     return

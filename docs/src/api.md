@@ -156,11 +156,6 @@ SoftPlus
 Tanh
 ```
 
-## `VectorNonlinearOracle`
-```@docs
-VectorNonlinearOracle
-```
-
 ## `AbstractFormulation`
 ```@docs
 AbstractFormulation

@@ -16,8 +16,7 @@ import MathOptInterface as MOI
         predictor::Flux.Chain;
         config::Dict = Dict{Any,Any}(),
         gray_box::Bool = false,
-        vector_nonlinear_oracle::Bool = false,
-        hessian::Bool = vector_nonlinear_oracle,
+        hessian::Bool = gray_box,
         input_size::Union{Nothing,NTuple{N,Int}} = nothing,
     )
 
@@ -50,13 +49,9 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
  * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
    formulation.
 
- * `vector_nonlinear_oracle`: if `true`, the neural network is added using
-   a [`VectorNonlinearOracle`](@ref) formulation.
-
- * `hessian`: if `true`, the `gray_box` and `vector_nonlinear_oracle`
-   formulations compute the Hessian of the output using `Flux.hessian`.
-   The default for `hessian` is `false` if `gray_box` is used, and `true` if
-   `vector_nonlinear_oracle` is used.
+ * `hessian`: if `true`, the `gray_box` formulations compute the Hessian of the
+   output using `Flux.hessian`. The default for `hessian` is `true` if
+   `gray_box` is used.
 
  * `input_size`: to disambiguate the input and output sizes of matrix inputs,
    chains containing `Conv`, `MaxPool`, and `MeanPool` layers must specify an
@@ -107,35 +102,14 @@ function MathOptAI.build_predictor(
     predictor::Flux.Chain;
     config::Dict = Dict{Any,Any}(),
     gray_box::Bool = false,
-    vector_nonlinear_oracle::Bool = false,
-    hessian::Bool = vector_nonlinear_oracle,
+    hessian::Bool = gray_box,
     input_size::Union{Nothing,NTuple} = nothing,
-    # For backwards compatibility
-    gray_box_hessian::Bool = false,
 )
-    if vector_nonlinear_oracle
-        if gray_box
-            error(
-                "cannot specify `gray_box = true` if `vector_nonlinear_oracle = true`",
-            )
-        elseif !isempty(config)
-            error(
-                "cannot specify the `config` kwarg if `vector_nonlinear_oracle = true`",
-            )
-        end
-        return MathOptAI.VectorNonlinearOracle(
-            predictor;
-            hessian = hessian | gray_box_hessian,
-        )
-    end
     if gray_box
         if !isempty(config)
             error("cannot specify the `config` kwarg if `gray_box = true`")
         end
-        return MathOptAI.GrayBox(
-            predictor;
-            hessian = hessian | gray_box_hessian,
-        )
+        return MathOptAI.GrayBox(predictor; hessian)
     end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
@@ -143,25 +117,6 @@ function MathOptAI.build_predictor(
             _build_predictor(inner_predictor, layer, config, input_size)
     end
     return inner_predictor
-end
-
-function MathOptAI.GrayBox(predictor::Flux.Chain; hessian::Bool = false)
-    function output_size(x)
-        return only(Flux.outputsize(predictor, (length(x),)))
-    end
-    function callback(x)
-        x32 = collect(Float32.(x))
-        ret = Flux.withjacobian(predictor, x32)
-        if !hessian
-            return (value = ret.val, jacobian = only(ret.grad))
-        end
-        Hs = map(1:length(ret.val)) do i
-            return Flux.hessian(x -> predictor(x)[i], x32)
-        end
-        H = cat(Hs...; dims = 3)
-        return (value = ret.val, jacobian = only(ret.grad), hessian = H)
-    end
-    return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
 function _build_predictor(
@@ -310,7 +265,7 @@ end
 
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
-    predictor::MathOptAI.VectorNonlinearOracle{<:Flux.Chain},
+    predictor::MathOptAI.GrayBox{<:Flux.Chain},
     x::Vector,
 )
     set = _build_set(predictor.predictor, length(x), predictor.hessian)

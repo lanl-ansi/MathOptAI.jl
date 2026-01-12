@@ -55,7 +55,8 @@ formulation
 
 ## Gray-box
 
-Use the `gray_box = true` keyword to embed the network as a nonlinear operator:
+Use the `gray_box = true` keyword to embed the network as a vector nonlinear
+operator:
 
 ```@repl
 using JuMP, Flux, MathOptAI
@@ -64,26 +65,6 @@ model = Model();
 @variable(model, x[1:1]);
 y, formulation =
     MathOptAI.add_predictor(model, predictor, x; gray_box = true);
-y
-formulation
-```
-
-## [VectorNonlinearOracle](@id flux-vector-nonlinear-oracle)
-
-Use the `vector_nonlinear_oracle = true` keyword to embed the network as a
-vector nonlinear operator:
-
-```@repl
-using JuMP, Flux, MathOptAI
-predictor = Flux.Chain(Flux.Dense(1 => 2, Flux.relu), Flux.Dense(2 => 1));
-model = Model();
-@variable(model, x[1:1]);
-y, formulation = MathOptAI.add_predictor(
-    model,
-    predictor,
-    x;
-    vector_nonlinear_oracle = true,
-);
 y
 formulation
 ```

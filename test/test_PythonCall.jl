@@ -325,12 +325,7 @@ function test_gray_box_sigmoid()
     set_silent(model)
     @variable(model, x[i in 1:3] == i)
     torch_model = MathOptAI.PytorchModel(filename)
-    y, formulation = MathOptAI.add_predictor(
-        model,
-        torch_model,
-        x;
-        gray_box = true,
-    )
+    y, _ = MathOptAI.add_predictor(model, torch_model, x; gray_box = true)
     optimize!(model)
     assert_is_solved_and_feasible(model)
     @test isapprox(value.(y), _evaluate_model(filename, value.(x)); atol = 1e-4)

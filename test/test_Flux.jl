@@ -516,7 +516,7 @@ function test_flatten_by_itself()
 end
 
 struct CustomModel{T<:Flux.Chain}
-  chain::T
+    chain::T
 end
 
 (model::CustomModel)(x) = model.chain(x) + x

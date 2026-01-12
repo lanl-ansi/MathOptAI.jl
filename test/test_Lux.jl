@@ -64,7 +64,7 @@ function test_end_to_end_with_scale()
         model,
         state,
         [x];
-        config = Dict(Lux.relu => MathOptAI.ReLUBigM(100.0)),
+        config = Dict(Lux.relu => () -> MathOptAI.ReLUBigM(100.0)),
     )
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
@@ -87,7 +87,7 @@ function test_end_to_end_ReLUBigM()
         model,
         state,
         [x];
-        config = Dict(Lux.relu => MathOptAI.ReLUBigM(100.0)),
+        config = Dict(Lux.relu => () -> MathOptAI.ReLUBigM(100.0)),
     )
     @constraint(model, only(y) <= 4)
     @objective(model, Min, x)
@@ -110,7 +110,7 @@ function test_end_to_end_ReLUQuadratic()
         model,
         state,
         [x];
-        config = Dict(Lux.relu => MathOptAI.ReLUQuadratic()),
+        config = Dict(Lux.relu => MathOptAI.ReLUQuadratic),
     )
     # Ipopt needs a starting point to avoid the local minima.
     set_start_value(only(y), 4.0)

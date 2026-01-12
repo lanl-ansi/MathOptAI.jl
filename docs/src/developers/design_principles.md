@@ -214,7 +214,7 @@ Currently, we achieve this with a `config` dictionary, which maps the various
 neural network layers to an [`AbstractPredictor`](@ref). For example:
 ```julia
 chain = Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1));
-config = Dict(Flux.relu => MathOptAI.ReLU())
+config = Dict(Flux.relu => MathOptAI.ReLU)
 predictor = MathOptAI.build_predictor(chain; config)
 ```
 Please open a GitHub issue if you have a suggestion for a better API.

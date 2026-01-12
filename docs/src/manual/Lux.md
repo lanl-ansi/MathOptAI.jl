@@ -77,7 +77,7 @@ y, formulation = MathOptAI.add_predictor(
     model,
     predictor,
     x;
-    config = Dict(Lux.relu => MathOptAI.ReLUSOS1()),
+    config = Dict(Lux.relu => MathOptAI.ReLUSOS1),
 );
 y
 formulation

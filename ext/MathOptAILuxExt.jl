@@ -33,10 +33,22 @@ Convert a trained neural network from Lux.jl to a [`Pipeline`](@ref).
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps supported `Lux` activation functions to
-   [`AbstractPredictor`](@ref)s that control how the activation functions are
-   reformulated. For example, `Lux.sigmoid => MathOptAI.Sigmoid()` or
-   `Lux.relu => MathOptAI.QuadraticReLU()`.
+ * `config`: see the `Config` section below.
+
+## Config
+
+The `config` dictionary controls how layers in Flux are mapped to
+[`AbstractPredictor`](@ref)s.
+
+Supported keys and and example key-value pairs are:
+
+ * `Lux.relu => MathOptAI.ReLU`
+ * `Lux.sigmoid => MathOptAI.Sigmoid`
+ * `Lux.sigmoid_fast => MathOptAI.Sigmoid`
+ * `Lux.softmax => MathOptAI.SoftMax`
+ * `Lux.softplus => MathOptAI.SoftPlus`
+ * `Lux.tanh => MathOptAI.Tanh`
+ * `Lux.tanh_fast => MathOptAI.Tanh`
 
 ## Example
 
@@ -62,7 +74,7 @@ julia> y, _ = MathOptAI.add_predictor(
            model,
            (chain, parameters, state),
            x;
-           config = Dict(Lux.relu => MathOptAI.ReLU()),
+           config = Dict(Lux.relu => MathOptAI.ReLU),
        );
 
 julia> y
@@ -71,7 +83,7 @@ julia> y
 
 julia> MathOptAI.build_predictor(
            (chain, parameters, state);
-           config = Dict(Lux.relu => MathOptAI.ReLU()),
+           config = Dict(Lux.relu => MathOptAI.ReLU),
        )
 Pipeline with layers:
  * Affine(A, b) [input: 1, output: 16]
@@ -80,7 +92,7 @@ Pipeline with layers:
 
 julia> MathOptAI.build_predictor(
            (chain, parameters, state);
-           config = Dict(Lux.relu => MathOptAI.ReLUQuadratic()),
+           config = Dict(Lux.relu => MathOptAI.ReLUQuadratic),
        )
 Pipeline with layers:
  * Affine(A, b) [input: 1, output: 16]
@@ -106,25 +118,25 @@ end
 
 _default(::typeof(identity)) = nothing
 _default(::Any) = missing
-_default(::typeof(Lux.relu)) = MathOptAI.ReLU()
-_default(::typeof(Lux.sigmoid)) = MathOptAI.Sigmoid()
-_default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid()
-_default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus()
-_default(::typeof(Lux.tanh)) = MathOptAI.Tanh()
-_default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh()
+_default(::typeof(Lux.relu)) = MathOptAI.ReLU
+_default(::typeof(Lux.sigmoid)) = MathOptAI.Sigmoid
+_default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid
+_default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus
+_default(::typeof(Lux.tanh)) = MathOptAI.Tanh
+_default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh
 
 function _build_predictor(
     predictor::MathOptAI.Pipeline,
     activation,
     config::Dict,
 )
-    layer = get(config, activation, _default(activation))
-    if layer === nothing
+    layer_fn = get(config, activation, _default(activation))
+    if layer_fn === nothing
         # Do nothing: a linear activation
-    elseif layer === missing
+    elseif layer_fn === missing
         error("Unsupported activation function: $activation")
     else
-        push!(predictor.layers, layer)
+        push!(predictor.layers, layer_fn())
     end
     return
 end
@@ -157,7 +169,7 @@ function _build_predictor(
     ::Any,
     config::Dict,
 )
-    push!(predictor.layers, get(config, Lux.softmax, MathOptAI.SoftMax()))
+    push!(predictor.layers, get(config, Lux.softmax, MathOptAI.SoftMax)())
     return
 end
 

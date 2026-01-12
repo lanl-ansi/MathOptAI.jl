@@ -643,6 +643,43 @@ function test_model_input_size_error()
     return
 end
 
+function test_model_MaxPool2d_BigM()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_MaxPool_BigM.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(
+            torch.nn.MaxPool2d((2, 2)),
+            torch.nn.Flatten(0),
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:4, j in 1:6] == i + 4 * (j - 1))
+    cnn = MathOptAI.PytorchModel(filename)
+    my_max_pool(k; kwargs...) = MathOptAI.MaxPool2dBigM(k; M = 100.0, kwargs...)
+    y, formulation = MathOptAI.add_predictor(
+        model,
+        cnn,
+        x;
+        config = Dict(:MaxPool2d => my_max_pool),
+    )
+    @test length(y) == 6
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor([[fix_value.(x[i, :]) for i in 1:4]])
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

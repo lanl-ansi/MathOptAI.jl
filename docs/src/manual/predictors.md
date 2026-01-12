@@ -25,6 +25,7 @@ The following predictors are supported. See their docstrings for details:
 | [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
 | [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |
 | [`MaxPool2d`](@ref)             | Global nonlinear     | $M \rightarrow N$ |
+| [`MaxPool2dBigM`](@ref)         | Mixed-integer linear | $M \rightarrow N$ |
 | [`Pipeline`](@ref)              |                      | $M \rightarrow N$ |
 | [`Quantile`](@ref)              | Local nonlinear      | $M \rightarrow N$ |
 | [`ReLU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |

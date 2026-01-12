@@ -86,6 +86,11 @@ LeakyReLU
 MaxPool2d
 ```
 
+## `MaxPool2dBigM`
+```@docs
+MaxPool2dBigM
+```
+
 ## `Permutation`
 ```@docs
 Permutation

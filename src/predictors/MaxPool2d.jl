@@ -12,7 +12,10 @@
         padding::Tuple{Int,Int} = (0, 0),
     ) <: AbstractPredictor
 
-The max pooling layer.
+An [`AbstractPredictor`](@ref) that represents a two-dimensinal max pooling
+layer.
+
+The `max` function is implemented as a non-smooth nonlinear constraint.
 
 ## Example
 

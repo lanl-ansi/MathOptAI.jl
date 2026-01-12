@@ -447,6 +447,29 @@ function test_custom_models()
     return
 end
 
+function test_flux_MaxPool_BigM()
+    cnn = Flux.Chain(Flux.MaxPool((2, 2)), Flux.flatten)
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:4, j in 1:6] == i + 4 * (j - 1))
+    my_max_pool(k; kwargs...) = MathOptAI.MaxPool2dBigM(k; M = 100.0, kwargs...)
+    y, formulation = MathOptAI.add_predictor(
+        model,
+        cnn,
+        x;
+        config = Dict(Flux.MaxPool => my_max_pool),
+    )
+    @test length(y) == 6
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @show value(y)
+    @test maximum(
+        abs,
+        value(y) - cnn(convert.(Float32, reshape(fix_value.(x), 4, 6, 1, 1))),
+    ) <= 1e-5
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

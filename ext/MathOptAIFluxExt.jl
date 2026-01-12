@@ -42,10 +42,7 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps supported `Flux` activation functions to
-   [`AbstractPredictor`](@ref)s that control how the activation functions are
-   reformulated. For example, `Flux.sigmoid => MathOptAI.Sigmoid()` or
-   `Flux.relu => MathOptAI.QuadraticReLU()`.
+ * `config`: see the `Config` section below.
 
  * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
    formulation.
@@ -61,6 +58,25 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
  * `input_size`: to disambiguate the input and output sizes of matrix inputs,
    chains containing `Conv`, `MaxPool`, and `MeanPool` layers must specify an
    initial input size.
+
+## Config
+
+The `config` dictionary controls how layers in Flux are mapped to
+[`AbstractPredictor`](@ref)s.
+
+Examples of key-value pairs are:
+
+ * `Flux.relu => MathOptAI.ReLU()`
+ * `Flux.sigmoid => MathOptAI.Sigmoid()`
+ * `Flux.softplus => MathOptAI.SoftPlus()`
+ * `Flux.softmax => MathOptAI.SoftMax()`
+ * `Flux.tanh => MathOptAI.Tanh()`
+
+The `Flux.MaxPool` layer is also configurable, but since it takes in multiple
+arguments, you must provide a function that builds a predictor instead of a
+finished predictor:
+
+ * `Flux.MaxPool => (k; kwargs...) -> MathOptAI.MaxPool2dBigM(k; M = 10.0, kwargs...)`
 
 ## Example
 
@@ -281,12 +297,13 @@ function _build_predictor(
     input_size::Any,
 )
     input_size_normalized = _normalize_input_size(layer, input_size)
-    p = MathOptAI.MaxPool2d(
+    F = get(config, Flux.MaxPool, MathOptAI.MaxPool2d)
+    p = F(
         layer.k;
         input_size = input_size_normalized,
         padding = layer.pad[1:2],
         stride = layer.stride,
-    )
+    )::MathOptAI.AbstractPredictor
     push!(predictor.layers, p)
     return MathOptAI.output_size(p, input_size_normalized)
 end

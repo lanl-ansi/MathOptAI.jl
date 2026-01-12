@@ -43,18 +43,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
 ## Keyword arguments
 
- * `config`: a dictionary that maps `Symbol`s to [`AbstractPredictor`](@ref)s
-   that control how the activation functions are reformulated. For example,
-   `:Sigmoid => MathOptAI.Sigmoid()` or `:ReLU => MathOptAI.QuadraticReLU()`.
-   The supported Symbols are:
-    * `:GELU`
-    * `:ReLU`
-    * `:Sigmoid`
-    * `:SoftMax`
-    * `:SoftPlus`
-    * `:Tanh`
-    Note that `:LeakyReLU` is not supported. Use `:ReLU` to control how the
-    inner ReLU is modeled.
+ * `config`: see the `Config` section below.
 
  * `gray_box`: if `true`, the neural network is added using a [`GrayBox`](@ref)
    formulation.
@@ -73,6 +62,29 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `input_size`: to disambiguate the input and output sizes of matrix inputs,
    models containing `AvgPool2d`, `Conv2d`, and `MaxPool2d` layers must specify
    an initial input size.
+
+## Config
+
+The `config` dictionary controls how layers in Flux are mapped to
+[`AbstractPredictor`](@ref)s.
+
+Examples of key-value pairs are:
+
+ * `:GELU => MathOptAI.GELU()`
+ * `:ReLU => MathOptAI.ReLU()`
+ * `:Sigmoid => MathOptAI.Sigmoid()`
+ * `:SoftMax => MathOptAI.SoftMax()`
+ * `:SoftPlus => MathOptAI.SoftPlus()`
+ * `:Tanh => MathOptAI.Tanh()`
+
+Note that `:LeakyReLU` is not supported. Use `:ReLU` to control how the inner
+ReLU is modeled.
+
+The `nn.MaxPool2d` layer is also configurable, but since it takes in multiple
+arguments, you must provide a function that builds a predictor instead of a
+finished predictor:
+
+ * `:MaxPool2d => (k; kwargs...) -> MathOptAI.MaxPool2dBigM(k; M = 10.0, kwargs...)`
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;
@@ -178,7 +190,7 @@ function _predictor(nn, layer, config, input_size)
         MathOptAI.LeakyReLU(; negative_slope, relu)
     elseif _is_instance(layer, nn.MaxPool2d)
         input_size = _normalize_input_size("nn.MaxPool2d", input_size)
-        MathOptAI.MaxPool2d(
+        get(config, :MaxPool2d, MathOptAI.MaxPool2d)(
             _to_tuple(layer.kernel_size);
             input_size,
             padding = _to_tuple(layer.padding),

@@ -164,8 +164,19 @@ function MathOptAI.GrayBox(predictor::Flux.Chain; hessian::Bool = false)
     return MathOptAI.GrayBox(output_size, callback; has_hessian = hessian)
 end
 
-function _build_predictor(::MathOptAI.Pipeline, layer::Any, ::Dict, ::Any)
-    return error("Unsupported layer: $layer")
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Any,
+    config::Dict,
+    input_size::Any,
+)
+    try
+        p = MathOptAI.build_predictor(layer)
+        push!(predictor.layers, p)
+        return MathOptAI.output_size(p, input_size)
+    catch
+        return error("Unsupported layer: $layer")
+    end
 end
 
 _default(::Any) = missing

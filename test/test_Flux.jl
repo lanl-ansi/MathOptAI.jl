@@ -515,6 +515,44 @@ function test_flatten_by_itself()
     return
 end
 
+struct CustomModel{T<:Flux.Chain}
+    chain::T
+end
+
+(model::CustomModel)(x) = model.chain(x) + x
+
+struct CustomPredictor <: MathOptAI.AbstractPredictor
+    p::MathOptAI.Pipeline
+end
+
+function MathOptAI.build_predictor(model::CustomModel)
+    predictor = MathOptAI.build_predictor(model.chain)
+    return CustomPredictor(predictor)
+end
+
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::CustomPredictor,
+    x::Vector;
+    kwargs...,
+)
+    y, formulation = MathOptAI.add_predictor(model, predictor.p, x; kwargs...)
+    @assert length(x) == length(y)
+    return y .+ x, formulation
+end
+
+function test_custom_models()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:3] == 1.0 + sin(i))
+    predictor =
+        Flux.Chain(CustomModel(Flux.Chain(Flux.Dense(3 => 3, Flux.relu))))
+    y, _ = MathOptAI.add_predictor(model, predictor, x)
+    optimize!(model)
+    @test isapprox(value.(y), predictor(Float32.(value.(x))); atol = 1e-4)
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

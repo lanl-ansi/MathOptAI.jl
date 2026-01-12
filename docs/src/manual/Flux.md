@@ -107,3 +107,40 @@ y, formulation = MathOptAI.add_predictor(
 y
 formulation
 ```
+
+## Custom models
+
+If your Flux model contains a custom layer, define new methods for
+[`build_predictor`](@ref) and [`add_predictor`](@ref):
+
+```@repl
+using JuMP, Flux, MathOptAI
+struct CustomModel{T<:Flux.Chain}
+  chain::T
+end
+(model::CustomModel)(x) = model.chain(x) + x
+struct CustomPredictor <: MathOptAI.AbstractPredictor
+    p::MathOptAI.Pipeline
+end
+function MathOptAI.build_predictor(model::CustomModel)
+    predictor = MathOptAI.build_predictor(model.chain)
+    return CustomPredictor(predictor)
+end
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::CustomPredictor,
+    x::Vector;
+    kwargs...,
+)
+    y, formulation = MathOptAI.add_predictor(model, predictor.p, x; kwargs...)
+    @assert length(x) == length(y)
+    return y .+ x, formulation
+end
+model = Model();
+@variable(model, x[i in 1:3]);
+predictor =
+    Flux.Chain(CustomModel(Flux.Chain(Flux.Dense(3 => 3, Flux.relu))))
+y, formulation = MathOptAI.add_predictor(model, predictor, x);
+y
+formulation
+```

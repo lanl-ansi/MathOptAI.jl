@@ -190,7 +190,7 @@ to upgrade from v0.1.19.
 ### Added
 
  - Set device in `output_size` (#170)
- - Support [`Softmax`](@ref) in PyTorchModel (#173)
+ - Support [`SoftMax`](@ref) in PyTorchModel (#173)
 
 ### Other
 

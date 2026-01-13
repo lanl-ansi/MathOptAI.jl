@@ -100,6 +100,16 @@ _fix_release_lines(
     joinpath(@__DIR__, "src", "release_notes.md"),
 )
 
+function _add_edit_url(filename, url)
+    contents = read(filename, String)
+    open(filename, "w") do io
+        write(io, "```@meta\nEditURL = \"$url\"\n```\n\n")
+        write(io, contents)
+        return
+    end
+    return
+end
+
 _add_edit_url(joinpath(@__DIR__, "src", "release_notes.md"), "changelog.md")
 
 # ==============================================================================

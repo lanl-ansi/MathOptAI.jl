@@ -17,7 +17,7 @@ to upgrade from v0.1.19.
  - Remove `::Matrix` method that maps over columns (#223).
 
    This change means you cannot do `MathOptAI.add_predictor(model, predictor, x)`
-   where `x::Matrix` and have it return a `y::Matrix` corrresponding to mappping
+   where `x::Matrix` and have it return a `y::Matrix` corresponding to mapping
    the predictor over the columns of `x`.
 
    To upgrade, replace:
@@ -51,7 +51,7 @@ to upgrade from v0.1.19.
    MathOptAI.add_predictor(model, predictor, x; gray_box = true)
    ```
 
- - Change config dictionary to have functions as values (#233)
+ - Change `config` dictionary to have functions as values (#233)
 
    We have changed how the `; config = Dict()` keyword works for the Flux, Lux,
    and PyTorch extensions. Where previously the values were instantiated
@@ -79,7 +79,7 @@ to upgrade from v0.1.19.
 
 ### Fixed
 
- - Simplfiy test to fix flakey `TestPythonCallExt.test_gelu` (#228)
+ - Simplify test to fix flakey `TestPythonCallExt.test_gelu` (#228)
 
 ### Other
 
@@ -106,7 +106,7 @@ to upgrade from v0.1.19.
 
 ### Fixed
 
- - Iterate over Pytorch Sequential module itself, rather than its children (#207)
+ - Iterate over PyTorch Sequential module itself, rather than its children (#207)
 
 ## Version 0.1.16 (October 22, 2025)
 
@@ -150,12 +150,12 @@ to upgrade from v0.1.19.
 
 ### Added
 
- - Add a reduced_space fallback for extensions (#187)
+ - Add a `reduced_space` fallback for extensions (#187)
 
 ### Other
 
  - Update test for change in MOI@1.40.2 (#186)
- - Add Softmax to the PyTorch manual page (#188)
+ - Add `Softmax` to the PyTorch manual page (#188)
 
 ## Version 0.1.11 (June 2, 2025)
 
@@ -189,12 +189,12 @@ to upgrade from v0.1.19.
 
 ### Added
 
- - Set device in output_size (#170)
- - Support Softmax in PytorchModel (#173)
+ - Set device in `output_size` (#170)
+ - Support [`Softmax`](@ref) in PyTorchModel (#173)
 
 ### Other
 
- - Add paper to readme (#169)
+ - Add paper to README (#169)
 
 ## Version 0.1.7 (January 17, 2025)
 
@@ -212,7 +212,7 @@ to upgrade from v0.1.19.
 
 ### Added
 
- - Add `gray_box_device` option for `PytorchModel` (#159)
+ - Add `gray_box_device` option for `PyTorchModel` (#159)
 
 ### Fixed
 

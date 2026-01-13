@@ -63,7 +63,7 @@ _literate_directory(joinpath(@__DIR__, "src", "tutorials"))
 
 function fix_release_line(
     line::String,
-    url::String = "https://github.com/jump-dev/JuMP.jl",
+    url::String = "https://github.com/lanl-ansi/MathOptAI.jl",
 )
     # (#XXXX) -> ([#XXXX](url/issue/XXXX))
     while (m = match(r"\(\#([0-9]+)\)", line)) !== nothing

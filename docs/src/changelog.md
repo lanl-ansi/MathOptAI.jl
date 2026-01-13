@@ -7,7 +7,7 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 0.2.0 (unreleased)
+## Version 0.2.0 (January 14, 2026)
 
 This release contains a number of breaking changes. See below for details on how
 to upgrade from v0.1.19.
@@ -75,7 +75,7 @@ to upgrade from v0.1.19.
  - Add [`AvgPool2d`](@ref), [`Conv2d`](@ref), and [`MaxPool2d`](@ref) predictors
    (#220), (#222), (#224)
  - Add support for custom models in Flux (#227)
- - Add [`MaxPool2dBigM`](@ref) predictor (#231)
+ - Add [`MaxPool2dBigM`](@ref) predictor (#231), (#235)
 
 ### Fixed
 
@@ -84,6 +84,7 @@ to upgrade from v0.1.19.
 ### Other
 
  - Remove comment that `vector_nonlinear_oracle` is experimental (#219)
+ - Added this changelog (#234), (#236)
 
 ## Version 0.1.19 (December 5, 2025)
 

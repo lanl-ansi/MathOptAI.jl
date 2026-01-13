@@ -58,6 +58,51 @@ end
 _literate_directory(joinpath(@__DIR__, "src", "tutorials"))
 
 # ==============================================================================
+#  Modify the release notes
+# ==============================================================================
+
+function fix_release_line(
+    line::String,
+    url::String = "https://github.com/jump-dev/JuMP.jl",
+)
+    # (#XXXX) -> ([#XXXX](url/issue/XXXX))
+    while (m = match(r"\(\#([0-9]+)\)", line)) !== nothing
+        id = m.captures[1]
+        line = replace(line, m.match => "([#$id]($url/issues/$id))")
+    end
+    # ## Version X.Y.Z -> [Version X.Y.Z](url/releases/tag/vX.Y.Z)
+    while (m = match(r"\#\# Version ([0-9]+.[0-9]+.[0-9]+)", line)) !== nothing
+        tag = m.captures[1]
+        line = replace(
+            line,
+            m.match => "## [Version $tag]($url/releases/tag/v$tag)",
+        )
+    end
+    # ## vX.Y.Z -> [vX.Y.Z](url/releases/tag/vX.Y.Z)
+    while (m = match(r"\#\# (v[0-9]+.[0-9]+.[0-9]+)", line)) !== nothing
+        tag = m.captures[1]
+        line = replace(line, m.match => "## [$tag]($url/releases/tag/$tag)")
+    end
+    return line
+end
+
+function _fix_release_lines(changelog, release_notes, args...)
+    open(release_notes, "w") do io
+        for line in readlines(changelog; keep = true)
+            write(io, fix_release_line(line, args...))
+        end
+    end
+    return
+end
+
+_fix_release_lines(
+    joinpath(@__DIR__, "src", "changelog.md"),
+    joinpath(@__DIR__, "src", "release_notes.md"),
+)
+
+_add_edit_url(joinpath(@__DIR__, "src", "release_notes.md"), "changelog.md")
+
+# ==============================================================================
 #  Build the documentation
 # ==============================================================================
 
@@ -91,6 +136,7 @@ Documenter.makedocs(;
         ],
         "Developers" => ["developers/design_principles.md"],
         "api.md",
+        "release_notes.md",
     ],
     modules = [
         MathOptAI,

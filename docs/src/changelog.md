@@ -75,7 +75,7 @@ to upgrade from v0.1.19.
  - Add [`AvgPool2d`](@ref), [`Conv2d`](@ref), and [`MaxPool2d`](@ref) predictors
    (#220), (#222), (#224)
  - Add support for custom models in Flux (#227)
- - Add [`MaxPool2dBigM`](@ref) predictor (#231)
+ - Add [`MaxPool2dBigM`](@ref) predictor (#231), (#235)
 
 ### Fixed
 
@@ -84,6 +84,7 @@ to upgrade from v0.1.19.
 ### Other
 
  - Remove comment that `vector_nonlinear_oracle` is experimental (#219)
+ - Added this changelog (#234), (#236)
 
 ## Version 0.1.19 (December 5, 2025)
 

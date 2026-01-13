@@ -87,7 +87,7 @@ to upgrade from v0.1.19.
 
 ## Version 0.1.19 (December 5, 2025)
 
-## Added
+### Added
 
  - Add [`replace_weights_with_variables`](@ref) (#215)
 

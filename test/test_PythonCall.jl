@@ -65,7 +65,7 @@ function test_model_ReLU()
         model,
         ml_model,
         x;
-        config = Dict(:ReLU => MathOptAI.ReLUBigM(100)),
+        config = Dict(:ReLU => () -> MathOptAI.ReLUBigM(100)),
     )
     optimize!(model)
     @test is_solved_and_feasible(model)
@@ -284,7 +284,7 @@ function test_gray_box_errors()
         ),
         MathOptAI.build_predictor(
             MathOptAI.PytorchModel("model.pt");
-            config = Dict(:ReLU => MathOptAI.ReLUBigM(100)),
+            config = Dict(:ReLU => () -> MathOptAI.ReLUBigM(100)),
             gray_box = true,
         ),
     )
@@ -450,7 +450,7 @@ function test_model_LeakyReLU()
         model,
         ml_model,
         x;
-        config = Dict(:ReLU => MathOptAI.ReLUBigM(100)),
+        config = Dict(:ReLU => () -> MathOptAI.ReLUBigM(100)),
     )
     optimize!(model)
     @test is_solved_and_feasible(model)

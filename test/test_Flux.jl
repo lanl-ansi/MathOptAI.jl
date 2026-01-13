@@ -56,7 +56,7 @@ function test_end_to_end_with_scale()
         model,
         chain,
         [x];
-        config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
+        config = Dict(Flux.relu => () -> MathOptAI.ReLUBigM(100.0)),
     )
     optimize!(model)
     @test is_solved_and_feasible(model)
@@ -75,7 +75,7 @@ function test_end_to_end_ReLUBigM()
         model,
         chain,
         [x];
-        config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
+        config = Dict(Flux.relu => () -> MathOptAI.ReLUBigM(100.0)),
     )
     optimize!(model)
     @test is_solved_and_feasible(model)
@@ -94,7 +94,7 @@ function test_end_to_end_ReLUQuadratic()
         model,
         chain,
         [x];
-        config = Dict(Flux.relu => MathOptAI.ReLUQuadratic()),
+        config = Dict(Flux.relu => MathOptAI.ReLUQuadratic),
     )
     # Ipopt needs a starting point to avoid the local minima.
     set_start_value(only(y), 4.0)
@@ -219,7 +219,7 @@ function test_gray_box_errors()
         ),
         MathOptAI.build_predictor(
             chain;
-            config = Dict(Flux.relu => MathOptAI.ReLUBigM(100.0)),
+            config = Dict(Flux.relu => () -> MathOptAI.ReLUBigM(100.0)),
             gray_box = true,
         ),
     )

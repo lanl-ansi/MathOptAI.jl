@@ -60,26 +60,21 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
 ## Config
 
-The `config` dictionary controls how layers in Flux are mapped to
+The `config` dictionary controls how layers in PyTorch are mapped to
 [`AbstractPredictor`](@ref)s.
 
-Examples of key-value pairs are:
+Supported keys and and example key-value pairs are:
 
- * `:GELU => MathOptAI.GELU()`
- * `:ReLU => MathOptAI.ReLU()`
- * `:Sigmoid => MathOptAI.Sigmoid()`
- * `:SoftMax => MathOptAI.SoftMax()`
- * `:SoftPlus => MathOptAI.SoftPlus()`
- * `:Tanh => MathOptAI.Tanh()`
+ * `:GELU => MathOptAI.GELU`
+ * `:MaxPool2d => (k; kwargs...) -> MathOptAI.MaxPool2dBigM(k; M = 10.0, kwargs...)`
+ * `:ReLU => MathOptAI.ReLU`
+ * `:Sigmoid => MathOptAI.Sigmoid`
+ * `:SoftMax => MathOptAI.SoftMax`
+ * `:SoftPlus => (; beta) -> MathOptAI.SoftPlus(; beta)`
+ * `:Tanh => MathOptAI.Tanh`
 
 Note that `:LeakyReLU` is not supported. Use `:ReLU` to control how the inner
 ReLU is modeled.
-
-The `nn.MaxPool2d` layer is also configurable, but since it takes in multiple
-arguments, you must provide a function that builds a predictor instead of a
-finished predictor:
-
- * `:MaxPool2d => (k; kwargs...) -> MathOptAI.MaxPool2dBigM(k; M = 10.0, kwargs...)`
 """
 function MathOptAI.build_predictor(
     predictor::MathOptAI.PytorchModel;
@@ -154,10 +149,10 @@ function _predictor(nn, layer, config, input_size)
         p = vec(permutedims(col_major_indices, reverse(1:length(input_size))))
         MathOptAI.ReducedSpace(MathOptAI.Permutation(p))
     elseif _is_instance(layer, nn.GELU)
-        get(config, :GELU, MathOptAI.GELU())
+        get(config, :GELU, MathOptAI.GELU)()
     elseif _is_instance(layer, nn.LeakyReLU)
         negative_slope = PythonCall.pyconvert(Float64, layer.negative_slope)
-        relu = get(config, :ReLU, MathOptAI.ReLU())
+        relu = get(config, :ReLU, MathOptAI.ReLU)()
         MathOptAI.LeakyReLU(; negative_slope, relu)
     elseif _is_instance(layer, nn.MaxPool2d)
         input_size = _normalize_input_size("nn.MaxPool2d", input_size)
@@ -168,16 +163,16 @@ function _predictor(nn, layer, config, input_size)
             stride = _to_tuple(layer.stride),
         )
     elseif _is_instance(layer, nn.ReLU)
-        get(config, :ReLU, MathOptAI.ReLU())
+        get(config, :ReLU, MathOptAI.ReLU)()
     elseif _is_instance(layer, nn.Sigmoid)
-        get(config, :Sigmoid, MathOptAI.Sigmoid())
+        get(config, :Sigmoid, MathOptAI.Sigmoid)()
     elseif _is_instance(layer, nn.Softmax)
-        get(config, :SoftMax, MathOptAI.SoftMax())
+        get(config, :SoftMax, MathOptAI.SoftMax)()
     elseif _is_instance(layer, nn.Softplus)
         beta = PythonCall.pyconvert(Float64, layer.beta)
-        get(config, :SoftPlus, MathOptAI.SoftPlus(; beta))
+        get(config, :SoftPlus, MathOptAI.SoftPlus)(; beta)
     elseif _is_instance(layer, nn.Tanh)
-        get(config, :Tanh, MathOptAI.Tanh())
+        get(config, :Tanh, MathOptAI.Tanh)()
     else
         error("unsupported layer: $layer")
     end

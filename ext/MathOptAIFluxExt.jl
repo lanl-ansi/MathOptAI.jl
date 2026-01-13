@@ -59,19 +59,14 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
 The `config` dictionary controls how layers in Flux are mapped to
 [`AbstractPredictor`](@ref)s.
 
-Examples of key-value pairs are:
-
- * `Flux.relu => MathOptAI.ReLU()`
- * `Flux.sigmoid => MathOptAI.Sigmoid()`
- * `Flux.softplus => MathOptAI.SoftPlus()`
- * `Flux.softmax => MathOptAI.SoftMax()`
- * `Flux.tanh => MathOptAI.Tanh()`
-
-The `Flux.MaxPool` layer is also configurable, but since it takes in multiple
-arguments, you must provide a function that builds a predictor instead of a
-finished predictor:
+Supported keys and and example key-value pairs are:
 
  * `Flux.MaxPool => (k; kwargs...) -> MathOptAI.MaxPool2dBigM(k; M = 10.0, kwargs...)`
+ * `Flux.relu => MathOptAI.ReLU`
+ * `Flux.sigmoid => MathOptAI.Sigmoid`
+ * `Flux.softmax => MathOptAI.SoftMax`
+ * `Flux.softplus => MathOptAI.SoftPlus`
+ * `Flux.tanh => MathOptAI.Tanh`
 
 ## Example
 
@@ -88,7 +83,7 @@ julia> y, _ = MathOptAI.add_predictor(
            model,
            chain,
            x;
-           config = Dict(Flux.relu => MathOptAI.ReLU()),
+           config = Dict(Flux.relu => MathOptAI.ReLU),
        );
 
 julia> y
@@ -97,7 +92,7 @@ julia> y
 
 julia> MathOptAI.build_predictor(
            chain;
-           config = Dict(Flux.relu => MathOptAI.ReLU()),
+           config = Dict(Flux.relu => MathOptAI.ReLU),
        )
 Pipeline with layers:
  * Affine(A, b) [input: 1, output: 16]
@@ -106,7 +101,7 @@ Pipeline with layers:
 
 julia> MathOptAI.build_predictor(
            chain;
-           config = Dict(Flux.relu => MathOptAI.ReLUQuadratic()),
+           config = Dict(Flux.relu => MathOptAI.ReLUQuadratic),
        )
 Pipeline with layers:
  * Affine(A, b) [input: 1, output: 16]
@@ -151,11 +146,11 @@ function _build_predictor(
 end
 
 _default(::Any) = missing
-_default(::typeof(Flux.relu)) = MathOptAI.ReLU()
-_default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid()
-_default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus()
-_default(::typeof(Flux.softmax)) = MathOptAI.SoftMax()
-_default(::typeof(Flux.tanh)) = MathOptAI.Tanh()
+_default(::typeof(Flux.relu)) = MathOptAI.ReLU
+_default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid
+_default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus
+_default(::typeof(Flux.softmax)) = MathOptAI.SoftMax
+_default(::typeof(Flux.tanh)) = MathOptAI.Tanh
 
 function _build_predictor(
     ::MathOptAI.Pipeline,
@@ -185,13 +180,13 @@ function _build_predictor(
     config::Dict,
     input_size::Union{Nothing,NTuple},
 )
-    layer = get(config, activation, _default(activation))
-    if layer === missing
+    layer_fn = get(config, activation, _default(activation))
+    if layer_fn === missing
         error("Unsupported activation function: $activation")
-    else
-        push!(predictor.layers, layer)
     end
-    return MathOptAI.output_size(layer, input_size)
+    p = layer_fn()
+    push!(predictor.layers, p)
+    return MathOptAI.output_size(p, input_size)
 end
 
 function _build_predictor(
@@ -252,8 +247,7 @@ function _build_predictor(
     input_size::Any,
 )
     input_size_normalized = _normalize_input_size(layer, input_size)
-    F = get(config, Flux.MaxPool, MathOptAI.MaxPool2d)
-    p = F(
+    p = get(config, Flux.MaxPool, MathOptAI.MaxPool2d)(
         layer.k;
         input_size = input_size_normalized,
         padding = layer.pad[1:2],

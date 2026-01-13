@@ -7,6 +7,84 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.0 (unreleased)
+
+This release contains a number of breaking changes. See below for details on how
+to upgrade from v0.1.19.
+
+### Breaking
+
+ - Remove `::Matrix` method that maps over columns (#223).
+
+   This change means you cannot do `MathOptAI.add_predictor(model, predictor, x)`
+   where `x::Matrix` and have it return a `y::Matrix` corrresponding to mappping
+   the predictor over the columns of `x`.
+
+   To upgrade, replace:
+   ```julia
+   y, formulation = MathOptAI.add_predictor(model, predictor, x::Matrix)
+   ```
+   with:
+   ```julia
+   ret = map(1:size(x, 2)) do i
+       return MathOptAI.add_predictor(model, predictor, x[:, i])
+   end
+   formulation = last.(ret)
+   y = reduce(hcat, first.(ret))
+   ```
+   and write additional code as needed to handle the `formulation` objects.
+
+ - Replace GrayBox by VectorNonlinearOracle implementation (#230)
+
+   We have removed the old `GrayBox` predictor and replaced it by the
+   `VectorNonlinearOracle` predictor, which has now been renamed to `GrayBox`.
+   In addition, the `; vector_nonlinear_oracle = true` keyword argument has been
+   removed, and the new `; gray_box = true` is equivalent to the old
+   `; vector_nonlinear_oracle = true`.
+
+   To upgrade, replace:
+   ```julia
+   MathOptAI.add_predictor(model, predictor, x; vector_nonlinear_oracle = true)
+   ```
+   with:
+   ```julia
+   MathOptAI.add_predictor(model, predictor, x; gray_box = true)
+   ```
+
+ - Change config dictionary to have functions as values (#233)
+
+   We have changed how the `; config = Dict()` keyword works for the Flux, Lux,
+   and PyTorch extensions. Where previously the values were instantiated
+   [`AbstractPredictor`](@ref) _objects_, they must now be _constructors_ that,
+   when called, return an [`AbstractPredictor`](@ref) object.
+
+   As an example of upgrading, replace:
+   ```julia
+   ; config = Dict(Flux.relu => MathOptAI.ReLU())
+   ```
+   with:
+   ```julia
+   ; config = Dict(Flux.relu => MathOptAI.ReLU)
+   # or, alternatively
+   ; config = Dict(Flux.relu => () -> MathOptAI.ReLU())
+   ```
+
+### Added
+
+ - Add [`LeakyReLU`](@ref) predictor (#218)
+ - Add [`AvgPool2d`](@ref), [`Conv2d`](@ref), and [`MaxPool2d`](@ref) predictors
+   (#220), (#222), (#224)
+ - Add support for custom models in Flux (#227)
+ - Add [`MaxPool2dBigM`](@ref) predictor (#231)
+
+### Fixed
+
+ - Simplfiy test to fix flakey `TestPythonCallExt.test_gelu` (#228)
+
+### Other
+
+ - Remove comment that `vector_nonlinear_oracle` is experimental (#219)
+
 ## Version 0.1.19 (December 5, 2025)
 
 ## Added

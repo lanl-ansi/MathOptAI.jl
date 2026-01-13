@@ -7,8 +7,9 @@
 """
     MaxPool2dBigM(
         kernel_size::Tuple{Int,Int};
+        M::Float64,
         input_size::Tuple{Int,Int,Int},
-        stride::Tuple{Int,Int} = (1, 1),
+        stride::Tuple{Int,Int} = kernel_size,
         padding::Tuple{Int,Int} = (0, 0),
     ) <: AbstractPredictor
 

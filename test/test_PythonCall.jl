@@ -6,6 +6,13 @@
 
 module TestPythonCallExt
 
+# To make testing easier, setup the environment variables as needed for @odow's
+# conda setup.
+if get(ENV, "LOGNAME", "") == "odow"
+    ENV["JULIA_PYTHONCALL_EXE"] = "python3"
+    ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+end
+
 using JuMP
 using Test
 

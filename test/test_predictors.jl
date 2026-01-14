@@ -864,9 +864,8 @@ end
 
 function test_pipeline()
     input_size = (4, 4, 1)
-    p = MathOptAI.Pipeline(
-        [MathOptAI.MaxPool2d((2, 2); input_size), MathOptAI.ReLU()]
-    )
+    layers = [MathOptAI.MaxPool2d((2, 2); input_size), MathOptAI.ReLU()]
+    p = MathOptAI.Pipeline(layers)
     @test MathOptAI.output_size(p, nothing) === nothing
     @test MathOptAI.output_size(p, (4, 4)) === (2, 2, 1)
     @test MathOptAI.output_size(p, (4, 4, 1)) === (2, 2, 1)

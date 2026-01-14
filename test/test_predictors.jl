@@ -862,6 +862,17 @@ function test_MaxPool2dBigM()
     return
 end
 
+function test_pipeline()
+    input_size = (4, 4, 1)
+    p = MathOptAI.Pipeline(
+        [MathOptAI.MaxPool2d((2, 2); input_size), MathOptAI.ReLU()]
+    )
+    @test MathOptAI.output_size(p, nothing) === nothing
+    @test MathOptAI.output_size(p, (4, 4)) === (2, 2, 1)
+    @test MathOptAI.output_size(p, (4, 4, 1)) === (2, 2, 1)
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

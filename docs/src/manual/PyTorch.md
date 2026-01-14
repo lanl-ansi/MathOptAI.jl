@@ -148,7 +148,18 @@ formulation
 
 If your PyTorch model contains a custom layer, define a new [`AbstractPredictor`](@ref)
 and pass a `config` dictionary that maps the Class object to a callback that
-builds the new predictor:
+builds the new predictor.
+
+The callback must have the signature `(layer::PythonCall.Py; kwargs...)`. Valid
+keyword arguments are currently:
+
+ * `input_size`: the input size of they layer
+ * `config`: the `config` dictionary, if needed to convert layers inside the
+   custom layer
+ * `nn`: a reference to `torch.nn`
+
+You must always have `kwargs...` so that future versions of MathOptAI can add
+new keywords in a non-breaking way.
 
 ```@repl
 using JuMP, PythonCall, MathOptAI

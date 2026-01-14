@@ -146,21 +146,37 @@ formulation
 
 ## Custom layers
 
-If your PyTorch model contains a custom layer, define new methods for
-[`build_predictor`](@ref) and [`add_predictor`](@ref):
+If your PyTorch model contains a custom layer, define a new [`AbstractPredictor`](@ref)
+and pass a `config` dictionary that maps the Class object to a callback that
+builds the new predictor:
 
 ```@repl
 using JuMP, PythonCall, MathOptAI
 dir = mktempdir()
+write(
+    joinpath(dir, "custom_model.py"),
+    """
+    import torch
+    class Skip(torch.nn.Module):
+        def __init__(self, inner):
+            super().__init__()
+            self.inner = inner
+        def forward(self, x):
+            return self.inner(x) + x
+    """,
+)
 filename = joinpath(dir, "custom_model.pt")
 PythonCall.@pyexec(
-    filename => """
-    import torch
-    from mathoptaipy.issue_109 import Skip
-    inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
-    model = Skip(inner)
-    torch.save(model, filename)
-    """ => Skip,
+    (dir, filename) =>
+        """
+        import sys
+        sys.path.insert(0, dir)
+        import torch
+        from custom_model import Skip
+        inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
+        model = Skip(inner)
+        torch.save(model, filename)
+        """ => Skip,
 )
 struct CustomPredictor <: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
@@ -182,7 +198,7 @@ function skip_callback(layer::PythonCall.Py; input_size, kwargs...)
     return CustomPredictor(MathOptAI.build_predictor(layer.inner))
 end
 config = Dict(Skip => skip_callback)
-y, _ = MathOptAI.add_predictor(model, predictor, x; config);
+y, formulation = MathOptAI.add_predictor(model, predictor, x; config);
 y
 formulation
 ```

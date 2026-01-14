@@ -706,16 +706,31 @@ end
 
 function test_issue_109()
     dir = mktempdir()
-    filename = joinpath(dir, "model_skip_connection.pt")
-    script = """
-    import torch
-    from mathoptaipy.issue_109 import Skip
-    inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
-    model = Skip(inner)
-    torch.save(model, filename)
-    """
-    PythonCall.@pyexec(filename => script => Skip)
-    torch = PythonCall.pyimport("torch")
+    write(
+        joinpath(dir, "custom_model.py"),
+        """
+        import torch
+        class Skip(torch.nn.Module):
+            def __init__(self, inner):
+                super().__init__()
+                self.inner = inner
+            def forward(self, x):
+                return self.inner(x) + x
+        """,
+    )
+    filename = joinpath(dir, "custom_model.pt")
+    PythonCall.@pyexec(
+        (dir, filename) =>
+            """
+            import sys
+            sys.path.insert(0, dir)
+            import torch
+            from custom_model import Skip
+            inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
+            model = Skip(inner)
+            torch.save(model, filename)
+            """ => Skip,
+    )
     model = Model(Ipopt.Optimizer)
     set_silent(model)
     @variable(model, x[i in 1:3] == 1.0 + sin(i))
@@ -726,6 +741,7 @@ function test_issue_109()
     config = Dict(Skip => skip_callback)
     y, _ = MathOptAI.add_predictor(model, predictor, x; config)
     optimize!(model)
+    torch = PythonCall.pyimport("torch")
     torch_model = torch.load(filename; weights_only = false)
     input = torch.tensor(value.(x))
     y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())

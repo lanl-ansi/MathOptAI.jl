@@ -750,6 +750,7 @@ function test_AvgPool2d()
     set_silent(model)
     @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
     predictor = MathOptAI.AvgPool2d((2, 2); input_size = (2, 4, 1))
+    @test MathOptAI.output_size(predictor, (2, 4)) == (1, 2, 1)
     @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
     @test MathOptAI.output_size(predictor, nothing) === nothing
     y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
@@ -781,6 +782,7 @@ function test_Conv2d()
     weight = reshape(sin.(1:8), 2, 2, 1, 2)
     bias = [1.0, 2.0]
     predictor = MathOptAI.Conv2d(weight, bias; input_size = (2, 4, 1))
+    @test MathOptAI.output_size(predictor, (2, 4)) == (1, 3, 2)
     @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 3, 2)
     y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
     @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 6
@@ -821,6 +823,7 @@ function test_MaxPool2d()
     set_silent(model)
     @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
     predictor = MathOptAI.MaxPool2d((2, 2); input_size = (2, 4, 1))
+    @test MathOptAI.output_size(predictor, (2, 4)) == (1, 2, 1)
     @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
     y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 2
@@ -838,6 +841,21 @@ function test_MaxPool2d_reduced_space()
     y, formulation =
         MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [6, 8]
+    return
+end
+
+function test_MaxPool2dBigM()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[h in 1:2, w in 1:4] == w + 4 * (h - 1))
+    predictor =
+        MathOptAI.MaxPool2dBigM((2, 2); input_size = (2, 4, 1), M = 100.0)
+    @test MathOptAI.output_size(predictor, (2, 4)) == (1, 2, 1)
+    @test MathOptAI.output_size(predictor, (2, 4, 1)) == (1, 2, 1)
+    y, formulation = MathOptAI.add_predictor(model, predictor, vec(x))
     optimize!(model)
     @assert is_solved_and_feasible(model)
     @test value.(y) ≈ [6, 8]

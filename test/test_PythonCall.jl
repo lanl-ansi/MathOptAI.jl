@@ -6,6 +6,13 @@
 
 module TestPythonCallExt
 
+# To make testing easier, setup the environment variables as needed for @odow's
+# conda setup.
+if get(ENV, "LOGNAME", "") == "odow"
+    ENV["JULIA_PYTHONCALL_EXE"] = "python3"
+    ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+end
+
 using JuMP
 using Test
 
@@ -675,6 +682,68 @@ function test_model_MaxPool2d_BigM()
     torch = PythonCall.pyimport("torch")
     torch_model = torch.load(filename; weights_only = false)
     input = torch.tensor([[fix_value.(x[i, :]) for i in 1:4]])
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
+struct Predictor109 <: MathOptAI.AbstractPredictor
+    p::MathOptAI.Pipeline
+end
+
+MathOptAI.output_size(p::Predictor109, input_size) = input_size
+
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Predictor109,
+    x::Vector;
+    kwargs...,
+)
+    y, formulation = MathOptAI.add_predictor(model, predictor.p, x; kwargs...)
+    @assert length(x) == length(y)
+    return y .+ x, formulation
+end
+
+function test_issue_109()
+    dir = mktempdir()
+    write(
+        joinpath(dir, "custom_model.py"),
+        """
+        import torch
+        class Skip(torch.nn.Module):
+            def __init__(self, inner):
+                super().__init__()
+                self.inner = inner
+            def forward(self, x):
+                return self.inner(x) + x
+        """,
+    )
+    filename = joinpath(dir, "custom_model.pt")
+    PythonCall.@pyexec(
+        (dir, filename) =>
+            """
+            import sys
+            sys.path.insert(0, dir)
+            import torch
+            from custom_model import Skip
+            inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
+            model = Skip(inner)
+            torch.save(model, filename)
+            """ => Skip,
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:3] == 1.0 + sin(i))
+    predictor = MathOptAI.PytorchModel(filename)
+    function skip_callback(layer::PythonCall.Py; input_size, kwargs...)
+        return Predictor109(MathOptAI.build_predictor(layer.inner))
+    end
+    config = Dict(Skip => skip_callback)
+    y, _ = MathOptAI.add_predictor(model, predictor, x; config)
+    optimize!(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor(value.(x))
     y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
     @test maximum(abs, value(y) - y_in) <= 1e-5
     return

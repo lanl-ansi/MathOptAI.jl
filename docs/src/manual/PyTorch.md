@@ -143,3 +143,73 @@ y, formulation = MathOptAI.add_predictor(
 y
 formulation
 ```
+
+## Custom layers
+
+If your PyTorch model contains a custom layer, define a new [`AbstractPredictor`](@ref)
+and pass a `config` dictionary that maps the Class object to a callback that
+builds the new predictor.
+
+The callback must have the signature `(layer::PythonCall.Py; kwargs...)`. Valid
+keyword arguments are currently:
+
+ * `input_size`: the input size of they layer
+ * `config`: the `config` dictionary, if needed to convert layers inside the
+   custom layer
+ * `nn`: a reference to `torch.nn`
+
+You must always have `kwargs...` so that future versions of MathOptAI can add
+new keywords in a non-breaking way.
+
+```@repl
+using JuMP, PythonCall, MathOptAI
+dir = mktempdir()
+write(
+    joinpath(dir, "custom_model.py"),
+    """
+    import torch
+    class Skip(torch.nn.Module):
+        def __init__(self, inner):
+            super().__init__()
+            self.inner = inner
+        def forward(self, x):
+            return self.inner(x) + x
+    """,
+)
+filename = joinpath(dir, "custom_model.pt")
+PythonCall.@pyexec(
+    (dir, filename) =>
+        """
+        import sys
+        sys.path.insert(0, dir)
+        import torch
+        from custom_model import Skip
+        inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
+        model = Skip(inner)
+        torch.save(model, filename)
+        """ => Skip,
+)
+struct CustomPredictor <: MathOptAI.AbstractPredictor
+    p::MathOptAI.Pipeline
+end
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::CustomPredictor,
+    x::Vector;
+    kwargs...,
+)
+    y, formulation = MathOptAI.add_predictor(model, predictor.p, x; kwargs...)
+    @assert length(x) == length(y)
+    return y .+ x, formulation
+end
+model = Model();
+@variable(model, x[i in 1:3]);
+predictor = MathOptAI.PytorchModel(filename)
+function skip_callback(layer::PythonCall.Py; input_size, kwargs...)
+    return CustomPredictor(MathOptAI.build_predictor(layer.inner))
+end
+config = Dict(Skip => skip_callback)
+y, formulation = MathOptAI.add_predictor(model, predictor, x; config);
+y
+formulation
+```

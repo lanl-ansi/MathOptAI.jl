@@ -68,6 +68,13 @@ function Base.show(io::IO, p::Pipeline)
     return
 end
 
+function output_size(predictor::Pipeline, input_size)
+    for l in predictor.layers
+        input_size = output_size(l, input_size)
+    end
+    return input_size
+end
+
 function add_predictor(
     model::JuMP.AbstractModel,
     predictor::Pipeline,

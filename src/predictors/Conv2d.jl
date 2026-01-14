@@ -109,6 +109,10 @@ function (f::Conv2d)(model::JuMP.AbstractModel, x::Vector)
     )
 end
 
+function output_size(f::Conv2d, input_size::NTuple{2,Int})
+    return output_size(f, (input_size..., 1))
+end
+
 function output_size(f::Conv2d, input_size::NTuple{3,Int})
     (Hin, Win, C) = f.input_size
     kH, kW, Cin, Cout = size(f.weight)

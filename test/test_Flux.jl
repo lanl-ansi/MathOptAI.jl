@@ -462,7 +462,6 @@ function test_flux_MaxPool_BigM()
     @test length(y) == 6
     optimize!(model)
     assert_is_solved_and_feasible(model)
-    @show value(y)
     @test maximum(
         abs,
         value(y) - cnn(convert.(Float32, reshape(fix_value.(x), 4, 6, 1, 1))),

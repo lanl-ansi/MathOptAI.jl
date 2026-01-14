@@ -93,6 +93,10 @@ struct MaxPool2dBigM <: AbstractPredictor
     end
 end
 
+function output_size(f::MaxPool2dBigM, input_size::NTuple{2,Int})
+    return output_size(f, (input_size..., 1))
+end
+
 function output_size(f::MaxPool2dBigM, input_size::NTuple{3,Int})
     (Hin, Win, C) = f.input_size
     (kH, kW), (pH, pW), (sH, sW) = f.kernel_size, f.padding, f.stride

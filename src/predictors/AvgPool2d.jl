@@ -88,6 +88,10 @@ function (f::AvgPool2d)(model::JuMP.AbstractModel, x::Vector)
     )
 end
 
+function output_size(f::AvgPool2d, input_size::NTuple{2,Int})
+    return output_size(f, (input_size..., 1))
+end
+
 function output_size(f::AvgPool2d, input_size::NTuple{3,Int})
     (Hin, Win, C) = f.input_size
     (kH, kW), (pH, pW), (sH, sW) = f.kernel_size, f.padding, f.stride

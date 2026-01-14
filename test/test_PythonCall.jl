@@ -680,6 +680,60 @@ function test_model_MaxPool2d_BigM()
     return
 end
 
+struct Predictor109 <: MathOptAI.AbstractPredictor
+    p::MathOptAI.Pipeline
+end
+
+MathOptAI.output_size(p::Predictor109, input_size) = input_size
+
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::Predictor109,
+    x::Vector;
+    kwargs...,
+)
+    y, formulation = MathOptAI.add_predictor(model, predictor.p, x; kwargs...)
+    @assert length(x) == length(y)
+    return y .+ x, formulation
+end
+
+function test_issue_109()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_skip_connection.pt")
+    PythonCall.pyexec(
+        """
+        import sys
+        if test_dir != sys.path[0]:
+            sys.path.insert(0, test_dir)
+        import torch
+        from mathoptaipy.issue_109 import Skip
+        inner = torch.nn.Sequential(torch.nn.Linear(3, 3), torch.nn.ReLU())
+        model = Skip(inner)
+        torch.save(model, filename)
+        """,
+        Module(),
+        (; test_dir = @__DIR__, filename),
+    )
+    mathoptaipy = PythonCall.pyimport("mathoptaipy")
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:3] == 1.0 + sin(i))
+    predictor = MathOptAI.PytorchModel(filename)
+    function skip_callback(layer::PythonCall.Py; input_size, kwargs...)
+        return Predictor109(MathOptAI.build_predictor(layer.inner))
+    end
+    y, _ = MathOptAI.add_predictor(model, predictor, x;
+        config = Dict(mathoptaipy.issue_109.Skip => skip_callback),
+    )
+    optimize!(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor(value.(x))
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

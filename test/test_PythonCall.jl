@@ -749,6 +749,35 @@ function test_issue_109()
     return
 end
 
+function test_model_Dropout()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Dropout.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(torch.nn.Dropout(p = 0.2))
+        # We don't need model.eval(); Dropout layers are always skipped
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:3] == i)
+    cnn = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 3
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor(fix_value.(x))
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
 end  # module
 
 TestPythonCallExt.runtests()

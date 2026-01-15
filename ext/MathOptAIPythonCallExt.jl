@@ -28,6 +28,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
 
  * `nn.AvgPool2d`
  * `nn.Conv2d`
+ * `nn.Dropout`
  * `nn.Flatten`
  * `nn.GELU`
  * `nn.LeakyReLU`
@@ -39,6 +40,9 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `nn.Softmax`
  * `nn.Softplus`
  * `nn.Tanh`
+
+Note that `nn.Dropout` layers are skipped because we assume that the PyTorch
+model is being evaluated, not trained.
 
 ## Keyword arguments
 
@@ -117,6 +121,9 @@ function MathOptAI.build_predictor(
     if _is_instance(layer, nn.Sequential)
         layers = MathOptAI.AbstractPredictor[]
         for child in layer
+            if _is_instance(child, nn.Dropout)
+                continue
+            end
             p = MathOptAI.build_predictor(child; config, input_size, nn)
             input_size = MathOptAI.output_size(p, input_size)
             push!(layers, p)

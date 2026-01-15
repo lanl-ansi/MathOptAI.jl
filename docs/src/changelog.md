@@ -7,6 +7,12 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.1 (January 15, 2026)
+
+### Added
+
+ - Added support for custom layers in PyTorch (#237)
+
 ## Version 0.2.0 (January 14, 2026)
 
 This release contains a number of breaking changes. See below for details on how

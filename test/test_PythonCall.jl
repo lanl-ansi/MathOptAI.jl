@@ -772,6 +772,7 @@ function test_model_Dropout()
     @test is_solved_and_feasible(model)
     torch = PythonCall.pyimport("torch")
     torch_model = torch.load(filename; weights_only = false)
+    torch_model.eval()
     input = torch.tensor(fix_value.(x))
     y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
     @test maximum(abs, value(y) - y_in) <= 1e-5

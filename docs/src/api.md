@@ -161,6 +161,11 @@ SoftMax
 SoftPlus
 ```
 
+## `TAGConv`
+```@docs
+TAGConv
+```
+
 ## `Tanh`
 ```@docs
 Tanh

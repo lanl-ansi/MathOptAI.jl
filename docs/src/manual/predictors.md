@@ -37,4 +37,5 @@ The following predictors are supported. See their docstrings for details:
 | [`Sigmoid`](@ref)               | Global nonlinear     | $M \rightarrow M$ |
 | [`SoftMax`](@ref)               | Global nonlinear     | $M \rightarrow M$ |
 | [`SoftPlus`](@ref)              | Global nonlinear     | $M \rightarrow M$ |
+| [`TAGConv`](@ref)               | Linear               | $M \rightarrow N$ |
 | [`Tanh`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |

@@ -40,7 +40,7 @@ SoftMax()
 │ └ moai_SoftMax[2]
 └ constraints [8]
   ├ moai_SoftMax_denom[1] ≥ 0
-  ├ moai_SoftMax_denom[1] - (0.0 + exp(x[2]) + exp(x[1])) = 0
+  ├ moai_SoftMax_denom[1] - (0 + exp(x[2]) + exp(x[1])) = 0
   ├ moai_SoftMax[1] ≥ 0
   ├ moai_SoftMax[1] ≤ 1
   ├ moai_SoftMax[1] - (exp(x[1]) / moai_SoftMax_denom[1]) = 0
@@ -62,7 +62,7 @@ ReducedSpace(SoftMax())
 │ └ moai_SoftMax_denom[1]
 └ constraints [2]
   ├ moai_SoftMax_denom[1] ≥ 0
-  └ moai_SoftMax_denom[1] - (0.0 + exp(x[2]) + exp(x[1])) = 0
+  └ moai_SoftMax_denom[1] - (0 + exp(x[2]) + exp(x[1])) = 0
 ```
 """
 struct SoftMax <: AbstractPredictor end

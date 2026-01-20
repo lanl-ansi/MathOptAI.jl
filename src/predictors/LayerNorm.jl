@@ -51,7 +51,7 @@ julia> y
  moai_LayerNorm[6]
 
 julia> formulation
-MathOptAI.LayerNorm{Float64, 1}((2, 3, 1), (2,), 0.0, [1.0, 2.0], [0.5, 0.6])
+LayerNorm{Float64, 1}((2, 3, 1), (2,), 0.0, [1.0, 2.0], [0.5, 0.6])
 ├ variables [3]
 │ ├ VariableRef[moai_LayerNorm_μ[1], moai_LayerNorm_μ[2], moai_LayerNorm_μ[3]]
 │ ├ VariableRef[moai_LayerNorm_σ[1], moai_LayerNorm_σ[2], moai_LayerNorm_σ[3]]

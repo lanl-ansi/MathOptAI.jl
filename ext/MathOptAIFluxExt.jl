@@ -288,7 +288,7 @@ function _build_predictor(
     input_size::Any,
 )
     input_size_normalized = _normalize_input_size(layer, input_size)
-    weight, bias = _weight_and_bias(Float64, layer.diag, layer.size)
+    weight, bias = _weight_and_bias(typeof(layer.ϵ), layer.diag, layer.size)
     p = MathOptAI.LayerNorm(
         layer.size;
         input_size = input_size_normalized,

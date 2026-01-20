@@ -174,11 +174,11 @@ function MathOptAI.build_predictor(
     elseif _is_instance(layer, nn.GELU)
         return get(config, :GELU, MathOptAI.GELU)()
     elseif _is_instance(layer, nn.LayerNorm)
-        # The layer is complicated, because MathOptAI assumes we compute the
+        # The layer is complicated because MathOptAI assumes we compute the
         # LayerNorm over [normalized_shape, *], whereas PyTorch assumes we
         # compute the LayerNorm over [*, normalized_shape]
         #
-        # First we need to compute a permutation vector to transpose the arrays:
+        # First we need to compute a permutation vector to permute the arrays:
         indices = reshape(1:prod(input_size), input_size)
         col_to_row_major = vec(_reversedims(indices))
         row_to_col_major = invperm(col_to_row_major)
@@ -187,16 +187,15 @@ function MathOptAI.build_predictor(
         # of the normalized_shape
         input_size = _normalize_input_size("nn.LayerNorm", reverse(input_size))
         weight, bias = _weight_and_bias(layer)
-        layer_norm = get(config, :LayerNorm, MathOptAI.LayerNorm)(
-            reverse(PythonCall.pyconvert(Any, layer.normalized_shape));
-            input_size,
-            eps = PythonCall.pyconvert(Float64, layer.eps),
-            weight = _reversedims(weight),
-            bias = _reversedims(bias),
-        )
         return MathOptAI.Pipeline(
             MathOptAI.ReducedSpace(MathOptAI.Permutation(col_to_row_major)),
-            layer_norm,
+            get(config, :LayerNorm, MathOptAI.LayerNorm)(
+                reverse(PythonCall.pyconvert(Any, layer.normalized_shape));
+                input_size,
+                eps = PythonCall.pyconvert(Float64, layer.eps),
+                weight = _reversedims(weight),
+                bias = _reversedims(bias),
+            ),
             MathOptAI.ReducedSpace(MathOptAI.Permutation(row_to_col_major)),
         )
     elseif _is_instance(layer, nn.LeakyReLU)

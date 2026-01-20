@@ -779,15 +779,14 @@ function test_model_Dropout()
     return
 end
 
-
-function test_AAA_model_LayerNorm()
+function test_model_LayerNorm()
     dir = mktempdir()
     filename = joinpath(dir, "model_LayerNorm.pt")
     PythonCall.pyexec(
         """
         import torch
         model = torch.nn.Sequential(
-            torch.nn.LayerNorm((2,), eps = 1e-05, elementwise_affine = True),
+            torch.nn.LayerNorm((3,), eps = 0.0, elementwise_affine = True),
             torch.nn.Flatten(0)
         )
         torch.save(model, filename)
@@ -798,7 +797,74 @@ function test_AAA_model_LayerNorm()
 
     model = Model(Ipopt.Optimizer)
     set_silent(model)
-    @variable(model, x[i in 1:2, j in 1:3] == i + 3 * (j - 1))
+    A = [1 2 4; 3 5 6]
+    @variable(model, x[i in 1:2, j in 1:3] == A[i, j])
+    cnn = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 6
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor([fix_value.(x[i, :]) for i in 1:2])
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
+function test_model_LayerNorm2()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_LayerNorm.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(
+            torch.nn.LayerNorm((2, 3), eps = 1e-3, elementwise_affine = True),
+            torch.nn.Flatten(0)
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    A = [1 2 4; 3 5 6]
+    @variable(model, x[i in 1:2, j in 1:3] == A[i, j])
+    cnn = MathOptAI.PytorchModel(filename)
+    y, formulation = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 6
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor([fix_value.(x[i, :]) for i in 1:2])
+    y_in = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    @test maximum(abs, value(y) - y_in) <= 1e-5
+    return
+end
+
+function test_model_LayerNorm3()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_LayerNorm.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+        model = torch.nn.Sequential(
+            torch.nn.LayerNorm((2, 3), eps = 1e-3, elementwise_affine = False),
+            torch.nn.Flatten(0)
+        )
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    A = [1 2 4; 3 5 6]
+    @variable(model, x[i in 1:2, j in 1:3] == A[i, j])
     cnn = MathOptAI.PytorchModel(filename)
     y, formulation = MathOptAI.add_predictor(model, cnn, x)
     @test length(y) == 6

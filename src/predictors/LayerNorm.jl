@@ -85,9 +85,10 @@ struct LayerNorm{T,N} <: AbstractPredictor
         shape::NTuple{N,Int};
         input_size::Tuple{Int,Int,Int},
         eps::T = 1e-5,
-        weight::Array{T,N},
-        bias::Array{T,N},
+        weight::Array{T,N} = ones(T, shape),
+        bias::Array{T,N} = zeros(T, shape),
     ) where {N,T}
+        @assert size(weight) == size(bias) == shape
         return new{T,N}(input_size, shape, eps, weight, bias)
     end
 end
@@ -101,7 +102,7 @@ function add_predictor(
 ) where {T,N}
     ε, γ, β = predictor.eps, predictor.weight, predictor.bias
     n = prod(predictor.input_size[1:N])
-    m = prod(predictor.input_size[N+1:end])
+    m = prod(predictor.input_size[(N+1):end])
     y = add_variables(model, x, length(x), "moai_LayerNorm")
     μ = add_variables(model, x, m, "moai_LayerNorm_μ")
     σ = add_variables(model, x, m, "moai_LayerNorm_σ")

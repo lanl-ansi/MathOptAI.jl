@@ -31,6 +31,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `nn.Dropout`
  * `nn.Flatten`
  * `nn.GELU`
+ * `nn.LayerNorm`
  * `nn.LeakyReLU`
  * `nn.Linear`
  * `nn.MaxPool2d`
@@ -112,6 +113,18 @@ _to_tuple(p::Tuple{Int,Int}) = p
 
 _is_instance(x, T) = Bool(PythonCall.pybuiltins.isinstance(x, T))
 
+_reversedims(x) = permutedims(x, reverse(1:ndims(x)))
+
+function _weight_and_bias(layer::PythonCall.Py)
+    if Bool(layer.elementwise_affine)
+        w = _pyconvert(Array{Float64}, layer.weight)
+        b = _pyconvert(Array{Float64}, layer.bias)
+        return w, b
+    end
+    shape = PythonCall.pyconvert(Any, layer.normalized_shape)
+    return ones(Float64, shape), zeros(Float64, shape)
+end
+
 function MathOptAI.build_predictor(
     layer::PythonCall.Py;
     input_size::Union{Nothing,NTuple} = nothing,
@@ -160,6 +173,31 @@ function MathOptAI.build_predictor(
         return MathOptAI.ReducedSpace(MathOptAI.Permutation(p))
     elseif _is_instance(layer, nn.GELU)
         return get(config, :GELU, MathOptAI.GELU)()
+    elseif _is_instance(layer, nn.LayerNorm)
+        # The layer is complicated because MathOptAI assumes we compute the
+        # LayerNorm over [normalized_shape, *], whereas PyTorch assumes we
+        # compute the LayerNorm over [*, normalized_shape]
+        #
+        # First we need to compute a permutation vector to permute the arrays:
+        indices = reshape(1:prod(input_size), input_size)
+        col_to_row_major = vec(_reversedims(indices))
+        row_to_col_major = invperm(col_to_row_major)
+        # Now we can create the LayerNorm predictor. Becase we're reversing the
+        # dimensions of the input array, we also need to reverse the dimensions
+        # of the normalized_shape
+        input_size = _normalize_input_size("nn.LayerNorm", reverse(input_size))
+        weight, bias = _weight_and_bias(layer)
+        return MathOptAI.Pipeline(
+            MathOptAI.ReducedSpace(MathOptAI.Permutation(col_to_row_major)),
+            get(config, :LayerNorm, MathOptAI.LayerNorm)(
+                reverse(PythonCall.pyconvert(Any, layer.normalized_shape));
+                input_size,
+                eps = PythonCall.pyconvert(Float64, layer.eps),
+                weight = _reversedims(weight),
+                bias = _reversedims(bias),
+            ),
+            MathOptAI.ReducedSpace(MathOptAI.Permutation(row_to_col_major)),
+        )
     elseif _is_instance(layer, nn.LeakyReLU)
         negative_slope = PythonCall.pyconvert(Float64, layer.negative_slope)
         relu = get(config, :ReLU, MathOptAI.ReLU)()

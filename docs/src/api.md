@@ -76,6 +76,11 @@ GELU
 GrayBox
 ```
 
+## `LayerNorm`
+```@docs
+LayerNorm
+```
+
 ## `LeakyReLU`
 ```@docs
 LeakyReLU

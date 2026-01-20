@@ -15,6 +15,7 @@ composed of:
  * [`nn.Conv2d`](https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html)
  * [`nn.Flatten`](https://pytorch.org/docs/stable/generated/torch.nn.Flatten.html)
  * [`nn.GELU`](https://pytorch.org/docs/stable/generated/torch.nn.GELU.html)
+ * [`nn.LayerNorm`](https://docs.pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html)
  * [`nn.LeakyReLU`](https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html)
  * [`nn.Linear`](https://pytorch.org/docs/stable/generated/torch.nn.Linear.html)
  * [`nn.MaxPool2d`](https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html)

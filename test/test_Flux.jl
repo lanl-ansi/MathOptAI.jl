@@ -469,6 +469,32 @@ function test_flux_MaxPool_BigM()
     return
 end
 
+function test_flux_LayerNorm()
+    cnn = Flux.Chain(Flux.LayerNorm((2,)), Flux.flatten)
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:2, j in 1:3] == i + 3 * (j - 1))
+    y, formulation = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 6
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test maximum(abs, value(y) - vec(cnn(Float32.(fix_value.(x))))) <= 1e-4
+    return
+end
+
+function test_flux_LayerNorm_affine_false()
+    cnn = Flux.Chain(Flux.LayerNorm((2,); affine = false), Flux.flatten)
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:2, j in 1:3] == i + 3 * (j - 1))
+    y, formulation = MathOptAI.add_predictor(model, cnn, x)
+    @test length(y) == 6
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test maximum(abs, value(y) - vec(cnn(Float32.(fix_value.(x))))) <= 1e-4
+    return
+end
+
 end  # module
 
 TestFluxExt.runtests()

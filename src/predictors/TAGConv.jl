@@ -91,11 +91,7 @@ function (f::TAGConv)(model::JuMP.AbstractModel, x)
     )
 end
 
-function add_predictor(
-    model::JuMP.AbstractModel,
-    predictor::TAGConv,
-    x::Vector,
-)
+function add_predictor(model::JuMP.AbstractModel, predictor::TAGConv, x::Vector)
     Y = predictor(model, x)
     y = add_variables(model, x, length(Y), "moai_TAGConv")
     cons = JuMP.@constraint(model, y .== vec(Y))

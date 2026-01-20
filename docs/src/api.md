@@ -66,6 +66,11 @@ BinaryDecisionTree
 Conv2d
 ```
 
+## `GCNConv`
+```@docs
+GCNConv
+```
+
 ## `GELU`
 ```@docs
 GELU

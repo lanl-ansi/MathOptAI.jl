@@ -21,6 +21,7 @@ The following predictors are supported. See their docstrings for details:
 | [`AvgPool2d`](@ref)             | Linear               | $M \rightarrow N$ |
 | [`BinaryDecisionTree`](@ref)    | Mixed-integer linear | $M \rightarrow 1$ |
 | [`Conv2d`](@ref).               | Linear               | $M \rightarrow N$ |
+| [`GCNConv`](@ref)               | Linear               | $M \rightarrow N$ |
 | [`GELU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
 | [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
 | [`LayerNorm`](@ref)             | Global nonlinear     | $M \rightarrow M$ |

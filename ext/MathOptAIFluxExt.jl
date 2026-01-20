@@ -27,6 +27,7 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
  * `Flux.Conv`
  * `Flux.Dense`
  * `Flux.flatten`
+ * `Flux.LayerNorm`
  * `Flux.MaxPool`
  * `Flux.MeanPool`
  * `Flux.Scale`
@@ -51,8 +52,8 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
    `gray_box` is used.
 
  * `input_size`: to disambiguate the input and output sizes of matrix inputs,
-   chains containing `Conv`, `MaxPool`, and `MeanPool` layers must specify an
-   initial input size.
+   chains containing `Conv`, `LayerNorm`, `MaxPool`, and `MeanPool` layers must
+   specify an initial input size.
 
 ## Config
 
@@ -271,6 +272,32 @@ function _build_predictor(
         stride = layer.stride,
     )
     push!(predictor.layers, p)
+    return MathOptAI.output_size(p, input_size_normalized)
+end
+
+_weight_and_bias(::Type{T}, f::Flux.Scale, size) where {T} = f.scale, f.bias
+
+function _weight_and_bias(::Type{T}, ::typeof(identity), size) where {T}
+    return ones(T, size), zeros(T, size)
+end
+
+function _build_predictor(
+    predictor::MathOptAI.Pipeline,
+    layer::Flux.LayerNorm,
+    config::Dict,
+    input_size::Any,
+)
+    input_size_normalized = _normalize_input_size(layer, input_size)
+    weight, bias = _weight_and_bias(Float64, layer.diag, layer.size)
+    p = MathOptAI.LayerNorm(
+        layer.size;
+        input_size = input_size_normalized,
+        eps = layer.ϵ,
+        weight,
+        bias,
+    )
+    push!(predictor.layers, p)
+    _build_predictor(predictor, layer.λ, config, nothing)
     return MathOptAI.output_size(p, input_size_normalized)
 end
 

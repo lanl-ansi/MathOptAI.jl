@@ -31,6 +31,7 @@ Convert a trained neural network from PyTorch via PythonCall.jl to a
  * `nn.Dropout`
  * `nn.Flatten`
  * `nn.GELU`
+ * `nn.LayerNorm`
  * `nn.LeakyReLU`
  * `nn.Linear`
  * `nn.MaxPool2d`
@@ -110,6 +111,17 @@ _to_tuple(p::PythonCall.Py) = _to_tuple(PythonCall.pyconvert(Any, p))
 _to_tuple(p::Int) = (p, p)
 _to_tuple(p::Tuple{Int,Int}) = p
 
+function _weight_and_bias(layer::PythonCall.Py)
+    if Bool(layer.elementwise_affine)
+        w = _pyconvert(Array{Float64}, layer.weight)
+        b = _pyconvert(Array{Float64}, layer.bias)
+        return w, b
+    end
+    w = ones(Float64, layer.normalized_shape)
+    b = zeros(Float64, layer.normalized_shape)
+    return w, b
+end
+
 _is_instance(x, T) = Bool(PythonCall.pybuiltins.isinstance(x, T))
 
 function MathOptAI.build_predictor(
@@ -160,6 +172,16 @@ function MathOptAI.build_predictor(
         return MathOptAI.ReducedSpace(MathOptAI.Permutation(p))
     elseif _is_instance(layer, nn.GELU)
         return get(config, :GELU, MathOptAI.GELU)()
+    elseif _is_instance(layer, nn.LayerNorm)
+        input_size = _normalize_input_size("nn.LayerNorm", input_size)
+        weight, bias = _weight_and_bias(layer)
+        return get(config, :LayerNorm, MathOptAI.LayerNorm)(
+            PythonCall.pyconvert(Any, layer.normalized_shape);
+            input_size,
+            eps = PythonCall.pyconvert(Float64, layer.eps),
+            weight,
+            bias,
+        )
     elseif _is_instance(layer, nn.LeakyReLU)
         negative_slope = PythonCall.pyconvert(Float64, layer.negative_slope)
         relu = get(config, :ReLU, MathOptAI.ReLU)()

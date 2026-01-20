@@ -23,6 +23,7 @@ The following predictors are supported. See their docstrings for details:
 | [`Conv2d`](@ref).               | Linear               | $M \rightarrow N$ |
 | [`GELU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
 | [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
+| [`LayerNorm`](@ref)             | Global nonlinear     | $M \rightarrow M$ |
 | [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |
 | [`MaxPool2d`](@ref)             | Global nonlinear     | $M \rightarrow N$ |
 | [`MaxPool2dBigM`](@ref)         | Mixed-integer linear | $M \rightarrow N$ |

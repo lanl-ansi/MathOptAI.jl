@@ -40,18 +40,18 @@ Sigmoid()
 └ constraints [6]
   ├ moai_Sigmoid[1] ≥ 0.2689414213699951
   ├ moai_Sigmoid[1] ≤ 0.7310585786300049
-  ├ moai_Sigmoid[1] - (1.0 / (1.0 + exp(-x[1]))) = 0
+  ├ moai_Sigmoid[1] - (1 / (1 + exp(-x[1]))) = 0
   ├ moai_Sigmoid[2] ≥ 0.2689414213699951
   ├ moai_Sigmoid[2] ≤ 0.8807970779778823
-  └ moai_Sigmoid[2] - (1.0 / (1.0 + exp(-x[2]))) = 0
+  └ moai_Sigmoid[2] - (1 / (1 + exp(-x[2]))) = 0
 
 julia> y, formulation =
            MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
- 1.0 / (1.0 + exp(-x[1]))
- 1.0 / (1.0 + exp(-x[2]))
+ 1 / (1 + exp(-x[1]))
+ 1 / (1 + exp(-x[2]))
 
 julia> formulation
 ReducedSpace(Sigmoid())

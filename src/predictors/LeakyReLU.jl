@@ -50,10 +50,10 @@ LeakyReLU{ReLU}(0.01, ReLU())
 └ constraints [8]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
-  ├ moai_ReLU[1] - max(0.0, x[1]) = 0
+  ├ moai_ReLU[1] - max(0, x[1]) = 0
   ├ moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] ≤ 2
-  ├ moai_ReLU[2] - max(0.0, x[2]) = 0
+  ├ moai_ReLU[2] - max(0, x[2]) = 0
   ├ -0.01 x[1] + moai_LeakyReLU[1] - 0.99 moai_ReLU[1] = 0
   └ -0.01 x[2] + moai_LeakyReLU[2] - 0.99 moai_ReLU[2] = 0
 
@@ -62,8 +62,8 @@ julia> y, formulation =
 
 julia> y
 2-element Vector{NonlinearExpr}:
- (0.01 x[1]) + (0.99 * max(0.0, x[1]))
- (0.01 x[2]) + (0.99 * max(0.0, x[2]))
+ (0.01 x[1]) + (0.99 * max(0, x[1]))
+ (0.01 x[2]) + (0.99 * max(0, x[2]))
 
 julia> formulation
 ReducedSpace(LeakyReLU{ReLU}(0.01, ReLU()))

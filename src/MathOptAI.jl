@@ -277,8 +277,8 @@ julia> y, formulation = MathOptAI.add_predictor(model, predictor, x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
- max(0.0, x[1])
- max(0.0, x[2])
+ max(0, x[1])
+ max(0, x[2])
 ```
 """
 struct ReducedSpace{P<:AbstractPredictor} <: AbstractPredictor

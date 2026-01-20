@@ -40,18 +40,18 @@ ReLU()
 └ constraints [6]
   ├ moai_ReLU[1] ≥ 0
   ├ moai_ReLU[1] ≤ 1
-  ├ moai_ReLU[1] - max(0.0, x[1]) = 0
+  ├ moai_ReLU[1] - max(0, x[1]) = 0
   ├ moai_ReLU[2] ≥ 0
   ├ moai_ReLU[2] ≤ 2
-  └ moai_ReLU[2] - max(0.0, x[2]) = 0
+  └ moai_ReLU[2] - max(0, x[2]) = 0
 
 julia> y, formulation =
            MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);
 
 julia> y
 2-element Vector{NonlinearExpr}:
- max(0.0, x[1])
- max(0.0, x[2])
+ max(0, x[1])
+ max(0, x[2])
 
 julia> formulation
 ReducedSpace(ReLU())

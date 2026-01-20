@@ -37,7 +37,7 @@ julia> f = MathOptAI.LayerNorm(
            weight = [1.0, 2.0],
            bias = [0.5, 0.6],
        )
-MathOptAI.LayerNorm{Float64, 1}((2, 3, 1), (2,), 0.0, [1.0, 2.0], [0.5, 0.6])
+LayerNorm{Float64, 1}((2, 3, 1), (2,), 0.0, [1.0, 2.0], [0.5, 0.6])
 
 julia> y, formulation = MathOptAI.add_predictor(model, f, x);
 

@@ -144,7 +144,10 @@ Documenter.makedocs(;
             "tutorials/pytorch.md",
             "tutorials/gaussian.md",
         ],
-        "Developers" => ["developers/design_principles.md"],
+        "Developers" => [
+            "developers/checklists.md",
+            "developers/design_principles.md",
+        ],
         "api.md",
         "release_notes.md",
     ],

@@ -335,7 +335,6 @@ output_size(::AbstractPredictor, ::Any) = nothing
 
 for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
     if endswith(file, ".jl")
-        @show file
         include(file)
     end
 end

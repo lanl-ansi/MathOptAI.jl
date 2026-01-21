@@ -353,4 +353,15 @@ function _build_set(
     )
 end
 
+function MathOptAI.GCNConv(
+    layer::PythonCall.Py;
+    edge_index::Vector{Pair{Int,Int}},
+)
+    return MathOptAI.GCNConv(;
+        weights = Matrix(_pyconvert(Matrix{Float64}, layer.lin.weight)'),
+        bias = _pyconvert(Vector{Float64}, layer.bias),
+        edge_index,
+    )
+end
+
 end  # module MathOptAIPythonCallExt

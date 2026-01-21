@@ -11,8 +11,8 @@
         edge_index::Vector{Pair{Int,Int}},
     )
 
-An [`AbstractPredictor`](@ref) that represents a topology adaptive graph
-convolutional network operator:
+An [`AbstractPredictor`](@ref) that represents a graph convolutional network
+operator:
 ```math
 Y = D^{-1/2} A D^{-1/2} X W + b
 ```
@@ -63,15 +63,19 @@ struct GCNConv{T} <: AbstractPredictor
         edge_index::Vector{Pair{Int,Int}},
         n::Int = mapreduce(maximum, max, edge_index),
     ) where {T}
+        edge_index = unique(edge_index)
         A = zeros(T, n, n)
         for (i, j) in edge_index
             A[i, j] += one(T)
         end
         for i in 1:n
-            A[i, i] += one(T)
+            if iszero(A[i, i])
+                A[i, i] += one(T)
+                push!(edge_index, i => i)
+            end
         end
         d = sqrt.(sum(A; dims = 2))
-        for (i, j) in unique(edge_index)
+        for (i, j) in edge_index
             A[i, j] /= (d[i] * d[j])
         end
         return new{T}(weights, bias, A)

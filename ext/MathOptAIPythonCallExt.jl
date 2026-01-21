@@ -353,6 +353,16 @@ function _build_set(
     )
 end
 
+"""
+    MathOptAI.GCNConv(
+        layer::PythonCall.Py;
+        edge_index::Vector{Pair{Int,Int}},
+    )
+
+Create a [`GCNConv`](@ref) layer from a `torch_geometric.nn.GCNConv` layer.
+
+See the [Graph neural networks](@ref) tutorial for details.
+"""
 function MathOptAI.GCNConv(
     layer::PythonCall.Py;
     edge_index::Vector{Pair{Int,Int}},
@@ -364,6 +374,16 @@ function MathOptAI.GCNConv(
     )
 end
 
+"""
+    MathOptAI.TAGConv(
+        layer::PythonCall.Py;
+        edge_index::Vector{Pair{Int,Int}},
+    )
+
+Create a [`TAGConv`](@ref) layer from a `torch_geometric.nn.TAGConv` layer.
+
+See the [Graph neural networks](@ref) tutorial for details.
+"""
 function MathOptAI.TAGConv(
     layer::PythonCall.Py;
     edge_index::Vector{Pair{Int,Int}},

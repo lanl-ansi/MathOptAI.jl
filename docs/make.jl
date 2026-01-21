@@ -134,6 +134,7 @@ Documenter.makedocs(;
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",
+            "manual/PythonCall.md",
             "manual/PyTorch.md",
         ],
         "Tutorials" => [
@@ -143,6 +144,7 @@ Documenter.makedocs(;
             "tutorials/mnist_lux.md",
             "tutorials/pytorch.md",
             "tutorials/gaussian.md",
+            "tutorials/graph_neural_networks.md",
         ],
         "Developers" =>
             ["developers/checklists.md", "developers/design_principles.md"],

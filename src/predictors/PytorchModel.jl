@@ -17,6 +17,8 @@ created using `torch.save(model, filename)`.
     ```julia
     import PythonCall
     ```
+    See the [Python integration](@ref) section of the documentation for
+    instructions on how to link Python to Julia.
 
 ## Example
 

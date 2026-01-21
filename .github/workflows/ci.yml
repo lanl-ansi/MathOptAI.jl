@@ -36,6 +36,7 @@ jobs:
         run: |
            pip3 install torch --index-url https://download.pytorch.org/whl/cpu
            pip3 install numpy
+           pip3 install torch_geometric
       # Install Julia
       - uses: julia-actions/setup-julia@v2
         with:

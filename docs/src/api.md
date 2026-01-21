@@ -66,6 +66,11 @@ BinaryDecisionTree
 Conv2d
 ```
 
+## `GCNConv`
+```@docs
+GCNConv
+```
+
 ## `GELU`
 ```@docs
 GELU
@@ -159,6 +164,11 @@ SoftMax
 ## `SoftPlus`
 ```@docs
 SoftPlus
+```
+
+## `TAGConv`
+```@docs
+TAGConv
 ```
 
 ## `Tanh`

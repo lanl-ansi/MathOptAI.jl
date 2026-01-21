@@ -353,4 +353,48 @@ function _build_set(
     )
 end
 
+"""
+    MathOptAI.GCNConv(
+        layer::PythonCall.Py;
+        edge_index::Vector{Pair{Int,Int}},
+    )
+
+Create a [`GCNConv`](@ref) layer from a `torch_geometric.nn.GCNConv` layer.
+
+See the [Graph neural networks](@ref) tutorial for details.
+"""
+function MathOptAI.GCNConv(
+    layer::PythonCall.Py;
+    edge_index::Vector{Pair{Int,Int}},
+)
+    return MathOptAI.GCNConv(;
+        weights = Matrix(_pyconvert(Matrix{Float64}, layer.lin.weight)'),
+        bias = _pyconvert(Vector{Float64}, layer.bias),
+        edge_index,
+    )
+end
+
+"""
+    MathOptAI.TAGConv(
+        layer::PythonCall.Py;
+        edge_index::Vector{Pair{Int,Int}},
+    )
+
+Create a [`TAGConv`](@ref) layer from a `torch_geometric.nn.TAGConv` layer.
+
+See the [Graph neural networks](@ref) tutorial for details.
+"""
+function MathOptAI.TAGConv(
+    layer::PythonCall.Py;
+    edge_index::Vector{Pair{Int,Int}},
+)
+    return MathOptAI.TAGConv(;
+        weights = map(layer.lins) do l
+            return Matrix(_pyconvert(Matrix{Float64}, l.weight)')
+        end,
+        bias = _pyconvert(Vector{Float64}, layer.bias),
+        edge_index,
+    )
+end
+
 end  # module MathOptAIPythonCallExt

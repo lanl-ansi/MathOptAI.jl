@@ -872,6 +872,73 @@ function test_pipeline()
     return
 end
 
+function test_GCNConv()
+    predictor = MathOptAI.GCNConv(;
+        weights = [1.0 2.0; 3.0 4.0; 5.0 6.0],
+        bias = [7.0, 8.0],
+        edge_index = [1 => 2, 2 => 1, 2 => 3, 3 => 2, 3 => 4, 4 => 3],
+    )
+    @test MathOptAI.output_size(predictor, nothing) === (4, 2)
+    @test MathOptAI.output_size(predictor, (4, 3)) === (4, 2)
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:4, j in 1:3] == i + j)
+    y, _ = MathOptAI.add_predictor(model, predictor, x)
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test round.(Int, value(y)) == [39, 49, 60, 56, 49, 63, 78, 72]
+    return
+end
+
+function test_GCNConv_reduced_space()
+    predictor = MathOptAI.GCNConv(;
+        weights = [1.0 2.0; 3.0 4.0; 5.0 6.0],
+        bias = [7.0, 8.0],
+        edge_index = [1 => 2, 2 => 1, 2 => 3, 3 => 2, 3 => 4, 4 => 3],
+    )
+    @test MathOptAI.output_size(predictor, nothing) === (4, 2)
+    @test MathOptAI.output_size(predictor, (4, 3)) === (4, 2)
+    model = Model()
+    @variable(model, x[i in 1:4, j in 1:3] == i + j)
+    y, _ = MathOptAI.add_predictor(model, predictor, x; reduced_space = true)
+    @test round.(Int, value(fix_value, y)) == [39, 49, 60, 56, 49, 63, 78, 72]
+    return
+end
+
+function test_TAGConv()
+    predictor = MathOptAI.TAGConv(;
+        weights = [[1.0 2.0; 3.0 4.0; 5.0 6.0], [1.0 2.0; 3.0 4.0; 5.0 6.0]],
+        bias = [7.0, 8.0],
+        edge_index = [1 => 2, 2 => 1, 2 => 3, 3 => 2, 3 => 4, 4 => 3],
+    )
+    @test MathOptAI.output_size(predictor, nothing) === (4, 2)
+    @test MathOptAI.output_size(predictor, (4, 3)) === (4, 2)
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:4, j in 1:3] == i + j)
+    y, _ = MathOptAI.add_predictor(model, predictor, x)
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    @test round.(Int, value(y)) == [66, 93, 117, 100, 85, 120, 152, 129]
+    return
+end
+
+function test_TAGConv_reduced_space()
+    predictor = MathOptAI.TAGConv(;
+        weights = [[1.0 2.0; 3.0 4.0; 5.0 6.0], [1.0 2.0; 3.0 4.0; 5.0 6.0]],
+        bias = [7.0, 8.0],
+        edge_index = [1 => 2, 2 => 1, 2 => 3, 3 => 2, 3 => 4, 4 => 3],
+    )
+    @test MathOptAI.output_size(predictor, nothing) === (4, 2)
+    @test MathOptAI.output_size(predictor, (4, 3)) === (4, 2)
+    model = Model()
+    @variable(model, x[i in 1:4, j in 1:3] == i + j)
+    y, _ = MathOptAI.add_predictor(model, predictor, x; reduced_space = true)
+    @test round.(Int, value(fix_value, y)) ==
+          [66, 93, 117, 100, 85, 120, 152, 129]
+    return
+end
+
 end  # module
 
 TestPredictors.runtests()

@@ -4,3 +4,4 @@ docs/.CondaPkg
 docs/build
 docs/src/tutorials/*.md
 test/.CondaPkg
+docs/src/tutorials/__pycache__

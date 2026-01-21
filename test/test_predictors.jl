@@ -919,7 +919,7 @@ function test_TAGConv()
     y, _ = MathOptAI.add_predictor(model, predictor, x)
     optimize!(model)
     assert_is_solved_and_feasible(model)
-    @test round.(Int, value(y)) ==  [66, 93, 117, 100, 85, 120, 152, 129]
+    @test round.(Int, value(y)) == [66, 93, 117, 100, 85, 120, 152, 129]
     return
 end
 

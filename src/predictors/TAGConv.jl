@@ -103,5 +103,5 @@ function add_predictor(
     predictor::ReducedSpace{TAGConv{T}},
     x::Vector,
 ) where {T}
-    return predictor(model, x), Formulation(predictor)
+    return vec(predictor.predictor(model, x)), Formulation(predictor)
 end

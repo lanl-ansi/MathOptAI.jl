@@ -101,5 +101,5 @@ function add_predictor(
     predictor::ReducedSpace{GCNConv{T}},
     x::Vector,
 ) where {T}
-    return predictor(model, x), Formulation(predictor)
+    return vec(predictor.predictor(model, x)), Formulation(predictor)
 end

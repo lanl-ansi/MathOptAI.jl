@@ -878,7 +878,7 @@ function test_model_LayerNorm3()
     return
 end
 
-function test_AAA_custom_GCNConv()
+function test_custom_GCNConv()
     dir = mktempdir()
     write(
         joinpath(dir, "custom_model_gcnconv.py"),
@@ -917,6 +917,60 @@ function test_AAA_custom_GCNConv()
         )
     end
     config = Dict(GCN => callback)
+    y, _ = MathOptAI.add_predictor(model, predictor, x; config)
+    optimize!(model)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = Dict(
+        "x" => torch.tensor([fix_value.(x[i, :]) for i in 1:4]),
+        "edge_index" =>
+            torch.tensor([[0, 1, 1, 2, 2, 3], [1, 0, 2, 1, 3, 2]]),
+    )
+    Y_py = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
+    Y = reshape(value(y), 4, 3)
+    @test maximum(abs, Y - Y_py) <= 1e-5
+    return
+end
+
+function test_custom_TAGConv()
+    dir = mktempdir()
+    write(
+        joinpath(dir, "custom_model_tagconv.py"),
+        """
+        import torch
+        import torch_geometric
+        class TAG(torch.nn.Module):
+            def __init__(self):
+                super().__init__()
+                self.conv = torch_geometric.nn.TAGConv(2, 3, K = 3)
+            def forward(self, data):
+                x = self.conv(data['x'], data['edge_index'])
+                return torch.nn.functional.relu(x)
+        """,
+    )
+    filename = joinpath(dir, "custom_model_tagconv.pt")
+    PythonCall.@pyexec(
+        (dir, filename) => """
+                           import sys
+                           sys.path.insert(0, dir)
+                           import torch
+                           from custom_model_tagconv import TAG
+                           torch.save(TAG(), filename)
+                           """ => TAG,
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[i in 1:4, j in 1:2] == sin(i) + cos(j))
+    predictor = MathOptAI.PytorchModel(filename)
+    edge_index = [1 => 2, 2 => 1, 2 => 3, 3 => 2, 3 => 4, 4 => 3]
+    function callback(layer::PythonCall.Py; kwargs...)
+        @assert Bool(PythonCall.pybuiltins.isinstance(layer, TAG))
+        return MathOptAI.Pipeline(
+            MathOptAI.TAGConv(layer.conv; edge_index),
+            MathOptAI.ReLU(),
+        )
+    end
+    config = Dict(TAG => callback)
     y, _ = MathOptAI.add_predictor(model, predictor, x; config)
     optimize!(model)
     torch = PythonCall.pyimport("torch")

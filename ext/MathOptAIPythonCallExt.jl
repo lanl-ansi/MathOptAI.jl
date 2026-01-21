@@ -364,4 +364,17 @@ function MathOptAI.GCNConv(
     )
 end
 
+function MathOptAI.TAGConv(
+    layer::PythonCall.Py;
+    edge_index::Vector{Pair{Int,Int}},
+)
+    return MathOptAI.TAGConv(;
+        weights = map(layer.lins) do l
+            return Matrix(_pyconvert(Matrix{Float64}, l.weight)')
+        end,
+        bias = _pyconvert(Vector{Float64}, layer.bias),
+        edge_index,
+    )
+end
+
 end  # module MathOptAIPythonCallExt

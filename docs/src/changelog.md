@@ -7,6 +7,19 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.2 (January 22, 2026)
+
+### Added
+
+ - Added support for `nn.Dropout` (#239)
+ - Added [`LayerNorm`](@ref) predictor (#240)
+ - Added [`GCNConv`](@ref) and [`TAGConv`](@ref) predictors (#244)
+
+### Other
+
+ - Updated printing in docstrings for JuMP@1.29.4 (#241)
+ - Added checklists to docs (#242)
+
 ## Version 0.2.1 (January 15, 2026)
 
 ### Added

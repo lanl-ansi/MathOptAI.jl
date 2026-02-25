@@ -52,28 +52,6 @@ combining two packages that the package author had previously not considered or
 tested. In the pessimistic case, this can lead to incorrect results or cryptic
 error messages.
 
-Exceptions to the `Vector` rule will be carefully considered and tested.
-
-Currently, there are two exceptions:
-
- 1. If `x` is a `Matrix`, then the columns of `x` are interpreted as independent
-    observations, and the output `y` will be a `Matrix` with the same number of
-    columns
- 2. The `StatsModels` extension allows `x` to be a `DataFrames.DataFrame`, if
-    the predictor is a `StatsModels.TableRegressionModel`.
-
-Exceptions 1 and 2 are combined in the `StatsModels` exception, so that the
-predictor is mapped over the rows of the `DataFrames.DataFrame` (which we assume
-will be a common use-case).
-
-We choose to interpret the rows as input variables and columns as independent
-observations (rather than the more traditional table-based approach where
-columns are the input variables and rows are observations) because Julia uses
-column-major ordering in `Matrix`. Another justification follows from the
-[`Affine`](@ref) predictor, ``f(x) = Ax + b``, where passing in a `Matrix` as
-`x` with column observations naturally leads to a `Matrix` output for `y` of the
-appropriate dimensions.
-
 We choose to make `y` a `Vector`, even for scalar outputs, to simplify code that
 works generically for many different predictors. Without this principle, there
 will inevitably be cases where a scalar and length-1 vector are confused.
@@ -81,6 +59,16 @@ will inevitably be cases where a scalar and length-1 vector are confused.
 If you want to use a predictor that does not take `Vector` input (for example,
 it is an image as input to a neural network), the first preprocessing step
 should be to `vec` the input into a single `Vector`.
+
+Exceptions to the `Vector` rule will be carefully considered and tested.
+
+Currently, there are two exceptions:
+
+ 1. The `StatsModels` extension allows `x` to be a `DataFrames.DataFrame`, if
+    the predictor is a `StatsModels.TableRegressionModel`.
+ 2. There is a fallback that, when given `x::Array` as input, calls `vec(x)` and
+    sets the `input_size` keyword argument. This fallback is used by some
+    extensions to simplify inputs for array-based neural network layers.
 
 ## Inputs are provided, outputs are returned
 

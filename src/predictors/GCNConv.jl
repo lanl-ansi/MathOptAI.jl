@@ -32,7 +32,7 @@ julia> f = MathOptAI.GCNConv(;
            edge_index = [1 => 2, 2 => 1, 2 => 3, 3 => 2],
        );
 
-julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+julia> y, formulation = MathOptAI.add_predictor(model, f, vec(x));
 
 julia> y
 3-element Vector{VariableRef}:

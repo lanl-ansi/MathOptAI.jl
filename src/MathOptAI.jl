@@ -234,10 +234,11 @@ MaxPool2d((4, 4, 1), (2, 2), (2, 2), (0, 0))
 """
 function add_predictor(
     model::JuMP.AbstractModel,
-    predictor,
+    predictor::P,
     x::Array;
     kwargs...,
-)
+) where {P}
+    _error_if_abstract_predictor(predictor)
     return add_predictor(
         model,
         predictor,
@@ -247,6 +248,18 @@ function add_predictor(
     )
 end
 
+function _error_if_abstract_predictor(::P) where {P<:AbstractPredictor}
+    return error(
+        """
+        The predictor $P does not support `::Array` inputs`.
+
+        You must first vectorize the input by calling `vec(x)`.
+        """,
+    )
+end
+
+_error_if_abstract_predictor(::Any) = nothing
+
 """
     build_predictor(extension; kwargs...)::AbstractPredictor
 
@@ -255,7 +268,12 @@ A uniform interface to convert various extension types to an
 
 See the various extension docstrings for details.
 """
-build_predictor(predictor::AbstractPredictor; kwargs...) = predictor
+function build_predictor(predictor::AbstractPredictor; kwargs...)
+    if !isempty(kwargs)
+        error("Unsupported keyword arguments: ", kwargs...)
+    end
+    return predictor
+end
 
 """
     ReducedSpace(predictor::AbstractPredictor)

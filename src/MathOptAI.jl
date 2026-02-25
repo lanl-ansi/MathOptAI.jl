@@ -248,11 +248,10 @@ function add_predictor(
     )
 end
 
-function _error_if_abstract_predictor(::P) where {P<:AbstractPredictor}
+function _error_if_abstract_predictor(predictor::AbstractPredictor)
     return error(
         """
-        The predictor $P does not support `::Array` inputs`.
-
+        The predictor $(typeof(predictor)) does not support `::Array` inputs`.
         You must first vectorize the input by calling `vec(x)`.
         """,
     )

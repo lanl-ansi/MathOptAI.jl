@@ -949,7 +949,6 @@ function test_add_predictor_kwarg_err()
         ErrorException(
             """
             The predictor $(typeof(predictor)) does not support `::Array` inputs`.
-
             You must first vectorize the input by calling `vec(x)`.
             """,
         ),

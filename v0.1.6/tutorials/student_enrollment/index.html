@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Logistic regression with GLM.jl · MathOptAI.jl</title><meta name="title" content="Logistic regression with GLM.jl · MathOptAI.jl"/><meta property="og:title" content="Logistic regression with GLM.jl · MathOptAI.jl"/><meta property="twitter:title" content="Logistic regression with GLM.jl · MathOptAI.jl"/><meta name="description" content="Documentation for MathOptAI.jl."/><meta property="og:description" content="Documentation for MathOptAI.jl."/><meta property="twitter:description" content="Documentation for MathOptAI.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MathOptAI.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">MathOptAI.jl</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Manual</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../manual/predictors/">Predictors</a></li><li><a class="tocitem" href="../../manual/AbstractGPs/">AbstractGPs.jl</a></li><li><a class="tocitem" href="../../manual/DecisionTree/">DecisionTree.jl</a></li><li><a class="tocitem" href="../../manual/Flux/">Flux.jl</a></li><li><a class="tocitem" href="../../manual/GLM/">GLM.jl</a></li><li><a class="tocitem" href="../../manual/Lux/">Lux.jl</a></li><li><a class="tocitem" href="../../manual/PyTorch/">PyTorch</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox" checked/><label class="tocitem" for="menuitem-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li class="is-active"><a class="tocitem" href>Logistic regression with GLM.jl</a><ul class="internal"><li><a class="tocitem" href="#Required-packages"><span>Required packages</span></a></li><li><a class="tocitem" href="#Data"><span>Data</span></a></li><li><a class="tocitem" href="#Prediction-model"><span>Prediction model</span></a></li><li><a class="tocitem" href="#Decision-model"><span>Decision model</span></a></li><li><a class="tocitem" href="#Solution-analysis"><span>Solution analysis</span></a></li></ul></li><li><a class="tocitem" href="../decision_trees/">Classification problems with DecisionTree.jl</a></li><li><a class="tocitem" href="../mnist/">Adversarial machine learning with Flux.jl</a></li><li><a class="tocitem" href="../mnist_lux/">Adversarial machine learning with Lux.jl</a></li><li><a class="tocitem" href="../pytorch/">Function fitting with PyTorch</a></li><li><a class="tocitem" href="../gaussian/">Function fitting with AbstractGPs</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Developers</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../developers/design_principles/">Design principles</a></li></ul></li><li><a class="tocitem" href="../../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Logistic regression with GLM.jl</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Logistic regression with GLM.jl</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/lanl-ansi/MathOptAI.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/main/docs/src/tutorials/student_enrollment.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Logistic-regression-with-GLM.jl"><a class="docs-heading-anchor" href="#Logistic-regression-with-GLM.jl">Logistic regression with GLM.jl</a><a id="Logistic-regression-with-GLM.jl-1"></a><a class="docs-heading-anchor-permalink" href="#Logistic-regression-with-GLM.jl" title="Permalink"></a></h1><p>The purpose of this tutorial is to explain how to embed a logistic regression model from <a href="https://github.com/JuliaStats/GLM.jl">GLM.jl</a> into JuMP.</p><p>The data and example in this tutorial comes from the paper: David Bergman, Teng Huang, Philip Brooks, Andrea Lodi, Arvind U. Raghunathan (2021) JANOS: An Integrated Predictive and Prescriptive Modeling Framework. INFORMS Journal on Computing 34(2):807-816. <a href="https://doi.org/10.1287/ijoc.2020.1023">https://doi.org/10.1287/ijoc.2020.1023</a></p><h2 id="Required-packages"><a class="docs-heading-anchor" href="#Required-packages">Required packages</a><a id="Required-packages-1"></a><a class="docs-heading-anchor-permalink" href="#Required-packages" title="Permalink"></a></h2><p>This tutorial uses the following packages.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import CSV</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import DataFrames</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import Downloads</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import GLM</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import Ipopt</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import MathOptAI</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; import Statistics</code><code class="nohighlight hljs ansi" style="display:block;"></code></pre><h2 id="Data"><a class="docs-heading-anchor" href="#Data">Data</a><a id="Data-1"></a><a class="docs-heading-anchor-permalink" href="#Data" title="Permalink"></a></h2><p>Here is a function to load the data directly from the JANOS repository:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; function read_df(filename)
+           url = &quot;https://raw.githubusercontent.com/INFORMSJoC/2020.1023/master/data/&quot;
+           data = Downloads.download(url * filename)
+           return CSV.read(data, DataFrames.DataFrame)
+       end</code><code class="nohighlight hljs ansi" style="display:block;">read_df (generic function with 1 method)</code></pre><p>There are two important files. The first, <code>college_student_enroll-s1-1.csv</code>, contains historical admissions data on anonymized students, their SAT score, their GPA, their merit scholarships, and whether the enrolled in the college.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; train_df = read_df(&quot;college_student_enroll-s1-1.csv&quot;)</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">20000×6 DataFrame</span>
+<span class="sgr1">   Row </span>│<span class="sgr1"> Column1  StudentID  SAT    GPA      merit    enroll </span>
+       │<span class="sgr90"> Int64    Int64      Int64  Float64  Float64  Int64  </span>
+───────┼─────────────────────────────────────────────────────
+     1 │       1          1   1507     3.72     1.64       0
+     2 │       2          2   1532     3.93     0.52       0
+     3 │       3          3   1487     3.77     1.67       0
+     4 │       4          4   1259     3.05     1.21       1
+     5 │       5          5   1354     3.39     1.65       1
+     6 │       6          6   1334     3.22     0.0        0
+     7 │       7          7   1125     2.73     1.68       1
+     8 │       8          8   1180     2.82     0.0        1
+   ⋮   │    ⋮         ⋮        ⋮       ⋮        ⋮       ⋮
+ 19994 │   19994      19994   1185     3.09     1.16       1
+ 19995 │   19995      19995   1471     3.7      1.05       0
+ 19996 │   19996      19996   1139     3.03     1.21       1
+ 19997 │   19997      19997   1371     3.39     1.26       0
+ 19998 │   19998      19998   1424     3.72     0.85       0
+ 19999 │   19999      19999   1170     3.01     0.73       1
+ 20000 │   20000      20000   1389     3.57     0.55       0
+<span class="sgr36">                                           19985 rows omitted</span></code></pre><p>The second, <code>college_applications6000.csv</code>, contains the SAT and GPA data of students who are currently applying:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df = read_df(&quot;college_applications6000.csv&quot;)</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">6000×3 DataFrame</span>
+<span class="sgr1">  Row </span>│<span class="sgr1"> StudentID  SAT    GPA     </span>
+      │<span class="sgr90"> Int64      Int64  Float64 </span>
+──────┼───────────────────────────
+    1 │         1   1240     3.22
+    2 │         2   1206     2.87
+    3 │         3   1520     3.74
+    4 │         4   1238     3.11
+    5 │         5   1142     2.74
+    6 │         6   1086     2.77
+    7 │         7   1367     3.28
+    8 │         8   1034     2.41
+  ⋮   │     ⋮        ⋮       ⋮
+ 5994 │      5994   1121     2.96
+ 5995 │      5995   1564     4.1
+ 5996 │      5996   1332     3.14
+ 5997 │      5997   1228     2.95
+ 5998 │      5998   1165     2.81
+ 5999 │      5999   1400     3.43
+ 6000 │      6000   1097     2.65
+<span class="sgr36">                 5985 rows omitted</span></code></pre><p>There are 6,000 prospective students:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; n_students = size(evaluate_df, 1)</code><code class="nohighlight hljs ansi" style="display:block;">6000</code></pre><h2 id="Prediction-model"><a class="docs-heading-anchor" href="#Prediction-model">Prediction model</a><a id="Prediction-model-1"></a><a class="docs-heading-anchor-permalink" href="#Prediction-model" title="Permalink"></a></h2><p>The first step is to train a logistic regression model to predict the Boolean <code>enroll</code> column based on the <code>SAT</code>, <code>GPA</code>, and <code>merit</code> columns.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; predictor = GLM.glm(
+           GLM.@formula(enroll ~ 0 + SAT + GPA + merit),
+           train_df,
+           GLM.Bernoulli(),
+       )</code><code class="nohighlight hljs ansi" style="display:block;">StatsModels.TableRegressionModel{GLM.GeneralizedLinearModel{GLM.GlmResp{Vector{Float64}, Distributions.Bernoulli{Float64}, GLM.LogitLink}, GLM.DensePredChol{Float64, LinearAlgebra.CholeskyPivoted{Float64, Matrix{Float64}, Vector{Int64}}}}, Matrix{Float64}}
+
+enroll ~ 0 + SAT + GPA + merit
+
+Coefficients:
+──────────────────────────────────────────────────────────────────────────
+             Coef.   Std. Error      z  Pr(&gt;|z|)    Lower 95%    Upper 95%
+──────────────────────────────────────────────────────────────────────────
+SAT     0.00243882  0.000309312   7.88    &lt;1e-14   0.00183258   0.00304506
+GPA    -1.09868     0.123796     -8.87    &lt;1e-18  -1.34132     -0.856045
+merit   0.248294    0.0191086    12.99    &lt;1e-37   0.210842     0.285747
+──────────────────────────────────────────────────────────────────────────</code></pre><h2 id="Decision-model"><a class="docs-heading-anchor" href="#Decision-model">Decision model</a><a id="Decision-model-1"></a><a class="docs-heading-anchor-permalink" href="#Decision-model" title="Permalink"></a></h2><p>Now that we have a trained logistic regression model, we want a decision model that chooses the optimal merit scholarship for each student in</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">6000×3 DataFrame</span>
+<span class="sgr1">  Row </span>│<span class="sgr1"> StudentID  SAT    GPA     </span>
+      │<span class="sgr90"> Int64      Int64  Float64 </span>
+──────┼───────────────────────────
+    1 │         1   1240     3.22
+    2 │         2   1206     2.87
+    3 │         3   1520     3.74
+    4 │         4   1238     3.11
+    5 │         5   1142     2.74
+    6 │         6   1086     2.77
+    7 │         7   1367     3.28
+    8 │         8   1034     2.41
+  ⋮   │     ⋮        ⋮       ⋮
+ 5994 │      5994   1121     2.96
+ 5995 │      5995   1564     4.1
+ 5996 │      5996   1332     3.14
+ 5997 │      5997   1228     2.95
+ 5998 │      5998   1165     2.81
+ 5999 │      5999   1400     3.43
+ 6000 │      6000   1097     2.65
+<span class="sgr36">                 5985 rows omitted</span></code></pre><p>Here&#39;s an empty JuMP model to start:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; model = Model()</code><code class="nohighlight hljs ansi" style="display:block;">A JuMP Model
+├ solver: none
+├ objective_sense: FEASIBILITY_SENSE
+├ num_variables: 0
+├ num_constraints: 0
+└ Names registered in the model: none</code></pre><p>First, we add a new column to <code>evaluate_df</code>, with one JuMP decision variable for each row. It is important the <code>.merit</code> column name in <code>evaluate_df</code> matches the name in <code>train_df</code>.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df.merit = @variable(model, 0 &lt;= x_merit[1:n_students] &lt;= 2.5);</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">6000×4 DataFrame</span>
+<span class="sgr1">  Row </span>│<span class="sgr1"> StudentID  SAT    GPA      merit         </span>
+      │<span class="sgr90"> Int64      Int64  Float64  GenericV…     </span>
+──────┼──────────────────────────────────────────
+    1 │         1   1240     3.22  x_merit[1]
+    2 │         2   1206     2.87  x_merit[2]
+    3 │         3   1520     3.74  x_merit[3]
+    4 │         4   1238     3.11  x_merit[4]
+    5 │         5   1142     2.74  x_merit[5]
+    6 │         6   1086     2.77  x_merit[6]
+    7 │         7   1367     3.28  x_merit[7]
+    8 │         8   1034     2.41  x_merit[8]
+  ⋮   │     ⋮        ⋮       ⋮           ⋮
+ 5994 │      5994   1121     2.96  x_merit[5994]
+ 5995 │      5995   1564     4.1   x_merit[5995]
+ 5996 │      5996   1332     3.14  x_merit[5996]
+ 5997 │      5997   1228     2.95  x_merit[5997]
+ 5998 │      5998   1165     2.81  x_merit[5998]
+ 5999 │      5999   1400     3.43  x_merit[5999]
+ 6000 │      6000   1097     2.65  x_merit[6000]
+<span class="sgr36">                                5985 rows omitted</span></code></pre><p>Then, we use <a href="../../api/#MathOptAI.add_predictor"><code>MathOptAI.add_predictor</code></a> to embed <code>predictor</code> into the JuMP <code>model</code>. <a href="../../api/#MathOptAI.add_predictor"><code>MathOptAI.add_predictor</code></a> returns a vector of variables, one for each row inn <code>evaluate_df</code>, corresponding to the output <code>enroll</code> of our logistic regression.</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df.enroll, _ = MathOptAI.add_predictor(model, predictor, evaluate_df);</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">6000×5 DataFrame</span>
+<span class="sgr1">  Row </span>│<span class="sgr1"> StudentID  SAT    GPA      merit          enroll          </span>
+      │<span class="sgr90"> Int64      Int64  Float64  GenericV…      GenericV…       </span>
+──────┼───────────────────────────────────────────────────────────
+    1 │         1   1240     3.22  x_merit[1]     moai_Sigmoid[1]
+    2 │         2   1206     2.87  x_merit[2]     moai_Sigmoid[1]
+    3 │         3   1520     3.74  x_merit[3]     moai_Sigmoid[1]
+    4 │         4   1238     3.11  x_merit[4]     moai_Sigmoid[1]
+    5 │         5   1142     2.74  x_merit[5]     moai_Sigmoid[1]
+    6 │         6   1086     2.77  x_merit[6]     moai_Sigmoid[1]
+    7 │         7   1367     3.28  x_merit[7]     moai_Sigmoid[1]
+    8 │         8   1034     2.41  x_merit[8]     moai_Sigmoid[1]
+  ⋮   │     ⋮        ⋮       ⋮           ⋮               ⋮
+ 5994 │      5994   1121     2.96  x_merit[5994]  moai_Sigmoid[1]
+ 5995 │      5995   1564     4.1   x_merit[5995]  moai_Sigmoid[1]
+ 5996 │      5996   1332     3.14  x_merit[5996]  moai_Sigmoid[1]
+ 5997 │      5997   1228     2.95  x_merit[5997]  moai_Sigmoid[1]
+ 5998 │      5998   1165     2.81  x_merit[5998]  moai_Sigmoid[1]
+ 5999 │      5999   1400     3.43  x_merit[5999]  moai_Sigmoid[1]
+ 6000 │      6000   1097     2.65  x_merit[6000]  moai_Sigmoid[1]
+<span class="sgr36">                                                 5985 rows omitted</span></code></pre><p>The <code>.enroll</code> column name in <code>evaluate_df</code> is just a name. It doesn&#39;t have to match the name in <code>train_df</code>.</p><p>The objective of our problem is to maximize the expected number of students who enroll:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; @objective(model, Max, sum(evaluate_df.enroll))</code><code class="nohighlight hljs ansi" style="display:block;">moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + [[...5940 terms omitted...]] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1] + moai_Sigmoid[1]</code></pre><p>Subject to the constraint that we can spend at most <code>0.2 * n_students</code> on merit scholarships:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; @constraint(model, sum(evaluate_df.merit) &lt;= 0.2 * n_students)</code><code class="nohighlight hljs ansi" style="display:block;">x_merit[1] + x_merit[2] + x_merit[3] + x_merit[4] + x_merit[5] + x_merit[6] + x_merit[7] + x_merit[8] + x_merit[9] + x_merit[10] + x_merit[11] + x_merit[12] + x_merit[13] + x_merit[14] + x_merit[15] + x_merit[16] + x_merit[17] + x_merit[18] + x_merit[19] + x_merit[20] + x_merit[21] + x_merit[22] + x_merit[23] + x_merit[24] + x_merit[25] + x_merit[26] + x_merit[27] + x_merit[28] + x_merit[29] + x_merit[30] + [[...5940 terms omitted...]] + x_merit[5971] + x_merit[5972] + x_merit[5973] + x_merit[5974] + x_merit[5975] + x_merit[5976] + x_merit[5977] + x_merit[5978] + x_merit[5979] + x_merit[5980] + x_merit[5981] + x_merit[5982] + x_merit[5983] + x_merit[5984] + x_merit[5985] + x_merit[5986] + x_merit[5987] + x_merit[5988] + x_merit[5989] + x_merit[5990] + x_merit[5991] + x_merit[5992] + x_merit[5993] + x_merit[5994] + x_merit[5995] + x_merit[5996] + x_merit[5997] + x_merit[5998] + x_merit[5999] + x_merit[6000] ≤ 1200</code></pre><p>Because logistic regression involves a <a href="../../api/#Sigmoid"><code>Sigmoid</code></a> layer, we need to use a smooth nonlinear optimizer. A common choice is Ipopt. Solve and check the optimizer found a feasible solution:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; set_optimizer(model, Ipopt.Optimizer)</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; set_silent(model)</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; optimize!(model)</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; @assert is_solved_and_feasible(model)</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; solution_summary(model)</code><code class="nohighlight hljs ansi" style="display:block;">* Solver : Ipopt
+
+* Status
+  Result count       : 1
+  Termination status : LOCALLY_SOLVED
+  Message from the solver:
+  &quot;Solve_Succeeded&quot;
+
+* Candidate solution (result #1)
+  Primal status      : FEASIBLE_POINT
+  Dual status        : FEASIBLE_POINT
+  Objective value    : 2.48820e+03
+  Dual objective value : -4.91918e+02
+
+* Work counters
+  Solve time (sec)   : 6.19348e+00
+  Barrier iterations : 142</code></pre><p>Let&#39;s store the solution in <code>evaluate_df</code> for analysis:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df.merit_sol = value.(evaluate_df.merit);</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df.enroll_sol = value.(evaluate_df.enroll);</code><code class="nohighlight hljs ansi" style="display:block;"></code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; evaluate_df</code><code class="nohighlight hljs ansi" style="display:block;"><span class="sgr1">6000×7 DataFrame</span>
+<span class="sgr1">  Row </span>│<span class="sgr1"> StudentID  SAT    GPA      merit          enroll           merit_sol  </span> ⋯
+      │<span class="sgr90"> Int64      Int64  Float64  GenericV…      GenericV…        Float64    </span> ⋯
+──────┼─────────────────────────────────────────────────────────────────────────
+    1 │         1   1240     3.22  x_merit[1]     moai_Sigmoid[1]  6.37389e-7  ⋯
+    2 │         2   1206     2.87  x_merit[2]     moai_Sigmoid[1]  1.08151
+    3 │         3   1520     3.74  x_merit[3]     moai_Sigmoid[1]  1.03717e-6
+    4 │         4   1238     3.11  x_merit[4]     moai_Sigmoid[1]  1.06046e-6
+    5 │         5   1142     2.74  x_merit[5]     moai_Sigmoid[1]  1.13489     ⋯
+    6 │         6   1086     2.77  x_merit[6]     moai_Sigmoid[1]  1.0759e-6
+    7 │         7   1367     3.28  x_merit[7]     moai_Sigmoid[1]  2.33948e-6
+    8 │         8   1034     2.41  x_merit[8]     moai_Sigmoid[1]  0.735482
+  ⋮   │     ⋮        ⋮       ⋮           ⋮               ⋮             ⋮       ⋱
+ 5994 │      5994   1121     2.96  x_merit[5994]  moai_Sigmoid[1]  6.26387e-7  ⋯
+ 5995 │      5995   1564     4.1   x_merit[5995]  moai_Sigmoid[1]  3.58792e-7
+ 5996 │      5996   1332     3.14  x_merit[5996]  moai_Sigmoid[1]  1.03863
+ 5997 │      5997   1228     2.95  x_merit[5997]  moai_Sigmoid[1]  1.21941
+ 5998 │      5998   1165     2.81  x_merit[5998]  moai_Sigmoid[1]  1.21872     ⋯
+ 5999 │      5999   1400     3.43  x_merit[5999]  moai_Sigmoid[1]  1.33971e-6
+ 6000 │      6000   1097     2.65  x_merit[6000]  moai_Sigmoid[1]  1.17865
+<span class="sgr36">                                                  1 column and 5985 rows omitted</span></code></pre><h2 id="Solution-analysis"><a class="docs-heading-anchor" href="#Solution-analysis">Solution analysis</a><a id="Solution-analysis-1"></a><a class="docs-heading-anchor-permalink" href="#Solution-analysis" title="Permalink"></a></h2><p>We expect that just under 2,500 students will enroll:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; sum(evaluate_df.enroll_sol)</code><code class="nohighlight hljs ansi" style="display:block;">2488.1951671444017</code></pre><p>We awarded merit scholarships to approximately 1 in 6 students:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; count(evaluate_df.merit_sol .&gt; 1e-5)</code><code class="nohighlight hljs ansi" style="display:block;">1152</code></pre><p>The average merit scholarship was worth just over <span>$</span>1,000:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; 1_000 * Statistics.mean(evaluate_df.merit_sol[evaluate_df.merit_sol.&gt;1e-5])</code><code class="nohighlight hljs ansi" style="display:block;">1041.6622990671967</code></pre><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../../manual/PyTorch/">« PyTorch</a><a class="docs-footer-nextpage" href="../decision_trees/">Classification problems with DecisionTree.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.7.0 on <span class="colophon-date" title="Thursday 7 November 2024 01:03">Thursday 7 November 2024</span>. Using Julia version 1.11.1.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

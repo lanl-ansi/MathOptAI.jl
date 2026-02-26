@@ -39,7 +39,7 @@ julia> f = MathOptAI.LayerNorm(
        )
 LayerNorm{Float64, 1}((2, 3, 1), (2,), 0.0, [1.0, 2.0], [0.5, 0.6])
 
-julia> y, formulation = MathOptAI.add_predictor(model, f, x);
+julia> y, formulation = MathOptAI.add_predictor(model, f, vec(x));
 
 julia> y
 6-element Vector{VariableRef}:

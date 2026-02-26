@@ -883,7 +883,7 @@ function test_GCNConv()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x[i in 1:4, j in 1:3] == i + j)
-    y, _ = MathOptAI.add_predictor(model, predictor, x)
+    y, _ = MathOptAI.add_predictor(model, predictor, vec(x))
     optimize!(model)
     assert_is_solved_and_feasible(model)
     @test round.(Int, value(y)) == [39, 49, 60, 56, 49, 63, 78, 72]
@@ -900,7 +900,8 @@ function test_GCNConv_reduced_space()
     @test MathOptAI.output_size(predictor, (4, 3)) === (4, 2)
     model = Model()
     @variable(model, x[i in 1:4, j in 1:3] == i + j)
-    y, _ = MathOptAI.add_predictor(model, predictor, x; reduced_space = true)
+    y, _ =
+        MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
     @test round.(Int, value(fix_value, y)) == [39, 49, 60, 56, 49, 63, 78, 72]
     return
 end
@@ -916,7 +917,7 @@ function test_TAGConv()
     model = Model(HiGHS.Optimizer)
     set_silent(model)
     @variable(model, x[i in 1:4, j in 1:3] == i + j)
-    y, _ = MathOptAI.add_predictor(model, predictor, x)
+    y, _ = MathOptAI.add_predictor(model, predictor, vec(x))
     optimize!(model)
     assert_is_solved_and_feasible(model)
     @test round.(Int, value(y)) == [66, 93, 117, 100, 85, 120, 152, 129]
@@ -933,9 +934,30 @@ function test_TAGConv_reduced_space()
     @test MathOptAI.output_size(predictor, (4, 3)) === (4, 2)
     model = Model()
     @variable(model, x[i in 1:4, j in 1:3] == i + j)
-    y, _ = MathOptAI.add_predictor(model, predictor, x; reduced_space = true)
+    y, _ =
+        MathOptAI.add_predictor(model, predictor, vec(x); reduced_space = true)
     @test round.(Int, value(fix_value, y)) ==
           [66, 93, 117, 100, 85, 120, 152, 129]
+    return
+end
+
+function test_add_predictor_kwarg_err()
+    model = Model()
+    @variable(model, x[1:2, 1:2])
+    predictor = MathOptAI.ReLU()
+    @test_throws(
+        ErrorException(
+            """
+            The predictor $(typeof(predictor)) does not support `::Array` inputs`.
+            You must first vectorize the input by calling `vec(x)`.
+            """,
+        ),
+        MathOptAI.add_predictor(model, predictor, x),
+    )
+    @test_throws(
+        ErrorException("Unsupported keyword arguments: :input_size => (2, 2)"),
+        MathOptAI.add_predictor(model, predictor, vec(x); input_size = (2, 2)),
+    )
     return
 end
 

@@ -955,7 +955,7 @@ function test_add_predictor_kwarg_err()
         MathOptAI.add_predictor(model, predictor, x),
     )
     @test_throws(
-        ErrorException("Unsupported keyword arguments: :input_size => (2, 2)"),
+        MethodError,
         MathOptAI.add_predictor(model, predictor, vec(x); input_size = (2, 2)),
     )
     return

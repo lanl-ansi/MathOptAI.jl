@@ -4,17 +4,16 @@
 # Use of this source code is governed by a BSD-style license that can be found
 # in the LICENSE.md file.
 
-using Test
-
-import Documenter
 import MathOptAI
+import ParallelTestRunner
 
-is_test(x) = startswith(x, "test_") && endswith(x, ".jl")
+is_test_file(f) = startswith(f, "test_") && endswith(f, ".jl")
 
-@testset "$file" for file in filter(is_test, readdir(@__DIR__))
-    include(joinpath(@__DIR__, file))
+testsuite = Dict{String,Expr}()
+for (root, dirs, files) in walkdir(@__DIR__)
+    for file in joinpath.(root, filter(is_test_file, files))
+        testsuite[file] = :(include($file))
+    end
 end
 
-@testset "Docstrings" begin
-    Documenter.doctest(MathOptAI; manual = false)
-end
+ParallelTestRunner.runtests(MathOptAI, ARGS; testsuite)

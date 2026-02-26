@@ -183,11 +183,20 @@ function add_predictor(
     reduced_space::Bool = false,
     kwargs...,
 )
-    inner_predictor = build_predictor(predictor; kwargs...)
+    inner = build_predictor(predictor; kwargs...)::AbstractPredictor
+    return add_predictor(model, inner, x; reduced_space)
+end
+
+function add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::AbstractPredictor,
+    x::Vector;
+    reduced_space::Bool = false,
+)
     if reduced_space
-        inner_predictor = ReducedSpace(inner_predictor)
+        return add_predictor(model, ReducedSpace(predictor), x)
     end
-    return add_predictor(model, inner_predictor, x)
+    return add_predictor(model, predictor, x)
 end
 
 """
@@ -234,11 +243,10 @@ MaxPool2d((4, 4, 1), (2, 2), (2, 2), (0, 0))
 """
 function add_predictor(
     model::JuMP.AbstractModel,
-    predictor::P,
+    predictor::Any,
     x::Array;
     kwargs...,
-) where {P}
-    _error_if_abstract_predictor(predictor)
+)
     return add_predictor(
         model,
         predictor,
@@ -248,7 +256,12 @@ function add_predictor(
     )
 end
 
-function _error_if_abstract_predictor(predictor::AbstractPredictor)
+function add_predictor(
+    ::JuMP.AbstractModel,
+    predictor::AbstractPredictor,
+    ::Array;
+    kwargs...,
+)
     return error(
         """
         The predictor $(typeof(predictor)) does not support `::Array` inputs`.
@@ -256,8 +269,6 @@ function _error_if_abstract_predictor(predictor::AbstractPredictor)
         """,
     )
 end
-
-_error_if_abstract_predictor(::Any) = nothing
 
 """
     build_predictor(extension; kwargs...)::AbstractPredictor
@@ -267,12 +278,7 @@ A uniform interface to convert various extension types to an
 
 See the various extension docstrings for details.
 """
-function build_predictor(predictor::AbstractPredictor; kwargs...)
-    if !isempty(kwargs)
-        error("Unsupported keyword arguments: ", kwargs...)
-    end
-    return predictor
-end
+function build_predictor end
 
 """
     ReducedSpace(predictor::AbstractPredictor)

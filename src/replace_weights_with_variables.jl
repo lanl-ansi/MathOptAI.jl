@@ -44,15 +44,10 @@ Pipeline with layers:
  * Affine(A, b) [input: 2, output: 3]
  * SoftMax()
 
-julia> predictor = MathOptAI.replace_weights_with_variables(model, predictor)
-Pipeline with layers:
- * Affine(A, b) [input: 2, output: 3]
- * SoftMax()
-
 julia> predictor = MathOptAI.replace_weights_with_variables(
            model,
            predictor;
-           filter = l -> l isa MathOptAI.Affine,
+           filter = (l::MathOptAI.AbstractPredictor) -> l isa MathOptAI.Affine,
        )
 Pipeline with layers:
  * Affine(A, b) [input: 2, output: 3]
@@ -62,6 +57,7 @@ julia> y, _ = MathOptAI.add_predictor(model, predictor, x);
 ```
 
 Instead of using the `filter` argument, you can also modify only some layers:
+
 ```jldoctest
 julia> using JuMP, Flux, MathOptAI
 

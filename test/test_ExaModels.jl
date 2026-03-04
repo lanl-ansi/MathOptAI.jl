@@ -246,20 +246,26 @@ end
 function test_GELU_derivative_correctness()
     # Verify the registered GELU second derivative matches finite difference
     ext = Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)
-    @assert ext !== nothing "Extension not loaded"
-    d_gelu = ext._moai_exa_d_gelu
-    dd_gelu = ext._moai_exa_dd_gelu
     for xv in [-2.0, -1.0, 0.0, 0.5, 1.0, 2.0]
-        h = 1.0e-5
-        fd = (d_gelu(xv + h) - d_gelu(xv - h)) / (2h)
-        @test isapprox(dd_gelu(xv), fd; atol = 1.0e-6, rtol = 1.0e-4)
+        h = 1e-6
+        @test isapprox(
+            ext._d_gelu(xv),
+            (ext._gelu(xv + h) - ext._gelu(xv - h)) / (2h);
+            atol = 1.0e-6,
+            rtol = 1.0e-4,
+        )
+        @test isapprox(
+            ext._dd_gelu(xv),
+            (ext._d_gelu(xv + h) - ext._d_gelu(xv - h)) / (2h);
+            atol = 1.0e-6,
+            rtol = 1.0e-4,
+        )
     end
     return
 end
 
 function test_Sigmoid_derivative_correctness()
     ext = Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)
-    @assert ext !== nothing "Extension not loaded"
     d_sig = ext._moai_exa_d_sigmoid
     dd_sig = ext._moai_exa_dd_sigmoid
     for xv in [-2.0, -1.0, 0.0, 0.5, 1.0, 2.0]

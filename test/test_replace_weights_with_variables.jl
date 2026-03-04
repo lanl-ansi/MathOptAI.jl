@@ -71,6 +71,44 @@ function test_Scale()
     return
 end
 
+function test_Pipeline_filter()
+    model = Model()
+    predictor = MathOptAI.Pipeline(
+        MathOptAI.Affine([1.0 3.0; 2.0 4.0], [5.0, 6.0]),
+        MathOptAI.ReLU(),
+        MathOptAI.Scale([7.0, 8.0], [9.0, 10.0]),
+    )
+    p = MathOptAI.replace_weights_with_variables(
+        model,
+        predictor;
+        filter = l -> l isa MathOptAI.Scale,
+    )
+    @test num_variables(model) == 4
+    @test start_value.(all_variables(model)) == 7:10
+    return
+end
+
+function test_Pipeline_nested_filter()
+    model = Model()
+    predictor = MathOptAI.Pipeline(
+        MathOptAI.ReLU(),
+        MathOptAI.Pipeline(
+            MathOptAI.Affine([1.0 3.0; 2.0 4.0], [5.0, 6.0]),
+            MathOptAI.ReLU(),
+            MathOptAI.Scale([7.0, 8.0], [9.0, 10.0]),
+        ),
+        MathOptAI.ReLU(),
+    )
+    p = MathOptAI.replace_weights_with_variables(
+        model,
+        predictor;
+        filter = l -> l isa MathOptAI.Affine,
+    )
+    @test num_variables(model) == 6
+    @test start_value.(all_variables(model)) == 1:6
+    return
+end
+
 end  # module
 
 TestReplaceWeightsWithVariables.runtests()

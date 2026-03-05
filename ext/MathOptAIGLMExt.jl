@@ -7,7 +7,6 @@
 module MathOptAIGLMExt
 
 import GLM
-import JuMP
 import MathOptAI
 
 """

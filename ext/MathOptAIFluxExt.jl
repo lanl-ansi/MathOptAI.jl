@@ -7,7 +7,6 @@
 module MathOptAIFluxExt
 
 import Flux
-import JuMP
 import MathOptAI
 import MathOptInterface as MOI
 
@@ -301,18 +300,11 @@ function _build_predictor(
     return MathOptAI.output_size(p, input_size_normalized)
 end
 
-function MathOptAI.add_predictor(
-    model::JuMP.AbstractModel,
+function MOI.VectorNonlinearOracle(
     predictor::MathOptAI.GrayBox{<:Flux.Chain},
-    x::Vector,
+    input_dimension::Int,
 )
-    set = _build_set(predictor.predictor, length(x), predictor.hessian)
-    y = MathOptAI.add_variables(model, x, set.output_dimension, "moai_Flux")
-    con = JuMP.@constraint(model, [x; y] in set)
-    return y, MathOptAI.Formulation(predictor, y, [con])
-end
-
-function _build_set(chain::Flux.Chain, input_dimension::Int, hessian::Bool)
+    chain = predictor.predictor
     output_dimension = only(Flux.outputsize(chain, (input_dimension,)))
     # We model the function as:
     #     0 <= f(x) - y <= 0
@@ -396,7 +388,7 @@ function _build_set(chain::Flux.Chain, input_dimension::Int, hessian::Bool)
         eval_jacobian,
         hessian_lagrangian_structure,
         eval_hessian_lagrangian = ifelse(
-            hessian,
+            predictor.hessian,
             eval_hessian_lagrangian,
             nothing,
         ),

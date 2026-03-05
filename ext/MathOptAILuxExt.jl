@@ -6,7 +6,6 @@
 
 module MathOptAILuxExt
 
-import JuMP
 import Lux
 import MathOptAI
 

@@ -6,7 +6,6 @@
 
 module MathOptAIPythonCallExt
 
-import JuMP
 import PythonCall
 import MathOptAI
 import MathOptInterface as MOI
@@ -227,34 +226,17 @@ function MathOptAI.build_predictor(
     return error("unsupported layer: $layer")
 end
 
-function MathOptAI.add_predictor(
-    model::JuMP.AbstractModel,
-    predictor::MathOptAI.GrayBox{MathOptAI.PytorchModel},
-    x::Vector,
-)
-    set = _build_set(
-        predictor.predictor.filename,
-        length(x),
-        predictor.device,
-        predictor.hessian,
-    )
-    y = MathOptAI.add_variables(model, x, set.output_dimension, "moai_Pytorch")
-    con = JuMP.@constraint(model, [x; y] in set)
-    return y, MathOptAI.Formulation(predictor, y, [con])
-end
-
 function _pyconvert(::Type{T}, tensor) where {T}
     return PythonCall.pyconvert(T, tensor.detach().cpu().numpy())
 end
 
-function _build_set(
-    filename::String,
+function MOI.VectorNonlinearOracle(
+    predictor::MathOptAI.GrayBox{MathOptAI.PytorchModel},
     input_dimension::Int,
-    device::String,
-    hessian::Bool,
 )
+    device = predictor.device
     torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(filename; weights_only = false)
+    torch_model = torch.load(predictor.predictor.filename; weights_only = false)
     torch_model = torch_model.to(device)
     y = torch_model(torch.zeros(input_dimension; device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
@@ -346,7 +328,7 @@ function _build_set(
         eval_jacobian,
         hessian_lagrangian_structure,
         eval_hessian_lagrangian = ifelse(
-            hessian,
+            predictor.hessian,
             eval_hessian_lagrangian,
             nothing,
         ),

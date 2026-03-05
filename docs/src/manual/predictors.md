@@ -14,29 +14,29 @@ to add the relationship `y = predictor(x)` to `model`.
 
 The following predictors are supported. See their docstrings for details:
 
-| Predictor                       | Problem class        | Dimensions        |
-| :------------------------------ | :------------------- | :---------------- |
-| [`Affine`](@ref)                | Linear               | $M \rightarrow N$ |
-| [`AffineCombination`](@ref)     | Linear               | $M \rightarrow N$ |
-| [`AvgPool2d`](@ref)             | Linear               | $M \rightarrow N$ |
-| [`BinaryDecisionTree`](@ref)    | Mixed-integer linear | $M \rightarrow 1$ |
-| [`Conv2d`](@ref).               | Linear               | $M \rightarrow N$ |
-| [`GCNConv`](@ref)               | Linear               | $M \rightarrow N$ |
-| [`GELU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
-| [`GrayBox`](@ref)               | Local nonlinear      | $M \rightarrow N$ |
-| [`LayerNorm`](@ref)             | Global nonlinear     | $M \rightarrow M$ |
-| [`LeakyReLU`](@ref)             | Depends on inner ReLU | $M \rightarrow M$ |
-| [`MaxPool2d`](@ref)             | Global nonlinear     | $M \rightarrow N$ |
-| [`MaxPool2dBigM`](@ref)         | Mixed-integer linear | $M \rightarrow N$ |
-| [`Pipeline`](@ref)              |                      | $M \rightarrow N$ |
-| [`Quantile`](@ref)              | Local nonlinear      | $M \rightarrow N$ |
-| [`ReLU`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
-| [`ReLUBigM`](@ref)              | Mixed-integer linear | $M \rightarrow M$ |
-| [`ReLUQuadratic`](@ref)         | Non-convex quadratic | $M \rightarrow M$ |
-| [`ReLUSOS1`](@ref)              | Mixed-integer linear | $M \rightarrow M$ |
-| [`Scale`](@ref)                 | Linear               | $M \rightarrow M$ |
-| [`Sigmoid`](@ref)               | Global nonlinear     | $M \rightarrow M$ |
-| [`SoftMax`](@ref)               | Global nonlinear     | $M \rightarrow M$ |
-| [`SoftPlus`](@ref)              | Global nonlinear     | $M \rightarrow M$ |
-| [`TAGConv`](@ref)               | Linear               | $M \rightarrow N$ |
-| [`Tanh`](@ref)                  | Global nonlinear     | $M \rightarrow M$ |
+| Predictor                    | Problem class         | JuMP | ExaModels |
+| :--------------------------- | :-------------------- | :--- | :-------- |
+| [`Affine`](@ref)             | Linear                | Yes  | Yes       |
+| [`AffineCombination`](@ref)  | Linear                | Yes  |           |
+| [`AvgPool2d`](@ref)          | Linear                | Yes  |           |
+| [`BinaryDecisionTree`](@ref) | Mixed-integer linear  | Yes  |           |
+| [`Conv2d`](@ref).            | Linear                | Yes  |           |
+| [`GCNConv`](@ref)            | Linear                | Yes  |           |
+| [`GELU`](@ref)               | Global nonlinear      | Yes  | Yes       |
+| [`GrayBox`](@ref)            | Local nonlinear       | Yes  |           |
+| [`LayerNorm`](@ref)          | Global nonlinear      | Yes  |           |
+| [`LeakyReLU`](@ref)          | Depends on inner ReLU | Yes  | Yes       |
+| [`MaxPool2d`](@ref)          | Global nonlinear      | Yes  |           |
+| [`MaxPool2dBigM`](@ref)      | Mixed-integer linear  | Yes  |           |
+| [`Pipeline`](@ref)           |                       | Yes  | Yes       |
+| [`Quantile`](@ref)           | Local nonlinear       | Yes  |           |
+| [`ReLU`](@ref)               | Global nonlinear      | Yes  | Yes       |
+| [`ReLUBigM`](@ref)           | Mixed-integer linear  | Yes  |           |
+| [`ReLUQuadratic`](@ref)      | Non-convex quadratic  | Yes  |           |
+| [`ReLUSOS1`](@ref)           | Mixed-integer linear  | Yes  |           |
+| [`Scale`](@ref)              | Linear                | Yes  | Yes       |
+| [`Sigmoid`](@ref)            | Global nonlinear      | Yes  | Yes       |
+| [`SoftMax`](@ref)            | Global nonlinear      | Yes  | Yes       |
+| [`SoftPlus`](@ref)           | Global nonlinear      | Yes  | Yes       |
+| [`TAGConv`](@ref)            | Linear                | Yes  |           |
+| [`Tanh`](@ref)               | Global nonlinear      | Yes  | Yes       |

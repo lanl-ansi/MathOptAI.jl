@@ -9,6 +9,7 @@ import DataFrames
 import DecisionTree
 import Documenter
 import EvoTrees
+import ExaModels
 import Flux
 import GLM
 import Literate
@@ -131,6 +132,7 @@ Documenter.makedocs(;
             "manual/AbstractGPs.md",
             "manual/DecisionTree.md",
             "manual/EvoTrees.md",
+            "manual/ExaModels.md",
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",

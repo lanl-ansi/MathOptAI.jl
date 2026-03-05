@@ -65,7 +65,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.GELU,
     x::ExaModels.AbstractVariable,
 )
-    n = _exa_length(x)
+    n = _length(x)
     y = ExaModels.variable(core, n)
     c1 = ExaModels.constraint(
         core,
@@ -73,7 +73,7 @@ function MathOptAI.add_predictor(
         lcon = 0.0,
         ucon = 0.0,
     )
-    return y, MathOptAI.Formulation(p, [y], Any[c1])
+    return y, MathOptAI.Formulation(p, Any[y], Any[c1])
 end
 
 function MathOptAI.add_predictor(
@@ -86,7 +86,7 @@ function MathOptAI.add_predictor(
     cons = [
         ExaModels.constraint(core, y[i] - _gelu(x[i]); lcon = 0.0, ucon = 0.0) for i in 1:n
     ]
-    return y, MathOptAI.Formulation(p, [y], cons)
+    return y, MathOptAI.Formulation(p, Any[y], cons)
 end
 
 function MathOptAI.add_predictor(
@@ -94,6 +94,6 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{<:MathOptAI.GELU},
     x,
 )
-    y = [_gelu(x[i]) for i in 1:_exa_length(x)]
+    y = [_gelu(x[i]) for i in 1:_length(x)]
     return y, MathOptAI.Formulation(p)
 end

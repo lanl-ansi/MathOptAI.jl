@@ -9,7 +9,6 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{MathOptAI.Permutation},
     x,
 )
-    perm = p.predictor.p
-    y = [x[perm[i]] for i in eachindex(perm)]
+    y = [x[p.predictor.p[i]] for i in eachindex(p.predictor.p)]
     return y, MathOptAI.Formulation(p)
 end

@@ -10,10 +10,10 @@ function MathOptAI.add_predictor(
     x::ExaModels.AbstractVariable,
 )
     y_relu, f_relu = MathOptAI.add_predictor(core, p.relu, x)
-    n = _exa_length(x)
+    n = _length(x)
     η = p.negative_slope
     y = ExaModels.variable(core, n)
-    c1 = ExaModels.constraint(
+    cons = ExaModels.constraint(
         core,
         y[i] - η * x[i] - (1 - η) * y_relu[i] for i in 1:n;
         lcon = 0.0,
@@ -22,7 +22,7 @@ function MathOptAI.add_predictor(
     form = MathOptAI.Formulation(
         p,
         [f_relu.variables; y],
-        [f_relu.constraints; c1],
+        [f_relu.constraints; cons],
     )
     return y, form
 end
@@ -58,10 +58,9 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{<:MathOptAI.LeakyReLU},
     x,
 )
-    inner = p.predictor
-    y_relu, _ =
-        MathOptAI.add_predictor(core, MathOptAI.ReducedSpace(inner.relu), x)
-    η = inner.negative_slope
-    y = [η * x[i] + (1 - η) * y_relu[i] for i in 1:_exa_length(x)]
+    inner = MathOptAI.ReducedSpace(p.predictor.relu)
+    y_relu, _ = MathOptAI.add_predictor(core, inner, x)
+    η = p.predictor.negative_slope
+    y = [η * x[i] + (1 - η) * y_relu[i] for i in 1:_length(x)]
     return y, MathOptAI.Formulation(p)
 end

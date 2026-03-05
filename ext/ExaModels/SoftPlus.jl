@@ -9,7 +9,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.SoftPlus,
     x::ExaModels.AbstractVariable,
 )
-    n = _exa_length(x)
+    n = _length(x)
     β = p.beta
     y = ExaModels.variable(core, n; lvar = 0.0)
     c1 = ExaModels.constraint(
@@ -18,7 +18,7 @@ function MathOptAI.add_predictor(
         lcon = 0.0,
         ucon = 0.0,
     )
-    return y, MathOptAI.Formulation(p, [y], Any[c1])
+    return y, MathOptAI.Formulation(p, Any[y], Any[c1])
 end
 
 function MathOptAI.add_predictor(
@@ -37,7 +37,7 @@ function MathOptAI.add_predictor(
             ucon = 0.0,
         ) for i in 1:n
     ]
-    return y, MathOptAI.Formulation(p, [y], cons)
+    return y, MathOptAI.Formulation(p, Any[y], cons)
 end
 
 function MathOptAI.add_predictor(
@@ -46,6 +46,6 @@ function MathOptAI.add_predictor(
     x,
 )
     β = p.predictor.beta
-    y = [log(1 + exp(β * x[i])) / β for i in 1:_exa_length(x)]
+    y = [log(1 + exp(β * x[i])) / β for i in 1:_length(x)]
     return y, MathOptAI.Formulation(p)
 end

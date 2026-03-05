@@ -266,12 +266,20 @@ end
 
 function test_Sigmoid_derivative_correctness()
     ext = Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)
-    d_sig = ext._moai_exa_d_sigmoid
-    dd_sig = ext._moai_exa_dd_sigmoid
     for xv in [-2.0, -1.0, 0.0, 0.5, 1.0, 2.0]
-        h = 1.0e-5
-        fd = (d_sig(xv + h) - d_sig(xv - h)) / (2h)
-        @test isapprox(dd_sig(xv), fd; atol = 1.0e-6, rtol = 1.0e-4)
+        h = 1e-6
+        @test isapprox(
+            ext._d_sigmoid(xv),
+            (ext._sigmoid(xv + h) - ext._sigmoid(xv - h)) / (2h);
+            atol = 1.0e-6,
+            rtol = 1.0e-4,
+        )
+        @test isapprox(
+            ext._dd_sigmoid(xv),
+            (ext._d_sigmoid(xv + h) - ext._d_sigmoid(xv - h)) / (2h);
+            atol = 1.0e-6,
+            rtol = 1.0e-4,
+        )
     end
     return
 end
@@ -412,8 +420,13 @@ end
 function test_GrayBox_error()
     core = ExaModels.ExaCore()
     x = ExaModels.variable(core, 2)
-    p = MathOptAI.GrayBox(identity)
-    @test_throws ErrorException MathOptAI.add_predictor(core, p, x)
+    @test_throws(
+        ErrorException(
+            "GrayBox is not supported with ExaCore. Convert your model to a " *
+            "Pipeline of explicit layer predictors.",
+        ),
+        MathOptAI.add_predictor(core, MathOptAI.GrayBox(identity), x),
+    )
     return
 end
 

@@ -9,7 +9,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.SoftMax,
     x::ExaModels.AbstractVariable,
 )
-    n = _exa_length(x)
+    n = _length(x)
     denom = ExaModels.variable(core, 1; lvar = 0.0)
     y = ExaModels.variable(core, n; lvar = 0.0, uvar = 1.0)
     # denom[1] - sum_j exp(x[j]) = 0
@@ -65,7 +65,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{MathOptAI.SoftMax},
     x,
 )
-    n = _exa_length(x)
+    n = _length(x)
     denom = ExaModels.variable(core, 1; lvar = 0.0)
     c_denom = ExaModels.constraint(
         core,
@@ -77,7 +77,6 @@ function MathOptAI.add_predictor(
         xj = x[j]
         ExaModels.constraint!(core, c_denom, i => -exp(xj) for i in 1:1)
     end
-    d = denom[1]
-    y = [exp(x[j]) / d for j in 1:n]
-    return y, MathOptAI.Formulation(p, [denom], Any[c_denom])
+    y = [exp(x[j]) / denom[1] for j in 1:n]
+    return y, MathOptAI.Formulation(p, Any[denom], Any[c_denom])
 end

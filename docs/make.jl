@@ -131,6 +131,7 @@ Documenter.makedocs(;
             "manual/AbstractGPs.md",
             "manual/DecisionTree.md",
             "manual/EvoTrees.md",
+            "manual/ExaModels.md",
             "manual/Flux.md",
             "manual/GLM.md",
             "manual/Lux.md",

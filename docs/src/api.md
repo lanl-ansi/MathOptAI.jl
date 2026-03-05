@@ -206,6 +206,11 @@ Modules = [Base.get_extension(MathOptAI, :MathOptAIDecisionTreeExt)]
 Modules = [Base.get_extension(MathOptAI, :MathOptAIEvoTreesExt)]
 ```
 
+## `ExaModels`
+```@autodocs
+Modules = [Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)]
+```
+
 ## `Flux`
 ```@autodocs
 Modules = [Base.get_extension(MathOptAI, :MathOptAIFluxExt)]

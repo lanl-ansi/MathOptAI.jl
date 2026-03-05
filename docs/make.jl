@@ -9,6 +9,7 @@ import DataFrames
 import DecisionTree
 import Documenter
 import EvoTrees
+import ExaModels
 import Flux
 import GLM
 import Literate

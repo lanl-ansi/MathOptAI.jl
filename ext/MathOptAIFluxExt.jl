@@ -34,6 +34,7 @@ Convert a trained neural network from Flux.jl to a [`Pipeline`](@ref).
 
 ## Supported activation functions
 
+ * `Flux.gelu_tanh`
  * `Flux.relu`
  * `Flux.sigmoid`
  * `Flux.softplus`
@@ -61,6 +62,7 @@ The `config` dictionary controls how layers in Flux are mapped to
 
 Supported keys and and example key-value pairs are:
 
+ * `Flux.gelu => MathOptAI.GELU`
  * `Flux.MaxPool => (k; kwargs...) -> MathOptAI.MaxPool2dBigM(k; M = 10.0, kwargs...)`
  * `Flux.relu => MathOptAI.ReLU`
  * `Flux.sigmoid => MathOptAI.Sigmoid`
@@ -146,6 +148,7 @@ function _build_predictor(
 end
 
 _default(::Any) = missing
+_default(::typeof(Flux.gelu_tanh)) = MathOptAI.GELU
 _default(::typeof(Flux.relu)) = MathOptAI.ReLU
 _default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid
 _default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus

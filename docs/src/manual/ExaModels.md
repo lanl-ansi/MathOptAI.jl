@@ -34,7 +34,7 @@ chain = Flux.Chain(
     Flux.Dense(2 => 2, Flux.relu),
     Flux.Scale(2),
     Flux.Dense(2 => 2, Flux.sigmoid),
-    Flux.Dense(2 => 2, Flux.softmax),
+    Flux.softmax,
     Flux.Dense(2 => 2, Flux.softplus),
     Flux.Dense(2 => 2, Flux.tanh),
 );

@@ -9,9 +9,12 @@ module MathOptAIExaModelsExt
 import ExaModels
 import MathOptAI
 
-_length(x::ExaModels.Variable) = x.length
-_length(x::ExaModels.Subexpr) = x.length
-_length(x::ExaModels.ReducedSubexpr) = x.length
+function _length(
+    x::Union{ExaModels.Variable,ExaModels.Subexpr,ExaModels.ReducedSubexpr},
+)
+    return x.length
+end
+
 _length(x::AbstractVector) = length(x)
 
 """

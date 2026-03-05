@@ -9,6 +9,7 @@ module TestExaModelsExt
 using Test
 
 import ExaModels
+import Flux
 import MathOptAI
 import NLPModelsIpopt
 
@@ -21,15 +22,11 @@ function runtests()
     return
 end
 
-# ── Helper ────────────────────────────────────────────────────────────────────
-
 function _make_core_with_input(n)
     core = ExaModels.ExaCore()
     x = ExaModels.variable(core, n)
     return core, x
 end
-
-# ── Affine ────────────────────────────────────────────────────────────────────
 
 function test_Affine_structure()
     A = [1.0 2.0; 3.0 4.0]
@@ -37,6 +34,23 @@ function test_Affine_structure()
     p = MathOptAI.Affine(A, b)
     core, x = _make_core_with_input(2)
     y, form = MathOptAI.add_predictor(core, p, x)
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 4   # 2 inputs + 2 outputs
+    @test m.meta.ncon == 2   # one equality per output row
+    @test form isa MathOptAI.Formulation
+    @test form.predictor === p
+    @test length(form.variables) == 1
+    @test form.variables[1] === y
+    @test length(form.constraints) == 1
+    return
+end
+
+function test_Affine_reduced_space_false()
+    A = [1.0 2.0; 3.0 4.0]
+    b = [0.5, -0.5]
+    p = MathOptAI.Affine(A, b)
+    core, x = _make_core_with_input(2)
+    y, form = MathOptAI.add_predictor(core, p, x; reduced_space = false)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4   # 2 inputs + 2 outputs
     @test m.meta.ncon == 2   # one equality per output row
@@ -70,8 +84,6 @@ function test_Affine_end_to_end()
     return
 end
 
-# ── ReducedSpace{Affine} ──────────────────────────────────────────────────────
-
 function test_ReducedSpace_Affine_structure()
     A = [2.0 0.0; 0.0 3.0]
     b = [1.0, -1.0]
@@ -90,7 +102,23 @@ function test_ReducedSpace_Affine_structure()
     return
 end
 
-# ── Scale ─────────────────────────────────────────────────────────────────────
+function test_ReducedSpace_Affine_kwarg()
+    A = [2.0 0.0; 0.0 3.0]
+    b = [1.0, -1.0]
+    p = MathOptAI.ReducedSpace(MathOptAI.Affine(A, b))
+    core, x = _make_core_with_input(2)
+    y, form = MathOptAI.add_predictor(core, p, x; reduced_space = true)
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 2   # only the 2 inputs, no new variables
+    @test m.meta.ncon == 0
+    @test form isa MathOptAI.Formulation
+    @test form.predictor === p
+    @test isempty(form.variables)
+    @test isempty(form.constraints)
+    @test y isa AbstractVector
+    @test length(y) == 2
+    return
+end
 
 function test_Scale_structure()
     p = MathOptAI.Scale([2.0, 3.0], [1.0, -1.0])
@@ -116,8 +144,6 @@ function test_ReducedSpace_Scale_structure()
     @test length(y) == 2
     return
 end
-
-# ── ReLU ──────────────────────────────────────────────────────────────────────
 
 function test_ReLU_structure()
     p = MathOptAI.ReLU()
@@ -154,8 +180,6 @@ function test_ReLU_AbstractVector()
     return
 end
 
-# ── Sigmoid ───────────────────────────────────────────────────────────────────
-
 function test_Sigmoid_structure()
     p = MathOptAI.Sigmoid()
     core, x = _make_core_with_input(2)
@@ -180,7 +204,7 @@ function test_ReducedSpace_Sigmoid_structure()
     return
 end
 
-function test_Sigmoid_structure()
+function test_Sigmoid_AbstractVector()
     p = MathOptAI.Sigmoid()
     core, x = _make_core_with_input(2)
     y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
@@ -212,8 +236,6 @@ function test_Sigmoid_derivative_correctness()
     end
     return
 end
-
-# ── Tanh ──────────────────────────────────────────────────────────────────────
 
 function test_Tanh_structure()
     p = MathOptAI.Tanh()
@@ -252,8 +274,6 @@ function test_Tanh_AbstractVector()
     return
 end
 
-# ── SoftPlus ──────────────────────────────────────────────────────────────────
-
 function test_SoftPlus_structure()
     p = MathOptAI.SoftPlus()
     core, x = _make_core_with_input(2)
@@ -288,8 +308,6 @@ function test_SoftPlus_AbstractVector()
     @test form isa MathOptAI.Formulation
     return
 end
-
-# ── GELU ──────────────────────────────────────────────────────────────────────
 
 function test_GELU_structure()
     p = MathOptAI.GELU()
@@ -345,8 +363,6 @@ function test_GELU_derivative_correctness()
     return
 end
 
-# ── LeakyReLU ────────────────────────────────────────────────────────────────
-
 function test_LeakyReLU_structure()
     p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
     core, x = _make_core_with_input(3)
@@ -383,8 +399,6 @@ function test_LeakyReLU_AbstractVector()
     return
 end
 
-# ── Permutation ──────────────────────────────────────────────────────────────
-
 function test_Permutation_structure()
     perm = MathOptAI.Permutation([3, 1, 2])
     core, x = _make_core_with_input(3)
@@ -396,8 +410,6 @@ function test_Permutation_structure()
     @test m.meta.ncon == 0
     return
 end
-
-# ── SoftMax ──────────────────────────────────────────────────────────────────
 
 function test_SoftMax_structure()
     p = MathOptAI.SoftMax()
@@ -433,8 +445,6 @@ function test_SoftMax_AbstractVector()
     @test form.predictor === p
     return
 end
-
-# ── Pipeline ──────────────────────────────────────────────────────────────────
 
 function test_Pipeline_structure()
     p = MathOptAI.Pipeline(
@@ -500,18 +510,24 @@ function test_Pipeline_end_to_end()
     return
 end
 
-# ── GrayBox (error) ───────────────────────────────────────────────────────────
-
-function test_GrayBox_error()
+function test_flux_end_to_end()
+    chain = Flux.Chain(
+        Flux.Dense(2 => 2, Flux.relu),
+        Flux.Scale(2),
+        Flux.Dense(2 => 2, Flux.sigmoid),
+        Flux.softmax,
+        Flux.Dense(2 => 2, Flux.softplus),
+        Flux.Dense(2 => 2, Flux.tanh),
+    );
     core = ExaModels.ExaCore()
-    x = ExaModels.variable(core, 2)
-    @test_throws(
-        ErrorException(
-            "GrayBox is not supported with ExaCore. Convert your model to a " *
-            "Pipeline of explicit layer predictors.",
-        ),
-        MathOptAI.add_predictor(core, MathOptAI.GrayBox(identity), x),
-    )
+    b = [1.1, 2.3]
+    x = ExaModels.variable(core, 2; lvar = b, uvar = b)
+    y, _ = MathOptAI.add_predictor(core, chain, x);
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y_star = chain(Float32.(b))
+    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
     return
 end
 

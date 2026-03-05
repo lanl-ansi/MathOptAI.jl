@@ -34,7 +34,7 @@ The following predictors are supported. See their docstrings for details:
 | [`ReLUBigM`](@ref)           | Mixed-integer linear  | Yes  |           |
 | [`ReLUQuadratic`](@ref)      | Non-convex quadratic  | Yes  |           |
 | [`ReLUSOS1`](@ref)           | Mixed-integer linear  | Yes  |           |
-| [`Scale`](@ref)              | Linear                | Yes  |           |
+| [`Scale`](@ref)              | Linear                | Yes  | Yes       |
 | [`Sigmoid`](@ref)            | Global nonlinear      | Yes  | Yes       |
 | [`SoftMax`](@ref)            | Global nonlinear      | Yes  | Yes       |
 | [`SoftPlus`](@ref)           | Global nonlinear      | Yes  | Yes       |

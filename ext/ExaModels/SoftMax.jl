@@ -34,7 +34,6 @@ function MathOptAI.add_predictor(
     return y, MathOptAI.Formulation(p, [denom, y], Any[c_denom, c_y])
 end
 
-# Scalar fallback for Vector{AbstractNode}.
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.SoftMax,

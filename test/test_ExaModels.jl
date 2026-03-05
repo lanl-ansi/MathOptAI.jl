@@ -142,6 +142,18 @@ function test_ReducedSpace_ReLU_structure()
     return
 end
 
+function test_ReLU_AbstractVector()
+    p = MathOptAI.ReLU()
+    core, x = _make_core_with_input(3)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 6   # 3 inputs + 3 outputs
+    @test m.meta.ncon == 3
+    @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
+    @test form isa MathOptAI.Formulation
+    return
+end
+
 # ── Sigmoid ───────────────────────────────────────────────────────────────────
 
 function test_Sigmoid_structure()
@@ -165,6 +177,39 @@ function test_ReducedSpace_Sigmoid_structure()
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
     @test length(y) == 2
+    return
+end
+
+function test_Sigmoid_structure()
+    p = MathOptAI.Sigmoid()
+    core, x = _make_core_with_input(2)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 4
+    @test m.meta.ncon == 2
+    @test all(m.meta.lvar[3:4] .== 0.0)
+    @test all(m.meta.uvar[3:4] .== 1.0)
+    @test form isa MathOptAI.Formulation
+    return
+end
+
+function test_Sigmoid_derivative_correctness()
+    ext = Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)
+    for xv in [-2.0, -1.0, 0.0, 0.5, 1.0, 2.0]
+        h = 1e-6
+        @test isapprox(
+            ext._d_sigmoid(xv),
+            (ext._sigmoid(xv + h) - ext._sigmoid(xv - h)) / (2h);
+            atol = 1.0e-6,
+            rtol = 1.0e-4,
+        )
+        @test isapprox(
+            ext._dd_sigmoid(xv),
+            (ext._d_sigmoid(xv + h) - ext._d_sigmoid(xv - h)) / (2h);
+            atol = 1.0e-6,
+            rtol = 1.0e-4,
+        )
+    end
     return
 end
 
@@ -194,6 +239,19 @@ function test_ReducedSpace_Tanh_structure()
     return
 end
 
+function test_Tanh_AbstractVector()
+    p = MathOptAI.Tanh()
+    core, x = _make_core_with_input(2)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 4
+    @test m.meta.ncon == 2
+    @test all(m.meta.lvar[3:4] .== -1.0)
+    @test all(m.meta.uvar[3:4] .== 1.0)
+    @test form isa MathOptAI.Formulation
+    return
+end
+
 # ── SoftPlus ──────────────────────────────────────────────────────────────────
 
 function test_SoftPlus_structure()
@@ -216,6 +274,18 @@ function test_ReducedSpace_SoftPlus_structure()
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
     @test length(y) == 2
+    return
+end
+
+function test_SoftPlus_AbstractVector()
+    p = MathOptAI.SoftPlus()
+    core, x = _make_core_with_input(2)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 4
+    @test m.meta.ncon == 2
+    @test all(m.meta.lvar[3:4] .== 0.0)
+    @test form isa MathOptAI.Formulation
     return
 end
 
@@ -243,6 +313,17 @@ function test_ReducedSpace_GELU_structure()
     return
 end
 
+function test_GELU_AbstractVector()
+    p = MathOptAI.GELU()
+    core, x = _make_core_with_input(2)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 4
+    @test m.meta.ncon == 2
+    @test form isa MathOptAI.Formulation
+    return
+end
+
 function test_GELU_derivative_correctness()
     # Verify the registered GELU second derivative matches finite difference
     ext = Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)
@@ -257,26 +338,6 @@ function test_GELU_derivative_correctness()
         @test isapprox(
             ext._dd_gelu(xv),
             (ext._d_gelu(xv + h) - ext._d_gelu(xv - h)) / (2h);
-            atol = 1.0e-6,
-            rtol = 1.0e-4,
-        )
-    end
-    return
-end
-
-function test_Sigmoid_derivative_correctness()
-    ext = Base.get_extension(MathOptAI, :MathOptAIExaModelsExt)
-    for xv in [-2.0, -1.0, 0.0, 0.5, 1.0, 2.0]
-        h = 1e-6
-        @test isapprox(
-            ext._d_sigmoid(xv),
-            (ext._sigmoid(xv + h) - ext._sigmoid(xv - h)) / (2h);
-            atol = 1.0e-6,
-            rtol = 1.0e-4,
-        )
-        @test isapprox(
-            ext._dd_sigmoid(xv),
-            (ext._d_sigmoid(xv + h) - ext._d_sigmoid(xv - h)) / (2h);
             atol = 1.0e-6,
             rtol = 1.0e-4,
         )
@@ -307,6 +368,18 @@ function test_ReducedSpace_LeakyReLU_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
+    return
+end
+
+function test_LeakyReLU_AbstractVector()
+    p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
+    core, x = _make_core_with_input(3)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 9   # 3 input + 3 relu + 3 leaky
+    @test m.meta.ncon == 6   # 3 relu + 3 leaky
+    @test form isa MathOptAI.Formulation
+    @test form.predictor === p
     return
 end
 
@@ -346,6 +419,18 @@ function test_ReducedSpace_SoftMax_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4   # 3 input + 1 denom
     @test m.meta.ncon == 1   # 1 denom
+    return
+end
+
+function test_SoftMax_AbstractVector()
+    p = MathOptAI.SoftMax()
+    core, x = _make_core_with_input(3)
+    y, form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 7   # 3 input + 1 denom + 3 y
+    @test m.meta.ncon == 4   # 1 denom + 3 y
+    @test form isa MathOptAI.Formulation
+    @test form.predictor === p
     return
 end
 

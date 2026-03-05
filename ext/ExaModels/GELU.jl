@@ -83,7 +83,7 @@ function MathOptAI.add_predictor(
 )
     n = length(x)
     y = ExaModels.variable(core, n)
-    cons = [
+    cons = Any[
         ExaModels.constraint(core, y[i] - _gelu(x[i]); lcon = 0.0, ucon = 0.0) for i in 1:n
     ]
     return y, MathOptAI.Formulation(p, Any[y], cons)

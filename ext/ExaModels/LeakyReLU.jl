@@ -27,7 +27,6 @@ function MathOptAI.add_predictor(
     return y, form
 end
 
-# Scalar fallback for Vector{AbstractNode}.
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.LeakyReLU,

@@ -20,8 +20,6 @@ function MathOptAI.add_predictor(
     return y, MathOptAI.Formulation(p, Any[y], Any[c1])
 end
 
-# Scalar fallback for Vector{AbstractNode} (e.g., output of a ReducedSpace layer).
-# One constraint per element — correct but not GPU-vectorized.
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.ReLU,

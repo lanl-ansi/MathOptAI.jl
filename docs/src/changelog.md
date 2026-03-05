@@ -7,6 +7,27 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.3 (March 5, 2025)
+
+### Added
+
+ - Added `; filter` keyword argument to [`replace_weights_with_variables`](@ref)
+   (#257)
+ - Added [Examodels.jl](@ref) extension (#259)
+
+### Fixed
+
+ - Added an error when `::Array` passed as input for `::AbstractPredictor`
+   (#252)
+ - Removed [`build_predictor`](@ref) fallback and simplified [`add_predictor`](@ref)
+   fallbacks (#253)
+ - Removed `import JuMP` from extensions where possible (#260)
+
+### Other
+
+ - Updated GitHub action versions (#250), (#255), (#261)
+ - Added ParallelTestRunner.jl (#254)
+
 ## Version 0.2.2 (January 22, 2026)
 
 ### Added

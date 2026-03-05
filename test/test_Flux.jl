@@ -133,6 +133,18 @@ function test_end_to_end_ReLU_reduced_space()
     return
 end
 
+function test_end_to_end_gelu()
+    chain = Flux.Chain(Flux.Dense(1 => 1, Flux.gelu))
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(model, chain, [x])
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
+    return
+end
+
 function test_end_to_end_SoftPlus()
     chain = _train_lux_model(
         Flux.Chain(Flux.Dense(1 => 16, Flux.softplus), Flux.Dense(16 => 1)),

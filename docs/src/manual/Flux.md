@@ -15,6 +15,7 @@ composed of:
   * [`Flux.Conv`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.Conv)
   * [`Flux.Dense`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.Dense)
   * [`Flux.flatten`](https://fluxml.ai/Flux.jl/stable/reference/data/mlutils/#Flux.flatten)
+  * [`Flux.gelu`](https://fluxml.ai/Flux.jl/stable/reference/models/activation/#NNlib.gelu)
   * [`Flux.LayerNorm`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.LayerNorm)
   * [`Flux.MaxPool`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.MaxPool)
   * [`Flux.MeanPool`](https://fluxml.ai/Flux.jl/stable/reference/models/layers/#Flux.MeanPool)

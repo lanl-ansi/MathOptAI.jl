@@ -62,7 +62,7 @@ struct GrayBox{P} <: AbstractPredictor
     end
 end
 
-function add_predictor(::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
+function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
     set = MOI.VectorNonlinearOracle(predictor, length(x))
     y = add_variables(model, x, set.output_dimension, "moai_GrayBox")
     con = JuMP.@constraint(model, [x; y] in set)

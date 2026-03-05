@@ -7,7 +7,6 @@
 module MathOptAIEvoTreesExt
 
 import EvoTrees
-import JuMP
 import MathOptAI
 
 """

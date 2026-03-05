@@ -35,12 +35,12 @@ julia> y, _ = MathOptAI.add_predictor(model, chain, x; gray_box = true);
 
 julia> y
 1-element Vector{VariableRef}:
- moai_Flux[1]
+ moai_GrayBox[1]
 
 julia> print(model)
 Feasibility
 Subject to
- [x[1], moai_Flux[1]] ∈ VectorNonlinearOracle{Float64}(;
+ [x[1], moai_GrayBox[1]] ∈ VectorNonlinearOracle{Float64}(;
      dimension = 2,
      l = [0.0],
      u = [0.0],
@@ -60,6 +60,13 @@ struct GrayBox{P} <: AbstractPredictor
     ) where {P}
         return new{P}(predictor, device, hessian)
     end
+end
+
+function add_predictor(model::JuMP.AbstractModel, predictor::GrayBox, x::Vector)
+    set = MOI.VectorNonlinearOracle(predictor, length(x))
+    y = add_variables(model, x, set.output_dimension, "moai_GrayBox")
+    con = JuMP.@constraint(model, [x; y] in set)
+    return y, Formulation(predictor, y, [con])
 end
 
 function add_predictor(

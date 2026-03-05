@@ -7,7 +7,6 @@
 module MathOptAIDecisionTreeExt
 
 import DecisionTree
-import JuMP
 import MathOptAI
 
 """

@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - Added `; filter` keyword argument to [`replace_weights_with_variables`](@ref)
    (#257)
- - Added [Examodels.jl](@ref) extension (#259)
+ - Added [ExaModels.jl](@ref) extension (#259)
 
 ### Fixed
 

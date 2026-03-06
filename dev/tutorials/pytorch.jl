@@ -19,8 +19,10 @@
 
 using JuMP
 using Test
+import ExaModels
 import Ipopt
 import MathOptAI
+import NLPModelsIpopt
 import Plots
 import PythonCall
 
@@ -89,6 +91,25 @@ for xi in X
     optimize!(model)
     @test is_solved_and_feasible(model)
     push!(Y, objective_value(model))
+end
+Plots.plot(x -> x^2 - 2x, X; label = "Truth", linestype = :dot)
+Plots.plot!(X, Y; label = "Fitted")
+
+# ## ExaModels
+
+# We can do a similar thing with ExaModels:
+
+predictor = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
+X, Y = -2:0.1:2, Float64[]
+for xi in X
+    core = ExaModels.ExaCore()
+    x = ExaModels.variable(core, 1; lvar = xi, uvar = xi)
+    y, _ = MathOptAI.add_predictor(core, predictor, x)
+    ExaModels.objective(core, sum(y[i] for i in 1:1))
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    push!(Y, result.objective)
 end
 Plots.plot(x -> x^2 - 2x, X; label = "Truth", linestype = :dot)
 Plots.plot!(X, Y; label = "Fitted")

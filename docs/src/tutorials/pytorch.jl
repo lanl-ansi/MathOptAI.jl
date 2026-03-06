@@ -103,7 +103,7 @@ predictor = MathOptAI.PytorchModel(joinpath(@__DIR__, "model.pt"))
 X, Y = -2:0.1:2, Float64[]
 for xi in X
     core = ExaModels.ExaCore()
-    x = ExaModels.variable(core, 1, lvar = xi, uvar = xi)
+    x = ExaModels.variable(core, 1; lvar = xi, uvar = xi)
     y, _ = MathOptAI.add_predictor(core, predictor, x)
     ExaModels.objective(core, sum(y[i] for i in 1:1))
     model = ExaModels.ExaModel(core)

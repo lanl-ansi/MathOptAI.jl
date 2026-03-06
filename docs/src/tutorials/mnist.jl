@@ -14,10 +14,12 @@
 # This tutorial requires the following packages
 
 using JuMP
+import ExaModels
 import Flux
 import Ipopt
 import MathOptAI
 import MLDatasets
+import NLPModelsIpopt
 import Plots
 
 # ## Data
@@ -165,6 +167,34 @@ end
 # is a `7`, although it is less confident.
 
 x_adversary = find_adversarial_image(test_data[3]; adversary_label = 7);
+Plots.plot(
+    plot_image(predictor, test_data[3].features),
+    plot_image(predictor, Float32.(x_adversary)),
+)
+
+# ## ExaModels
+
+# We can do a similar thing with ExaModels:
+
+function find_adversarial_image_exa(test_case; adversary_label, δ = 0.05)
+    core = ExaModels.ExaCore()
+    x = ExaModels.variable(core, 28^2; lvar = 0, uvar = 1)
+    ExaModels.constraint(
+        core,
+        x[i] - f for (i, f) in enumerate(test_case.features);
+        lcon = -δ,
+        ucon = δ,
+    )
+    y, _ = MathOptAI.add_predictor(core, predictor, x)
+    ExaModels.objective(core, y[test_case.targets+1] - y[adversary_label+1])
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @assert result.status ∈ (:first_order, :acceptable)
+    x = ExaModels.solution(result, x)
+    return reshape(x, 28, 28)
+end
+
+x_adversary = find_adversarial_image_exa(test_data[3]; adversary_label = 7)
 Plots.plot(
     plot_image(predictor, test_data[3].features),
     plot_image(predictor, Float32.(x_adversary)),

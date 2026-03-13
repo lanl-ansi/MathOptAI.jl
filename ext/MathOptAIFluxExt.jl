@@ -342,45 +342,51 @@ function MOI.VectorNonlinearOracle(
     end
     # We need to compute only ∇²f(x) because the -y part does not appear in
     # the Hessian.
-    #
-    # Note the order of the for-loops, first over the rows, and then across the
-    # columns, with j >= i ensuring that this is the upper triangle portion of
-    # the Hessian-of-the-Lagrangian.
-    hessian_lagrangian_structure = Tuple{Int64,Int64}[
-        (i, j) for j in 1:input_dimension for i in 1:input_dimension if j >= i
-    ]
-    # We want to compute the Hessian-of-the-Lagrangian:
-    #   ∇²L(x) = Σ μᵢ ∇²fᵢ(x)
-    # We could compute this by calculating the
-    # `output_dimension * input_dimension * input_dimension` dense hessian and
-    # then sum over the first dimension multiplying by μᵢ. This is pretty slow.
-    #
-    # Instead, we define L(x) = Σ μᵢ fᵢ(x), and then compute a single dense
-    # Hessian ∇²L(x).
-    #
-    # We can define L(x) by adding a new output_dimension-by-1 linear layer to
-    # the output of `chain` that does the multiplication f(x)' * μ.
-    #
-    # We update the parameters of μ_layer in our `eval_hessian_lagrangian`
-    # function.
-    μ_layer = Flux.Dense(output_dimension, 1; bias = false)
-    L = Flux.Chain(chain, μ_layer)
-    function eval_hessian_lagrangian(
-        ret::AbstractVector,
-        x::AbstractVector,
-        μ::AbstractVector,
-    )
-        input = Float32.(x[1:input_dimension])
-        copyto!(μ_layer.weight, μ)
-        ∇²L = Flux.hessian(x -> only(L(x)), input)::Matrix{Float32}
-        k = 0
-        for j in 1:input_dimension
-            for i in 1:j
-                k += 1
-                ret[k] = ∇²L[i, j]
+    hessian_lagrangian_structure = Tuple{Int64,Int64}[]
+    _eval_hessian_lagrangian = nothing
+    if predictor.hessian
+        # Note the order of the for-loops, first over the rows, and then
+        # across the columns, with j >= i ensuring that this is the upper
+        # triangle portion of the Hessian-of-the-Lagrangian.
+        hessian_lagrangian_structure = Tuple{Int64,Int64}[
+            (i, j) for j in 1:input_dimension for
+            i in 1:input_dimension if j >= i
+        ]
+        # We want to compute the Hessian-of-the-Lagrangian:
+        #   ∇²L(x) = Σ μᵢ ∇²fᵢ(x)
+        # We could compute this by calculating the
+        # `output_dimension * input_dimension * input_dimension` dense
+        # hessian and then sum over the first dimension multiplying by μᵢ.
+        # This is pretty slow.
+        #
+        # Instead, we define L(x) = Σ μᵢ fᵢ(x), and then compute a single
+        # dense Hessian ∇²L(x).
+        #
+        # We can define L(x) by adding a new output_dimension-by-1 linear
+        # layer to the output of `chain` that does the multiplication
+        # f(x)' * μ.
+        #
+        # We update the parameters of μ_layer in our
+        # `eval_hessian_lagrangian` function.
+        μ_layer = Flux.Dense(output_dimension, 1; bias = false)
+        L = Flux.Chain(chain, μ_layer)
+        _eval_hessian_lagrangian = function(
+            ret::AbstractVector,
+            x::AbstractVector,
+            μ::AbstractVector,
+        )
+            input = Float32.(x[1:input_dimension])
+            copyto!(μ_layer.weight, μ)
+            ∇²L = Flux.hessian(x -> only(L(x)), input)::Matrix{Float32}
+            k = 0
+            for j in 1:input_dimension
+                for i in 1:j
+                    k += 1
+                    ret[k] = ∇²L[i, j]
+                end
             end
+            return
         end
-        return
     end
     return MOI.VectorNonlinearOracle(;
         dimension = input_dimension + output_dimension,
@@ -390,11 +396,7 @@ function MOI.VectorNonlinearOracle(
         jacobian_structure,
         eval_jacobian,
         hessian_lagrangian_structure,
-        eval_hessian_lagrangian = ifelse(
-            predictor.hessian,
-            eval_hessian_lagrangian,
-            nothing,
-        ),
+        eval_hessian_lagrangian = _eval_hessian_lagrangian,
     )
 end
 

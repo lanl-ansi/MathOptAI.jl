@@ -274,50 +274,57 @@ function MOI.VectorNonlinearOracle(
     end
     # We need to compute only ∇²f(x) because the -y part does not appear in
     # the Hessian.
-    #
-    # Note the order of the for-loops, first over the rows, and then across the
-    # columns, with j >= i ensuring that this is the upper triangle portion of
-    # the Hessian-of-the-Lagrangian.
-    hessian_lagrangian_structure = Tuple{Int64,Int64}[
-        (i, j) for j in 1:input_dimension for i in 1:input_dimension if j >= i
-    ]
-    # We want to compute the Hessian-of-the-Lagrangian:
-    #   ∇²L(x) = Σ μᵢ ∇²fᵢ(x)
-    # We could compute this by calculating the
-    # `output_dimension * input_dimension * input_dimension` dense hessian and
-    # then sum over the first dimension multiplying by μᵢ. This is pretty slow.
-    #
-    # Instead, we define L(x) = Σ μᵢ fᵢ(x), and then compute a single dense
-    # Hessian ∇²L(x).
-    #
-    # We can define L(x) by adding a new output_dimension-by-1 linear layer to
-    # the output of `torch_model` that does the multiplication f(x)' * μ.
-    #
-    # We update the parameters of μ_layer in our `eval_hessian_lagrangian`
-    # function.
-    μ_layer = torch.nn.Linear(output_dimension, 1; bias = false)
-    L = torch.nn.Sequential(torch_model, μ_layer)
-    L.to(device)
-    ∇²L = torch.func.hessian(L)
-    function eval_hessian_lagrangian(
-        ret::AbstractVector,
-        x::AbstractVector,
-        μ::AbstractVector,
-    )
-        py_x = torch.tensor(x[1:input_dimension]; device)
-        # [μ] is Python syntax to make a 1xN tensor. Even though μ_layer is Nx1,
-        # torch.nn.Linear stores the weight matrix transposed.
-        py_μ = torch.tensor([μ]; device)
-        μ_layer.weight = torch.nn.Parameter(py_μ; requires_grad = false)
-        value = _pyconvert(Matrix, ∇²L(py_x)[0])
-        k = 0
-        for j in 1:input_dimension
-            for i in 1:j
-                k += 1
-                ret[k] = value[i, j]
+    hessian_lagrangian_structure = Tuple{Int64,Int64}[]
+    _eval_hessian_lagrangian = nothing
+    if predictor.hessian
+        # Note the order of the for-loops, first over the rows, and then
+        # across the columns, with j >= i ensuring that this is the upper
+        # triangle portion of the Hessian-of-the-Lagrangian.
+        hessian_lagrangian_structure = Tuple{Int64,Int64}[
+            (i, j) for j in 1:input_dimension for
+            i in 1:input_dimension if j >= i
+        ]
+        # We want to compute the Hessian-of-the-Lagrangian:
+        #   ∇²L(x) = Σ μᵢ ∇²fᵢ(x)
+        # We could compute this by calculating the
+        # `output_dimension * input_dimension * input_dimension` dense
+        # hessian and then sum over the first dimension multiplying by μᵢ.
+        # This is pretty slow.
+        #
+        # Instead, we define L(x) = Σ μᵢ fᵢ(x), and then compute a single
+        # dense Hessian ∇²L(x).
+        #
+        # We can define L(x) by adding a new output_dimension-by-1 linear
+        # layer to the output of `torch_model` that does the multiplication
+        # f(x)' * μ.
+        #
+        # We update the parameters of μ_layer in our
+        # `eval_hessian_lagrangian` function.
+        μ_layer = torch.nn.Linear(output_dimension, 1; bias = false)
+        L = torch.nn.Sequential(torch_model, μ_layer)
+        L.to(device)
+        ∇²L = torch.func.hessian(L)
+        _eval_hessian_lagrangian = function(
+            ret::AbstractVector,
+            x::AbstractVector,
+            μ::AbstractVector,
+        )
+            py_x = torch.tensor(x[1:input_dimension]; device)
+            # [μ] is Python syntax to make a 1xN tensor. Even though
+            # μ_layer is Nx1, torch.nn.Linear stores the weight matrix
+            # transposed.
+            py_μ = torch.tensor([μ]; device)
+            μ_layer.weight = torch.nn.Parameter(py_μ; requires_grad = false)
+            value = _pyconvert(Matrix, ∇²L(py_x)[0])
+            k = 0
+            for j in 1:input_dimension
+                for i in 1:j
+                    k += 1
+                    ret[k] = value[i, j]
+                end
             end
+            return
         end
-        return
     end
     return MOI.VectorNonlinearOracle(;
         dimension = input_dimension + output_dimension,
@@ -327,11 +334,7 @@ function MOI.VectorNonlinearOracle(
         jacobian_structure,
         eval_jacobian,
         hessian_lagrangian_structure,
-        eval_hessian_lagrangian = ifelse(
-            predictor.hessian,
-            eval_hessian_lagrangian,
-            nothing,
-        ),
+        eval_hessian_lagrangian = _eval_hessian_lagrangian,
     )
 end
 

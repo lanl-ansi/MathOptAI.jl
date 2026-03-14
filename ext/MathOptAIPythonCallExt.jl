@@ -230,48 +230,13 @@ function _pyconvert(::Type{T}, tensor) where {T}
     return PythonCall.pyconvert(T, tensor.detach().cpu().numpy())
 end
 
-function MOI.VectorNonlinearOracle(
-    predictor::MathOptAI.GrayBox{MathOptAI.PytorchModel},
-    input_dimension::Int,
+function _construct_hessian(
+    torch_model,
+    input_dimension,
+    output_dimension,
+    torch,
+    device,
 )
-    device = predictor.device
-    torch = PythonCall.pyimport("torch")
-    torch_model = torch.load(predictor.predictor.filename; weights_only = false)
-    torch_model = torch_model.to(device)
-    y = torch_model(torch.zeros(input_dimension; device))
-    output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
-    # We model the function as:
-    #     0 <= f(x) - y <= 0
-    function eval_f(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device)
-        value = _pyconvert(Vector, torch_model(py_x))
-        for i in 1:output_dimension
-            ret[i] = value[i] - x[input_dimension+i]
-        end
-        return
-    end
-    # Note the order of the for-loops, first over the output_dimension, and then
-    # across the input_dimension. This makes the Jacobian structure of ∇f(x) be
-    # column-major and dense with respect to x.
-    jacobian_structure = Tuple{Int64,Int64}[
-        (r, c) for c in 1:input_dimension for r in 1:output_dimension
-    ]
-    # We also need to add non-zero terms for the `-I` component of the Jacobian.
-    for i in 1:output_dimension
-        push!(jacobian_structure, (i, input_dimension + i))
-    end
-    J = torch.func.jacrev(torch_model)
-    function eval_jacobian(ret::AbstractVector, x::AbstractVector)
-        py_x = torch.tensor(x[1:input_dimension]; device)
-        value = _pyconvert(Matrix, J(py_x))
-        for i in 1:length(value)
-            ret[i] = value[i]             # ∇f(x)
-        end
-        for i in 1:output_dimension
-            ret[length(value)+i] = -1.0   # -I
-        end
-        return
-    end
     # We need to compute only ∇²f(x) because the -y part does not appear in
     # the Hessian.
     #
@@ -319,6 +284,62 @@ function MOI.VectorNonlinearOracle(
         end
         return
     end
+    return hessian_lagrangian_structure, eval_hessian_lagrangian
+end
+
+function MOI.VectorNonlinearOracle(
+    predictor::MathOptAI.GrayBox{MathOptAI.PytorchModel},
+    input_dimension::Int,
+)
+    device = predictor.device
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(predictor.predictor.filename; weights_only = false)
+    torch_model = torch_model.to(device)
+    y = torch_model(torch.zeros(input_dimension; device))
+    output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
+    # We model the function as:
+    #     0 <= f(x) - y <= 0
+    function eval_f(ret::AbstractVector, x::AbstractVector)
+        py_x = torch.tensor(x[1:input_dimension]; device)
+        value = _pyconvert(Vector, torch_model(py_x))
+        for i in 1:output_dimension
+            ret[i] = value[i] - x[input_dimension+i]
+        end
+        return
+    end
+    # Note the order of the for-loops, first over the output_dimension, and then
+    # across the input_dimension. This makes the Jacobian structure of ∇f(x) be
+    # column-major and dense with respect to x.
+    jacobian_structure = Tuple{Int64,Int64}[
+        (r, c) for c in 1:input_dimension for r in 1:output_dimension
+    ]
+    # We also need to add non-zero terms for the `-I` component of the Jacobian.
+    for i in 1:output_dimension
+        push!(jacobian_structure, (i, input_dimension + i))
+    end
+    J = torch.func.jacrev(torch_model)
+    function eval_jacobian(ret::AbstractVector, x::AbstractVector)
+        py_x = torch.tensor(x[1:input_dimension]; device)
+        value = _pyconvert(Matrix, J(py_x))
+        for i in 1:length(value)
+            ret[i] = value[i]             # ∇f(x)
+        end
+        for i in 1:output_dimension
+            ret[length(value)+i] = -1.0   # -I
+        end
+        return
+    end
+    hessian_lagrangian_structure, eval_hessian_lagrangian = if predictor.hessian
+        _construct_hessian(
+            torch_model,
+            input_dimension,
+            output_dimension,
+            torch,
+            device,
+        )
+    else
+        Tuple{Int,Int}[], nothing
+    end
     return MOI.VectorNonlinearOracle(;
         dimension = input_dimension + output_dimension,
         l = zeros(output_dimension),
@@ -327,11 +348,7 @@ function MOI.VectorNonlinearOracle(
         jacobian_structure,
         eval_jacobian,
         hessian_lagrangian_structure,
-        eval_hessian_lagrangian = ifelse(
-            predictor.hessian,
-            eval_hessian_lagrangian,
-            nothing,
-        ),
+        eval_hessian_lagrangian,
     )
 end
 

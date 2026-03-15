@@ -303,43 +303,7 @@ function _build_predictor(
     return MathOptAI.output_size(p, input_size_normalized)
 end
 
-function MOI.VectorNonlinearOracle(
-    predictor::MathOptAI.GrayBox{<:Flux.Chain},
-    input_dimension::Int,
-)
-    chain = predictor.predictor
-    output_dimension = only(Flux.outputsize(chain, (input_dimension,)))
-    # We model the function as:
-    #     0 <= f(x) - y <= 0
-    function eval_f(ret::AbstractVector, x::AbstractVector)
-        input = Float32.(x[1:input_dimension])
-        value = chain(input)
-        for i in 1:output_dimension
-            ret[i] = value[i] - x[input_dimension+i]
-        end
-        return
-    end
-    # Note the order of the for-loops, first over the output_dimension, and then
-    # across the input_dimension. This makes the Jacobian structure of ∇f(x) be
-    # column-major and dense with respect to x.
-    jacobian_structure = Tuple{Int64,Int64}[
-        (r, c) for c in 1:input_dimension for r in 1:output_dimension
-    ]
-    # We also need to add non-zero terms for the `-I` component of the Jacobian.
-    for i in 1:output_dimension
-        push!(jacobian_structure, (i, input_dimension + i))
-    end
-    function eval_jacobian(ret::AbstractVector, x::AbstractVector)
-        input = Float32.(x[1:input_dimension])
-        value = only(Flux.jacobian(chain, input)::Tuple{Matrix{Float32}})
-        for i in 1:length(value)
-            ret[i] = value[i]             # ∇f(x)
-        end
-        for i in 1:output_dimension
-            ret[length(value)+i] = -1.0   # -I
-        end
-        return
-    end
+function _construct_hessian(chain, input_dimension, output_dimension)
     # We need to compute only ∇²f(x) because the -y part does not appear in
     # the Hessian.
     #
@@ -382,6 +346,51 @@ function MOI.VectorNonlinearOracle(
         end
         return
     end
+    return hessian_lagrangian_structure, eval_hessian_lagrangian
+end
+
+function MOI.VectorNonlinearOracle(
+    predictor::MathOptAI.GrayBox{<:Flux.Chain},
+    input_dimension::Int,
+)
+    chain = predictor.predictor
+    output_dimension = only(Flux.outputsize(chain, (input_dimension,)))
+    # We model the function as:
+    #     0 <= f(x) - y <= 0
+    function eval_f(ret::AbstractVector, x::AbstractVector)
+        input = Float32.(x[1:input_dimension])
+        value = chain(input)
+        for i in 1:output_dimension
+            ret[i] = value[i] - x[input_dimension+i]
+        end
+        return
+    end
+    # Note the order of the for-loops, first over the output_dimension, and then
+    # across the input_dimension. This makes the Jacobian structure of ∇f(x) be
+    # column-major and dense with respect to x.
+    jacobian_structure = Tuple{Int64,Int64}[
+        (r, c) for c in 1:input_dimension for r in 1:output_dimension
+    ]
+    # We also need to add non-zero terms for the `-I` component of the Jacobian.
+    for i in 1:output_dimension
+        push!(jacobian_structure, (i, input_dimension + i))
+    end
+    function eval_jacobian(ret::AbstractVector, x::AbstractVector)
+        input = Float32.(x[1:input_dimension])
+        value = only(Flux.jacobian(chain, input)::Tuple{Matrix{Float32}})
+        for i in 1:length(value)
+            ret[i] = value[i]             # ∇f(x)
+        end
+        for i in 1:output_dimension
+            ret[length(value)+i] = -1.0   # -I
+        end
+        return
+    end
+    hessian_lagrangian_structure, eval_hessian_lagrangian = if predictor.hessian
+        _construct_hessian(chain, input_dimension, output_dimension)
+    else
+        Tuple{Int64,Int64}[], nothing
+    end
     return MOI.VectorNonlinearOracle(;
         dimension = input_dimension + output_dimension,
         l = zeros(output_dimension),
@@ -390,11 +399,7 @@ function MOI.VectorNonlinearOracle(
         jacobian_structure,
         eval_jacobian,
         hessian_lagrangian_structure,
-        eval_hessian_lagrangian = ifelse(
-            predictor.hessian,
-            eval_hessian_lagrangian,
-            nothing,
-        ),
+        eval_hessian_lagrangian,
     )
 end
 

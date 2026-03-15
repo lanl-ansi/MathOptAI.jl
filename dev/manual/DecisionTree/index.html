@@ -17,18 +17,18 @@ Depth:  2</code><br/><code class="language-julia-repl hljs" style="display:block
   ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.41966499895337794}
   └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0</code></pre><h2 id="Random-forest-regression"><a class="docs-heading-anchor" href="#Random-forest-regression">Random forest regression</a><a id="Random-forest-regression-1"></a><a class="docs-heading-anchor-permalink" href="#Random-forest-regression" title="Permalink"></a></h2><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, MathOptAI, DecisionTree</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; truth(x::Vector) = x[1] &lt;= 0.5 ? -2 : (x[2] &lt;= 0.3 ? 3 : 4)</code><code class="nohighlight hljs ansi" style="display:block;">truth (generic function with 1 method)</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; features = abs.(sin.((1:10) .* (3:4)&#39;));</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; size(features)</code><code class="nohighlight hljs ansi" style="display:block;">(10, 2)</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; labels = truth.(Vector.(eachrow(features)));</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; predictor = DecisionTree.build_forest(labels, features)</code><code class="nohighlight hljs ansi" style="display:block;">Ensemble of Decision Trees
 Trees:      10
-Avg Leaves: 3.5
-Avg Depth:  2.5</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; model = Model();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; @variable(model, 0 &lt;= x[1:2] &lt;= 1);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y, formulation = MathOptAI.add_predictor(model, predictor, x);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y</code><code class="nohighlight hljs ansi" style="display:block;">1-element Vector{JuMP.VariableRef}:
+Avg Leaves: 3.3
+Avg Depth:  2.3</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; model = Model();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; @variable(model, 0 &lt;= x[1:2] &lt;= 1);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y, formulation = MathOptAI.add_predictor(model, predictor, x);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y</code><code class="nohighlight hljs ansi" style="display:block;">1-element Vector{JuMP.VariableRef}:
  moai_AffineCombination[1]</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">AffineCombination
 ├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
-├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=2, depth=2]
-├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
-├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=5, depth=2]
-├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=5, depth=2]
 ├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
+├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
+├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
+├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=2, depth=2]
 ├ 0.1 * BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 └ 1.0 * [0.0]
 ├ variables [1]
@@ -43,10 +43,10 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.4743447016210958}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.4743457016210958}
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.3388454630301511}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.3388464630301511}
   ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.41966399895337797}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.4743457016210958}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.3388464630301511}
   ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.41966499895337794}
   └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
@@ -57,11 +57,11 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.4079932080996804}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.4079942080996804}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.41966399895337797}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.4079942080996804}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.41966499895337794}
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.6243860618889063}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.6243870618889064}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.9123426313144589}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.6243870618889064}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.912343631314459}
   └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ variables [4]
@@ -71,12 +71,12 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.831189428657276}
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.41223711733275015}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.831189428657276}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.4122381173327501}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.831190428657276}
-  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.7210746400035294}
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.3388454630301511}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.7210746400035294}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.3388464630301511}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.7210756400035294}
+  └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
 ├ variables [5]
 │ ├ moai_BinaryDecisionTree_value[1]
@@ -86,16 +86,87 @@ BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
 │ └ moai_BinaryDecisionTree_z[4]
 └ constraints [11]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.41116523477477984}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.4111662347747798}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.7509568278936385}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.4111662347747798}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.7509578278936385}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≤ 0.44605262741577173}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.4111662347747798}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.7509578278936385}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.4460536274157717}
-  └ -3 moai_BinaryDecisionTree_z[1] - 4 moai_BinaryDecisionTree_z[2] + 2 moai_BinaryDecisionTree_z[3] - 4 moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_value[1] = 0
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.9905675500332488}
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.9474673043150028}
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.5815518660067164}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.9905675500332488}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.9474673043150028}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.5815528660067164}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≤ 0.9905675500332488}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.9474683043150028}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.9905685500332488}
+  └ 2 moai_BinaryDecisionTree_z[1] - 4 moai_BinaryDecisionTree_z[2] + 2 moai_BinaryDecisionTree_z[3] - 4 moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_value[1] = 0
+BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
+├ variables [4]
+│ ├ moai_BinaryDecisionTree_value[1]
+│ ├ moai_BinaryDecisionTree_z[1]
+│ ├ moai_BinaryDecisionTree_z[2]
+│ └ moai_BinaryDecisionTree_z[3]
+└ constraints [7]
+  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.5312021626994367}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.5312031626994367}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.508008474393609}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.5312031626994367}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.508009474393609}
+  └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
+BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
+├ variables [5]
+│ ├ moai_BinaryDecisionTree_value[1]
+│ ├ moai_BinaryDecisionTree_z[1]
+│ ├ moai_BinaryDecisionTree_z[2]
+│ ├ moai_BinaryDecisionTree_z[3]
+│ └ moai_BinaryDecisionTree_z[4]
+└ constraints [11]
+  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] = 1
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.4743447016210958}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.4743457016210958}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.6437790823860555}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.4743457016210958}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.6437800823860556}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≤ 0.5882410751572464}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.4743457016210958}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.6437800823860556}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.5882420751572465}
+  └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 3 moai_BinaryDecisionTree_z[3] - 4 moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_value[1] = 0
+BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
+├ variables [5]
+│ ├ moai_BinaryDecisionTree_value[1]
+│ ├ moai_BinaryDecisionTree_z[1]
+│ ├ moai_BinaryDecisionTree_z[2]
+│ ├ moai_BinaryDecisionTree_z[3]
+│ └ moai_BinaryDecisionTree_z[4]
+└ constraints [11]
+  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] = 1
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.41223711733275015}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.4122381173327501}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.5439987996210628}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.4122381173327501}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.5439997996210628}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≤ 0.515200372485301}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.4122381173327501}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.5439997996210628}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.5152013724853011}
+  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] + 2 moai_BinaryDecisionTree_z[3] - 4 moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_value[1] = 0
+BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
+├ variables [5]
+│ ├ moai_BinaryDecisionTree_value[1]
+│ ├ moai_BinaryDecisionTree_z[1]
+│ ├ moai_BinaryDecisionTree_z[2]
+│ ├ moai_BinaryDecisionTree_z[3]
+│ └ moai_BinaryDecisionTree_z[4]
+└ constraints [11]
+  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] = 1
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.41223711733275015}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.4122381173327501}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.5439987996210628}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.4122381173327501}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.5439997996210628}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≤ 0.39570292410849206}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.4122381173327501}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.5439997996210628}
+  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.39570392410849203}
+  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] + 2 moai_BinaryDecisionTree_z[3] - 4 moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_value[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=2, depth=2]
 ├ variables [3]
 │ ├ moai_BinaryDecisionTree_value[1]
@@ -103,78 +174,9 @@ BinaryDecisionTree{Float64,Int64} [leaves=2, depth=2]
 │ └ moai_BinaryDecisionTree_z[2]
 └ constraints [4]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.6588474236241902}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.6588484236241903}
-  └ 2 moai_BinaryDecisionTree_z[1] - 4 moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_value[1] = 0
-BinaryDecisionTree{Float64,Int64} [leaves=4, depth=2]
-├ variables [5]
-│ ├ moai_BinaryDecisionTree_value[1]
-│ ├ moai_BinaryDecisionTree_z[1]
-│ ├ moai_BinaryDecisionTree_z[2]
-│ ├ moai_BinaryDecisionTree_z[3]
-│ └ moai_BinaryDecisionTree_z[4]
-└ constraints [11]
-  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.41223711733275015}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.4122381173327501}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.7210746400035294}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.4122381173327501}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.7210756400035294}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≤ 0.515200372485301}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.4122381173327501}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.7210756400035294}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.5152013724853011}
-  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] + 2 moai_BinaryDecisionTree_z[3] - 4 moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_value[1] = 0
-BinaryDecisionTree{Float64,Int64} [leaves=5, depth=2]
-├ variables [6]
-│ ├ moai_BinaryDecisionTree_value[1]
-│ ├ moai_BinaryDecisionTree_z[1]
-│ ├ moai_BinaryDecisionTree_z[2]
-│ ├ moai_BinaryDecisionTree_z[3]
-│ ├ moai_BinaryDecisionTree_z[4]
-│ └ moai_BinaryDecisionTree_z[5]
-└ constraints [16]
-  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_z[5] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.7509568278936385}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.7509578278936385}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≤ 0.831189428657276}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.7509578278936385}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.831190428657276}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≤ 0.9511507486755048}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.7509578278936385}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.831190428657276}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≥ 0.9511517486755048}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[2] ≤ 0.9905675500332488}
-  ├ moai_BinaryDecisionTree_z[5] --&gt; {x[2] ≥ 0.7509578278936385}
-  ├ moai_BinaryDecisionTree_z[5] --&gt; {x[2] ≥ 0.831190428657276}
-  ├ moai_BinaryDecisionTree_z[5] --&gt; {x[2] ≥ 0.9511517486755048}
-  ├ moai_BinaryDecisionTree_z[5] --&gt; {x[2] ≥ 0.9905685500332488}
-  └ -4 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + 2 moai_BinaryDecisionTree_z[4] - 4 moai_BinaryDecisionTree_z[5] + moai_BinaryDecisionTree_value[1] = 0
-BinaryDecisionTree{Float64,Int64} [leaves=5, depth=2]
-├ variables [6]
-│ ├ moai_BinaryDecisionTree_value[1]
-│ ├ moai_BinaryDecisionTree_z[1]
-│ ├ moai_BinaryDecisionTree_z[2]
-│ ├ moai_BinaryDecisionTree_z[3]
-│ ├ moai_BinaryDecisionTree_z[4]
-│ └ moai_BinaryDecisionTree_z[5]
-└ constraints [16]
-  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_z[4] + moai_BinaryDecisionTree_z[5] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[1] ≤ 0.4743447016210958}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≥ 0.4743457016210958}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.9123426313144589}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.5934293790787758}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.4743457016210958}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≤ 0.9123426313144589}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.5934303790787758}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≤ 0.7434707393465864}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.4743457016210958}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≤ 0.9123426313144589}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.5934303790787758}
-  ├ moai_BinaryDecisionTree_z[4] --&gt; {x[1] ≥ 0.7434717393465864}
-  ├ moai_BinaryDecisionTree_z[5] --&gt; {x[1] ≥ 0.4743457016210958}
-  ├ moai_BinaryDecisionTree_z[5] --&gt; {x[1] ≥ 0.912343631314459}
-  └ 2 moai_BinaryDecisionTree_z[1] - 3 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] - 3 moai_BinaryDecisionTree_z[4] - 4 moai_BinaryDecisionTree_z[5] + moai_BinaryDecisionTree_value[1] = 0
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.9511507486755048}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.9511517486755048}
+  └ -4 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_value[1] = 0
 BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 ├ variables [4]
 │ ├ moai_BinaryDecisionTree_value[1]
@@ -183,23 +185,9 @@ BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
 │ └ moai_BinaryDecisionTree_z[3]
 └ constraints [7]
   ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.403738353154152}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.403739353154152}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.6588474236241902}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.403739353154152}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.6588484236241903}
-  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0
-BinaryDecisionTree{Float64,Int64} [leaves=3, depth=2]
-├ variables [4]
-│ ├ moai_BinaryDecisionTree_value[1]
-│ ├ moai_BinaryDecisionTree_z[1]
-│ ├ moai_BinaryDecisionTree_z[2]
-│ └ moai_BinaryDecisionTree_z[3]
-└ constraints [7]
-  ├ moai_BinaryDecisionTree_z[1] + moai_BinaryDecisionTree_z[2] + moai_BinaryDecisionTree_z[3] = 1
-  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.41116523477477984}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.4111662347747798}
-  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.5233481850332455}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.4111662347747798}
-  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.5233491850332456}
-  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../AbstractGPs/">« AbstractGPs.jl</a><a class="docs-footer-nextpage" href="../EvoTrees/">EvoTrees.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Friday 6 March 2026 01:06">Friday 6 March 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+  ├ moai_BinaryDecisionTree_z[1] --&gt; {x[2] ≤ 0.516507238572207}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[2] ≥ 0.5165082385722071}
+  ├ moai_BinaryDecisionTree_z[2] --&gt; {x[1] ≤ 0.548746968232185}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[2] ≥ 0.5165082385722071}
+  ├ moai_BinaryDecisionTree_z[3] --&gt; {x[1] ≥ 0.5487479682321851}
+  └ -3 moai_BinaryDecisionTree_z[1] + 2 moai_BinaryDecisionTree_z[2] - 4 moai_BinaryDecisionTree_z[3] + moai_BinaryDecisionTree_value[1] = 0</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../AbstractGPs/">« AbstractGPs.jl</a><a class="docs-footer-nextpage" href="../EvoTrees/">EvoTrees.jl »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Sunday 15 March 2026 02:23">Sunday 15 March 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

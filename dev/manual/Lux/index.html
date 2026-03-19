@@ -9,8 +9,8 @@
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ 3.439697742462158 x[1] - moai_Affine[1] = -0.6141469478607178
-  └ 3.133542537689209 x[1] - moai_Affine[2] = -0.7445065975189209
+  ├ -0.16807851195335388 x[1] - moai_Affine[1] = -0.18631839752197266
+  └ 1.7017515897750854 x[1] - moai_Affine[2] = 0.18846869468688965
 MathOptAI.ReLU()
 ├ variables [2]
 │ ├ moai_ReLU[1]
@@ -24,13 +24,13 @@ Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
 └ constraints [1]
-  └ -0.4623091518878937 moai_ReLU[1] + 0.488895058631897 moai_ReLU[2] - moai_Affine[1] = -0.17682456970214844</code></pre><h2 id="Reduced-space"><a class="docs-heading-anchor" href="#Reduced-space">Reduced-space</a><a id="Reduced-space-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-space" title="Permalink"></a></h2><p>Use the <code>reduced_space = true</code> keyword to formulate a reduced-space model:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, Lux, MathOptAI, Random</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rng = Random.MersenneTwister();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 2, Lux.relu), Lux.Dense(2 =&gt; 1))</code><code class="nohighlight hljs ansi" style="display:block;">Chain(
+  └ -0.092513807117939 moai_ReLU[1] + 0.006846277508884668 moai_ReLU[2] - moai_Affine[1] = 0.658185601234436</code></pre><h2 id="Reduced-space"><a class="docs-heading-anchor" href="#Reduced-space">Reduced-space</a><a id="Reduced-space-1"></a><a class="docs-heading-anchor-permalink" href="#Reduced-space" title="Permalink"></a></h2><p>Use the <code>reduced_space = true</code> keyword to formulate a reduced-space model:</p><pre><code class="language-julia-repl hljs" style="display:block;">julia&gt; using JuMP, Lux, MathOptAI, Random</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; rng = Random.MersenneTwister();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; chain = Lux.Chain(Lux.Dense(1 =&gt; 2, Lux.relu), Lux.Dense(2 =&gt; 1))</code><code class="nohighlight hljs ansi" style="display:block;">Chain(
     layer_1 = Dense(1 =&gt; 2, relu),                <span class="sgr90"># 4 parameters</span>
     layer_2 = Dense(2 =&gt; 1),                      <span class="sgr90"># 3 parameters</span>
 ) <span class="sgr90">        # Total: </span>7 parameters,
 <span class="sgr90">          #        plus </span>0 states.</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; parameters, state = Lux.setup(rng, chain);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; predictor = (chain, parameters, state);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; model = Model();</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; @variable(model, x[1:1]);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y, formulation =
            MathOptAI.add_predictor(model, predictor, x; reduced_space = true);</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; y</code><code class="nohighlight hljs ansi" style="display:block;">1-element Vector{JuMP.NonlinearExpr}:
- ((+(0) + (-0.44993147253990173 * max(0, 0.5888257026672363 x[1] - 0.5985438823699951))) + (-0.937881350517273 * max(0, -0.20779386162757874 x[1] + 0.3942229747772217))) + 0.6105090975761414</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">ReducedSpace(Affine(A, b) [input: 1, output: 2])
+ ((+(0) + (-0.8519811034202576 * max(0, 0.2033769190311432 x[1] - 0.7302429676055908))) + (-0.9916006326675415 * max(0, 1.1705073118209839 x[1] + 0.8858006000518799))) + -0.3875429630279541</code><br/><code class="language-julia-repl hljs" style="display:block;">julia&gt; formulation</code><code class="nohighlight hljs ansi" style="display:block;">ReducedSpace(Affine(A, b) [input: 1, output: 2])
 ├ variables [0]
 └ constraints [0]
 ReducedSpace(MathOptAI.ReLU())
@@ -53,8 +53,8 @@ ReducedSpace(Affine(A, b) [input: 2, output: 1])
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ -1.4907515048980713 x[1] - moai_Affine[1] = 0.7636163234710693
-  └ -1.1832691431045532 x[1] - moai_Affine[2] = 0.6081135272979736
+  ├ 1.0882115364074707 x[1] - moai_Affine[1] = 0.043010711669921875
+  └ 2.0563337802886963 x[1] - moai_Affine[2] = -0.3671693801879883
 MathOptAI.ReLUSOS1()
 ├ variables [4]
 │ ├ moai_ReLU[1]
@@ -73,5 +73,6 @@ MathOptAI.ReLUSOS1()
 Affine(A, b) [input: 2, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
-└ constraints [1]
-  └ 0.21277101337909698 moai_ReLU[1] - 0.12539146840572357 moai_ReLU[2] - moai_Affine[1] = -0.33911287784576416</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../GLM/">« GLM.jl</a><a class="docs-footer-nextpage" href="../PythonCall/">Python integration »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Sunday 15 March 2026 21:12">Sunday 15 March 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+└ constraints [2]
+  ├ moai_Affine[1] ≥ 0.5276296734809875
+  └ 0.5821096897125244 moai_ReLU[1] + 0.6839768886566162 moai_ReLU[2] - moai_Affine[1] = -0.5276296734809875</code></pre></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../GLM/">« GLM.jl</a><a class="docs-footer-nextpage" href="../PythonCall/">Python integration »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 19 March 2026 06:24">Thursday 19 March 2026</span>. Using Julia version 1.12.5.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

@@ -49,7 +49,7 @@ ReLUEpigraph()
   ├ moai_ReLUEpigraph[1] ≤ 1
   ├ -x[2] + moai_ReLUEpigraph[2] ≥ 0
   ├ moai_ReLUEpigraph[2] ≥ 0
-  └ moai_ReLUEpigraph[2] ≤ 1
+  └ moai_ReLUEpigraph[2] ≤ 2
 ```
 """
 struct ReLUEpigraph <: AbstractPredictor end

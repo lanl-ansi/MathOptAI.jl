@@ -12,22 +12,18 @@ function MathOptAI.add_predictor(
     m, n = size(p.A)
     core, y = ExaModels.add_var(core, m)
     core, b = ExaModels.add_par(core, p.b)
-    # Base: y[i] - b[i] = 0, parallelized over i ∈ 1:m
+    core, A = ExaModels.add_par(core, p.A)
     core, c1 = ExaModels.add_con(
         core,
         y[i] - b[i] for i in 1:m;
         lcon = 0.0,
         ucon = 0.0,
     )
-    # Augment column-by-column: subtract A[i,j]*x[j] from constraint i.
-    # Full expression: y[i] - b[i] - sum_j A[i,j]*x[j] = 0  ⟺  y[i] = b[i] + A*x
-    # x[j] with a fixed integer j produces a fixed Var node — GPU-friendly.
-    for j in 1:n
-        core, A_col = ExaModels.add_par(core, p.A[:, j])
-        xj = x[j]
-        core, c2 =
-            ExaModels.add_con!(core, c1, i => -A_col[i] * xj for i in 1:m)
-    end
+    core, _ = ExaModels.add_con!(
+        core,
+        c1,
+        i => -A[j, i] * x[j] for i in 1:m, j in 1:n
+    )
     return (core, y), MathOptAI.Formulation(p, Any[y], Any[c1])
 end
 

@@ -40,13 +40,16 @@ julia> y
 
 julia> formulation
 ReLUEpigraph()
-├ variables [1]
-│ └ VariableRef[moai_ReLUEpigraph[1], moai_ReLUEpigraph[2]]
-└ constraints [4]
+├ variables [2]
+│ ├ moai_ReLUEpigraph[1]
+│ └ moai_ReLUEpigraph[2]
+└ constraints [6]
   ├ -x[1] + moai_ReLUEpigraph[1] ≥ 0
   ├ moai_ReLUEpigraph[1] ≥ 0
+  ├ moai_ReLUEpigraph[1] ≤ 1
   ├ -x[2] + moai_ReLUEpigraph[2] ≥ 0
-  └ moai_ReLUEpigraph[2] ≥ 0
+  ├ moai_ReLUEpigraph[2] ≥ 0
+  └ moai_ReLUEpigraph[2] ≤ 2
 ```
 """
 struct ReLUEpigraph <: AbstractPredictor end

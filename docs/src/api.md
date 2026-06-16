@@ -136,6 +136,11 @@ ReLU
 ReLUBigM
 ```
 
+## `ReLUEpigraph`
+```@docs
+ReLUEpigraph
+```
+
 ## `ReLUQuadratic`
 ```@docs
 ReLUQuadratic

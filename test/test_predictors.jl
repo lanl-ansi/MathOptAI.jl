@@ -232,6 +232,24 @@ function test_ReLU_BigM()
     return
 end
 
+function test_ReLU_Epigraph()
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = MathOptAI.ReLUEpigraph()
+    @test MathOptAI.output_size(f, (10,)) == (10,)
+    y, formulation = MathOptAI.add_predictor(model, f, x)
+    @test length(y) == 2
+    @test num_variables(model) == 4
+    @test num_constraints(model, AffExpr, MOI.GreaterThan{Float64}) == 2
+    @objective(model, Min, sum(y))
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test value.(y) ≈ [0.0, 2.0]
+    return
+end
+
 function test_ReLU_SOS1()
     model = Model(HiGHS.Optimizer)
     set_silent(model)

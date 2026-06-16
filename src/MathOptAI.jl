@@ -356,8 +356,8 @@ julia> output_size(MaxPool2d((3, 3); input_size = (6, 9, 1)), (6, 9, 1))
 """
 output_size(::AbstractPredictor, ::Any) = nothing
 
-for file in readdir(joinpath(@__DIR__, "predictors"); join = true)
-    if endswith(file, ".jl")
+let predictors = joinpath(@__DIR__, "predictors")
+    for file in filter(endswith(".jl"), readdir(predictors; join = true))
         include(file)
     end
 end

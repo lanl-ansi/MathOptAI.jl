@@ -38,9 +38,9 @@ chain = Flux.Chain(
     Flux.Dense(2 => 2, Flux.softplus),
     Flux.Dense(2 => 2, Flux.tanh),
 );
-core = ExaModels.ExaCore()
-x = ExaModels.variable(core, 2)
-y, _ = MathOptAI.add_predictor(core, chain, x);
+core = ExaModels.ExaCore(; concrete = Val(true))
+core, x = ExaModels.add_var(core, 2)
+(core, y), _ = MathOptAI.add_predictor(core, chain, x);
 y
 core
 ```

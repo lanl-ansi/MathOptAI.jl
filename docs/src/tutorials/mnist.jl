@@ -177,16 +177,17 @@ Plots.plot(
 # We can do a similar thing with ExaModels:
 
 function find_adversarial_image_exa(test_case; adversary_label, δ = 0.05)
-    core = ExaModels.ExaCore()
-    x = ExaModels.variable(core, 28^2; lvar = 0, uvar = 1)
-    ExaModels.constraint(
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    core, x = ExaModels.add_var(core, 28^2; lvar = 0, uvar = 1)
+    core, _ = ExaModels.add_con(
         core,
         x[i] - f for (i, f) in enumerate(test_case.features);
         lcon = -δ,
         ucon = δ,
     )
-    y, _ = MathOptAI.add_predictor(core, predictor, x)
-    ExaModels.objective(core, y[test_case.targets+1] - y[adversary_label+1])
+    (core, y), _ = MathOptAI.add_predictor(core, predictor, x)
+    core, _ =
+        ExaModels.add_obj(core, y[test_case.targets+1] - y[adversary_label+1])
     model = ExaModels.ExaModel(core)
     result = NLPModelsIpopt.ipopt(model; print_level = 0)
     @assert result.status ∈ (:first_order, :acceptable)

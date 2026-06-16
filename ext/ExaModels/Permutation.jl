@@ -5,10 +5,10 @@
 # in the LICENSE.md file.
 
 function MathOptAI.add_predictor(
-    ::ExaModels.ExaCore,
+    core::ExaModels.ExaCore,
     p::MathOptAI.ReducedSpace{MathOptAI.Permutation},
     x,
 )
     y = [x[p.predictor.p[i]] for i in eachindex(p.predictor.p)]
-    return y, MathOptAI.Formulation(p)
+    return (core, y), MathOptAI.Formulation(p)
 end

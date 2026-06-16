@@ -9,9 +9,10 @@ module MathOptAIExaModelsExt
 import ExaModels
 import MathOptAI
 
-function _length(
-    x::Union{ExaModels.Variable,ExaModels.Subexpr,ExaModels.ReducedSubexpr},
-)
+# This is a bug with ExaModels.
+using ExaModels: Constant
+
+function _length(x::Union{ExaModels.Variable,ExaModels.Expression})
     return x.length
 end
 
@@ -44,7 +45,7 @@ All other keyword arguments are passed to [`build_predictor`](@ref).
 ```jldoctest
 julia> using ExaModels, MathOptAI
 
-julia> model = ExaModels.ExaCore()
+julia> model = ExaModels.ExaCore(; concrete = Val(true))
 An ExaCore
 
   Float type: ...................... Float64
@@ -55,7 +56,7 @@ An ExaCore
   number of constraint patterns: ... 0
 
 
-julia> x = ExaModels.variable(core, 2)
+julia> core, x = ExaModels.add_var(core, 2)
 Variable
 
   x ∈ R^{2}

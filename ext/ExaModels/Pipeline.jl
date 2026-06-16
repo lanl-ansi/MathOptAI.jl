@@ -11,10 +11,10 @@ function MathOptAI.add_predictor(
 )
     form = MathOptAI.PipelineFormulation(p, Any[])
     for layer in p.layers
-        x, inner = MathOptAI.add_predictor(core, layer, x)
+        (core, x), inner = MathOptAI.add_predictor(core, layer, x)
         push!(form.layers, inner)
     end
-    return x, form
+    return (core, x), form
 end
 
 function MathOptAI.add_predictor(
@@ -24,9 +24,9 @@ function MathOptAI.add_predictor(
 )
     form = MathOptAI.PipelineFormulation(p, Any[])
     for layer in p.predictor.layers
-        x, inner =
+        (core, x), inner =
             MathOptAI.add_predictor(core, MathOptAI.ReducedSpace(layer), x)
         push!(form.layers, inner)
     end
-    return x, form
+    return (core, x), form
 end

@@ -9,11 +9,11 @@ function MathOptAI.add_predictor(
     p::MathOptAI.LeakyReLU,
     x::ExaModels.AbstractVariable,
 )
-    y_relu, f_relu = MathOptAI.add_predictor(core, p.relu, x)
+    (core, y_relu), f_relu = MathOptAI.add_predictor(core, p.relu, x)
     n = _length(x)
     η = p.negative_slope
-    y = ExaModels.variable(core, n)
-    cons = ExaModels.constraint(
+    core, y = ExaModels.add_var(core, n)
+    core, cons = ExaModels.add_con(
         core,
         y[i] - η * x[i] - (1 - η) * y_relu[i] for i in 1:n;
         lcon = 0.0,
@@ -24,7 +24,7 @@ function MathOptAI.add_predictor(
         [f_relu.variables; y],
         [f_relu.constraints; cons],
     )
-    return y, form
+    return (core, y), form
 end
 
 function MathOptAI.add_predictor(
@@ -32,24 +32,26 @@ function MathOptAI.add_predictor(
     p::MathOptAI.LeakyReLU,
     x::AbstractVector,
 )
-    y_relu, f_relu = MathOptAI.add_predictor(core, p.relu, x)
+    (core, y_relu), f_relu = MathOptAI.add_predictor(core, p.relu, x)
     n = length(x)
     η = p.negative_slope
-    y = ExaModels.variable(core, n)
-    cons = [
-        ExaModels.constraint(
+    core, y = ExaModels.add_var(core, n)
+    cons = Any[]
+    for i in 1:n
+        core, c = ExaModels.add_con(
             core,
             y[i] - η * x[i] - (1 - η) * y_relu[i];
             lcon = 0.0,
             ucon = 0.0,
-        ) for i in 1:n
-    ]
+        )
+        push!(cons, c)
+    end
     form = MathOptAI.Formulation(
         p,
         [f_relu.variables; y],
         [f_relu.constraints; cons...],
     )
-    return y, form
+    return (core, y), form
 end
 
 function MathOptAI.add_predictor(
@@ -58,8 +60,8 @@ function MathOptAI.add_predictor(
     x,
 )
     inner = MathOptAI.ReducedSpace(p.predictor.relu)
-    y_relu, _ = MathOptAI.add_predictor(core, inner, x)
+    (core, y_relu), _ = MathOptAI.add_predictor(core, inner, x)
     η = p.predictor.negative_slope
     y = [η * x[i] + (1 - η) * y_relu[i] for i in 1:_length(x)]
-    return y, MathOptAI.Formulation(p)
+    return (core, y), MathOptAI.Formulation(p)
 end

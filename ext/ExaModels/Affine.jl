@@ -22,7 +22,7 @@ function MathOptAI.add_predictor(
     core, _ = ExaModels.add_con!(
         core,
         c1,
-        i => -A[j, i] * x[j] for i in 1:m, j in 1:n
+        i => -A[i, j] * x[j] for i in 1:m, j in 1:n
     )
     return (core, y), MathOptAI.Formulation(p, Any[y], Any[c1])
 end

@@ -189,10 +189,13 @@ end
 
 function test_unsupported_layer()
     layer = Flux.Bilinear((5, 5) => 7)
+    F = typeof(layer)
     model = Model()
     @variable(model, x[1:2])
     @test_throws(
-        ErrorException("Unsupported layer: $layer"),
+        ErrorException(
+            "Unsupported layer of type: $F.\n\nTo fix this error, implement `MathOptAI.build_predictor(::$F; kwargs...)`.",
+        ),
         MathOptAI.add_predictor(model, Flux.Chain(layer), x),
     )
     return
@@ -431,8 +434,8 @@ struct CustomPredictor <: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
 end
 
-function MathOptAI.build_predictor(model::CustomModel)
-    predictor = MathOptAI.build_predictor(model.chain)
+function MathOptAI.build_predictor(model::CustomModel; kwargs...)
+    predictor = MathOptAI.build_predictor(model.chain; kwargs...)
     return CustomPredictor(predictor)
 end
 

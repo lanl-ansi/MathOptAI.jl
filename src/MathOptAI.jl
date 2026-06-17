@@ -278,7 +278,25 @@ A uniform interface to convert various extension types to an
 
 See the various extension docstrings for details.
 """
-function build_predictor end
+function build_predictor(::F; kwargs...) where {F}
+    return error(
+        "Unsupported layer of type: $(F).\n\nTo fix this error, implement `MathOptAI.build_predictor(::$F; kwargs...)`.",
+    )
+end
+
+function build_predictor(
+    activation::Function;
+    config::Dict = Dict{Any,Any}(),
+    kwargs...,
+)
+    layer_fn = get(config, activation, missing)
+    if layer_fn === missing
+        error("Unsupported activation function: $activation")
+    end
+    return layer_fn()
+end
+
+build_predictor(::typeof(identity); kwargs...) = Pipeline()
 
 """
     ReducedSpace(predictor::AbstractPredictor)

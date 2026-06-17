@@ -109,10 +109,29 @@ function test_end_to_end_ReLU()
         Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1)),
     )
     model = Model(Ipopt.Optimizer)
-    # set_silent(model)
+    set_silent(model)
     @variable(model, x == -1.2)
     y, _ = MathOptAI.add_predictor(model, chain, [x])
-    print(model)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
+    return
+end
+
+function test_end_to_end_my_ReLU()
+    myrelu(x) = max(0, x)
+    chain = _train_lux_model(
+        Flux.Chain(Flux.Dense(1 => 16, myrelu), Flux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(
+        model,
+        chain,
+        [x];
+        config = Dict(myrelu => MathOptAI.ReLU),
+    )
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)

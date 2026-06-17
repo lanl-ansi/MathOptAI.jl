@@ -105,71 +105,57 @@ function MathOptAI.build_predictor(
 )
     chain, parameters, _ = predictor
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
-    for (layer, parameter) in zip(chain.layers, parameters)
-        _build_predictor(inner_predictor, layer, parameter, config)
+    for layer_params in zip(chain.layers, parameters)
+        layer_p = MathOptAI.build_predictor(layer_params; config)
+        if layer_p isa MathOptAI.Pipeline
+            append!(inner_predictor.layers, layer_p.layers)
+        else
+            push!(inner_predictor.layers, layer_p)
+        end
     end
     return inner_predictor
 end
 
-function _build_predictor(::MathOptAI.Pipeline, layer::Any, ::Any, ::Dict)
-    return error("Unsupported layer: $layer")
-end
-
-_default(::typeof(identity)) = nothing
-_default(::Any) = missing
-_default(::typeof(Lux.relu)) = MathOptAI.ReLU
-_default(::typeof(Lux.sigmoid)) = MathOptAI.Sigmoid
-_default(::typeof(Lux.sigmoid_fast)) = MathOptAI.Sigmoid
-_default(::typeof(Lux.softplus)) = MathOptAI.SoftPlus
-_default(::typeof(Lux.tanh)) = MathOptAI.Tanh
-_default(::typeof(Lux.tanh_fast)) = MathOptAI.Tanh
-
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    activation,
-    config::Dict,
+for (f, P) in (
+    Lux.relu => MathOptAI.ReLU,
+    Lux.sigmoid => MathOptAI.Sigmoid,
+    Lux.sigmoid_fast => MathOptAI.Sigmoid,
+    Lux.softplus => MathOptAI.SoftPlus,
+    Lux.tanh => MathOptAI.Tanh,
+    Lux.tanh_fast => MathOptAI.Tanh,
 )
-    layer_fn = get(config, activation, _default(activation))
-    if layer_fn === nothing
-        # Do nothing: a linear activation
-    elseif layer_fn === missing
-        error("Unsupported activation function: $activation")
-    else
-        push!(predictor.layers, layer_fn())
+    @eval function MathOptAI.build_predictor(
+        activation::typeof($f);
+        config::Dict = Dict{Any,Any}(),
+        kwargs...,
+    )
+        return get(config, activation, $P)()
     end
-    return
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Lux.Dense,
-    p::Any,
-    config::Dict,
+function MathOptAI.build_predictor(
+    (layer, params)::Tuple{Lux.Dense,Any};
+    kwargs...,
 )
-    push!(predictor.layers, MathOptAI.Affine(p.weight, vec(p.bias)))
-    _build_predictor(predictor, layer.activation, config)
-    return
+    p = MathOptAI.Affine(params.weight, vec(params.bias))
+    σ = MathOptAI.build_predictor(layer.activation; kwargs...)
+    return MathOptAI.Pipeline(p, σ)
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Lux.Scale,
-    p::Any,
-    config::Dict,
+function MathOptAI.build_predictor(
+    (layer, params)::Tuple{Lux.Scale,Any};
+    kwargs...,
 )
-    push!(predictor.layers, MathOptAI.Scale(p.weight, p.bias))
-    _build_predictor(predictor, layer.activation, config)
-    return
+    p = MathOptAI.Scale(params.weight, params.bias)
+    σ = MathOptAI.build_predictor(layer.activation; kwargs...)
+    return MathOptAI.Pipeline(p, σ)
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    ::Lux.WrappedFunction{typeof(Lux.softmax)},
-    ::Any,
-    config::Dict,
+function MathOptAI.build_predictor(
+    ::Tuple{Lux.WrappedFunction{typeof(Lux.softmax)},Any};
+    config::Dict = Dict{Any,Any}(),
 )
-    push!(predictor.layers, get(config, Lux.softmax, MathOptAI.SoftMax)())
-    return
+    return get(config, Lux.softmax, MathOptAI.SoftMax)()
 end
 
 end  # module MathOptAILuxExt

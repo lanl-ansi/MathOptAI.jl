@@ -276,10 +276,13 @@ function test_unsupported_layer()
     rng = Random.MersenneTwister()
     ml_model = Lux.Chain(layer, layer)
     parameters, state = Lux.setup(rng, ml_model)
+    F = typeof((layer, first(parameters)))
     model = Model()
     @variable(model, x[1:2])
     @test_throws(
-        ErrorException("Unsupported layer: $layer"),
+        ErrorException(
+            "Unsupported layer of type: $F.\n\nTo fix this error, implement `MathOptAI.build_predictor(::$F; kwargs...)`.",
+        ),
         MathOptAI.add_predictor(model, (ml_model, parameters, state), x),
     )
     return

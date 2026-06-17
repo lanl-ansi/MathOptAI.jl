@@ -126,94 +126,59 @@ function MathOptAI.build_predictor(
     end
     inner_predictor = MathOptAI.Pipeline(MathOptAI.AbstractPredictor[])
     for layer in predictor.layers
-        input_size =
-            _build_predictor(inner_predictor, layer, config, input_size)
+        if layer == Flux.flatten
+            if input_size !== nothing
+                input_size = (prod(input_size),)
+            end
+            continue
+        end
+        layer_p = MathOptAI.build_predictor(layer; config, input_size)
+        input_size = MathOptAI.output_size(layer_p, input_size)
+        if layer_p isa MathOptAI.Pipeline
+            append!(inner_predictor.layers, layer_p.layers)
+        else
+            push!(inner_predictor.layers, layer_p)
+        end
     end
     return inner_predictor
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Any,
-    config::Dict,
-    input_size::Any,
+for (f, P) in (
+    Flux.gelu_tanh => MathOptAI.GELU,
+    Flux.relu => MathOptAI.ReLU,
+    Flux.sigmoid => MathOptAI.Sigmoid,
+    Flux.softplus => MathOptAI.SoftPlus,
+    Flux.softmax => MathOptAI.SoftMax,
+    Flux.tanh => MathOptAI.Tanh,
 )
-    try
-        p = MathOptAI.build_predictor(layer)
-        push!(predictor.layers, p)
-        return MathOptAI.output_size(p, input_size)
-    catch
-        return error("Unsupported layer: $layer")
+    @eval function MathOptAI.build_predictor(
+        activation::typeof($f);
+        config::Dict = Dict{Any,Any}(),
+        kwargs...,
+    )
+        return get(config, activation, $P)()
     end
 end
 
-_default(::Any) = missing
-_default(::typeof(Flux.gelu_tanh)) = MathOptAI.GELU
-_default(::typeof(Flux.relu)) = MathOptAI.ReLU
-_default(::typeof(Flux.sigmoid)) = MathOptAI.Sigmoid
-_default(::typeof(Flux.softplus)) = MathOptAI.SoftPlus
-_default(::typeof(Flux.softmax)) = MathOptAI.SoftMax
-_default(::typeof(Flux.tanh)) = MathOptAI.Tanh
-
-function _build_predictor(
-    ::MathOptAI.Pipeline,
-    ::typeof(identity),
-    ::Dict,
-    input_size::Union{Nothing,NTuple},
-)
-    # Do nothing: a linear activation
-    return input_size
-end
-
-function _build_predictor(
-    ::MathOptAI.Pipeline,
-    ::typeof(Flux.flatten),
-    ::Dict,
-    input_size::Union{Nothing,NTuple},
-)
-    if input_size === nothing
-        return nothing
-    end
-    return (prod(input_size),)
-end
-
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    activation::Function,
-    config::Dict,
-    input_size::Union{Nothing,NTuple},
-)
-    layer_fn = get(config, activation, _default(activation))
-    if layer_fn === missing
-        error("Unsupported activation function: $activation")
-    end
-    p = layer_fn()
-    push!(predictor.layers, p)
-    return MathOptAI.output_size(p, input_size)
-end
-
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.Dense,
-    config::Dict,
-    input_size::Union{Nothing,Tuple{Int}},
+function MathOptAI.build_predictor(
+    layer::Flux.Dense;
+    input_size::Union{Nothing,Tuple{Int}} = nothing,
+    kwargs...,
 )
     p = MathOptAI.Affine(layer.weight, layer.bias)
-    push!(predictor.layers, p)
     input_size = MathOptAI.output_size(p, input_size)
-    return _build_predictor(predictor, layer.σ, config, input_size)
+    σ = MathOptAI.build_predictor(layer.σ; input_size, kwargs...)
+    return MathOptAI.Pipeline(p, σ)
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.Scale,
-    config::Dict,
-    input_size::Union{Nothing,Tuple{Int}},
+function MathOptAI.build_predictor(
+    layer::Flux.Scale;
+    input_size::Union{Nothing,Tuple{Int}} = nothing,
+    kwargs...,
 )
     p = MathOptAI.Scale(layer.scale, layer.bias)
-    push!(predictor.layers, p)
-    input_size = MathOptAI.output_size(p, input_size)
-    return _build_predictor(predictor, layer.σ, config, input_size)
+    σ = MathOptAI.build_predictor(layer.σ; input_size, kwargs...)
+    return MathOptAI.Pipeline(p, σ)
 end
 
 function _normalize_input_size(layer, ::Nothing)
@@ -224,57 +189,48 @@ end
 _normalize_input_size(::Any, input_size::NTuple{2,Int}) = (input_size..., 1)
 _normalize_input_size(::Any, input_size::NTuple{3,Int}) = input_size
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.Conv,
-    config::Dict,
-    input_size::Any,
-)
-    input_size_normalized = _normalize_input_size(layer, input_size)
+function MathOptAI.build_predictor(
+    layer::Flux.Conv;
+    input_size::Union{Nothing,NTuple{N,Int}} = nothing,
+    kwargs...,
+) where {N}
+    input_size = _normalize_input_size(layer, input_size)
     p = MathOptAI.Conv2d(
         layer.weight,
         layer.bias;
-        input_size = input_size_normalized,
+        input_size,
         padding = layer.pad[1:2],
         stride = layer.stride,
     )
-    push!(predictor.layers, p)
-    input_size_normalized = MathOptAI.output_size(p, input_size_normalized)
-    return _build_predictor(predictor, layer.σ, config, input_size_normalized)
+    input_size = MathOptAI.output_size(p, input_size)
+    σ = MathOptAI.build_predictor(layer.σ; input_size, kwargs...)
+    return MathOptAI.Pipeline(p, σ)
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.MaxPool,
-    config::Dict,
-    input_size::Any,
+function MathOptAI.build_predictor(
+    layer::Flux.MaxPool;
+    config::Dict = Dict{Any,Any}(),
+    input_size::Any = nothing,
 )
-    input_size_normalized = _normalize_input_size(layer, input_size)
-    p = get(config, Flux.MaxPool, MathOptAI.MaxPool2d)(
+    return get(config, Flux.MaxPool, MathOptAI.MaxPool2d)(
         layer.k;
-        input_size = input_size_normalized,
+        input_size = _normalize_input_size(layer, input_size),
         padding = layer.pad[1:2],
         stride = layer.stride,
     )::MathOptAI.AbstractPredictor
-    push!(predictor.layers, p)
-    return MathOptAI.output_size(p, input_size_normalized)
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.MeanPool,
-    config::Dict,
-    input_size::Any,
+function MathOptAI.build_predictor(
+    layer::Flux.MeanPool;
+    input_size::Any = nothing,
+    kwargs...,
 )
-    input_size_normalized = _normalize_input_size(layer, input_size)
-    p = MathOptAI.AvgPool2d(
+    return MathOptAI.AvgPool2d(
         layer.k;
-        input_size = input_size_normalized,
+        input_size = _normalize_input_size(layer, input_size),
         padding = layer.pad[1:2],
         stride = layer.stride,
     )
-    push!(predictor.layers, p)
-    return MathOptAI.output_size(p, input_size_normalized)
 end
 
 _weight_and_bias(::Type{T}, f::Flux.Scale, size) where {T} = f.scale, f.bias
@@ -283,24 +239,21 @@ function _weight_and_bias(::Type{T}, ::typeof(identity), size) where {T}
     return ones(T, size), zeros(T, size)
 end
 
-function _build_predictor(
-    predictor::MathOptAI.Pipeline,
-    layer::Flux.LayerNorm,
-    config::Dict,
-    input_size::Any,
+function MathOptAI.build_predictor(
+    layer::Flux.LayerNorm;
+    input_size::Any = nothing,
+    kwargs...,
 )
-    input_size_normalized = _normalize_input_size(layer, input_size)
     weight, bias = _weight_and_bias(typeof(layer.ϵ), layer.diag, layer.size)
     p = MathOptAI.LayerNorm(
         layer.size;
-        input_size = input_size_normalized,
+        input_size = _normalize_input_size(layer, input_size),
         eps = layer.ϵ,
         weight,
         bias,
     )
-    push!(predictor.layers, p)
-    _build_predictor(predictor, layer.λ, config, nothing)
-    return MathOptAI.output_size(p, input_size_normalized)
+    λ = MathOptAI.build_predictor(layer.λ; input_size = nothing, kwargs...)
+    return MathOptAI.Pipeline(p, λ)
 end
 
 function _construct_hessian(chain, input_dimension, output_dimension)

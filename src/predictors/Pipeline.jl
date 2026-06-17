@@ -57,7 +57,17 @@ struct Pipeline <: AbstractPredictor
     layers::Vector{AbstractPredictor}
 end
 
-Pipeline(args::AbstractPredictor...) = Pipeline(collect(args))
+function Pipeline(args::AbstractPredictor...)
+    p = Pipeline(AbstractPredictor[])
+    for arg in args
+        if arg isa Pipeline
+            append!(p.layers, arg.layers)
+        else
+            push!(p.layers, arg)
+        end
+    end
+    return p
+end
 
 function Base.show(io::IO, p::Pipeline)
     print(io, "Pipeline with layers:")

@@ -109,10 +109,29 @@ function test_end_to_end_ReLU()
         Flux.Chain(Flux.Dense(1 => 16, Flux.relu), Flux.Dense(16 => 1)),
     )
     model = Model(Ipopt.Optimizer)
-    # set_silent(model)
+    set_silent(model)
     @variable(model, x == -1.2)
     y, _ = MathOptAI.add_predictor(model, chain, [x])
-    print(model)
+    optimize!(model)
+    @test is_solved_and_feasible(model)
+    @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
+    return
+end
+
+function test_end_to_end_my_ReLU()
+    myrelu(x) = max(0, x)
+    chain = _train_lux_model(
+        Flux.Chain(Flux.Dense(1 => 16, myrelu), Flux.Dense(16 => 1)),
+    )
+    model = Model(Ipopt.Optimizer)
+    set_silent(model)
+    @variable(model, x == -1.2)
+    y, _ = MathOptAI.add_predictor(
+        model,
+        chain,
+        [x];
+        config = Dict(myrelu => MathOptAI.ReLU),
+    )
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test isapprox(value.(y), chain(Float32[value(x)]); atol = 1e-2)
@@ -189,10 +208,13 @@ end
 
 function test_unsupported_layer()
     layer = Flux.Bilinear((5, 5) => 7)
+    F = typeof(layer)
     model = Model()
     @variable(model, x[1:2])
     @test_throws(
-        ErrorException("Unsupported layer: $layer"),
+        ErrorException(
+            "Unsupported layer of type: $F.\n\nTo fix this error, implement `MathOptAI.build_predictor(::$F; kwargs...)`.",
+        ),
         MathOptAI.add_predictor(model, Flux.Chain(layer), x),
     )
     return
@@ -431,8 +453,8 @@ struct CustomPredictor <: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
 end
 
-function MathOptAI.build_predictor(model::CustomModel)
-    predictor = MathOptAI.build_predictor(model.chain)
+function MathOptAI.build_predictor(model::CustomModel; kwargs...)
+    predictor = MathOptAI.build_predictor(model.chain; kwargs...)
     return CustomPredictor(predictor)
 end
 

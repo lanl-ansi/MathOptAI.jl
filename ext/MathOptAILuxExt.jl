@@ -139,7 +139,7 @@ function MathOptAI.build_predictor(
 )
     p = MathOptAI.Affine(params.weight, vec(params.bias))
     σ = MathOptAI.build_predictor(layer.activation; kwargs...)
-    return MathOptAI.Pipeline(MathOptAI.AbstractPredictor[p, σ])
+    return MathOptAI.Pipeline(p, σ)
 end
 
 function MathOptAI.build_predictor(
@@ -148,7 +148,7 @@ function MathOptAI.build_predictor(
 )
     p = MathOptAI.Scale(params.weight, params.bias)
     σ = MathOptAI.build_predictor(layer.activation; kwargs...)
-    return MathOptAI.Pipeline(MathOptAI.AbstractPredictor[p, σ])
+    return MathOptAI.Pipeline(p, σ)
 end
 
 function MathOptAI.build_predictor(

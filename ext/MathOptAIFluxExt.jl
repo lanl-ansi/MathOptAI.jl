@@ -168,7 +168,7 @@ function MathOptAI.build_predictor(
     p = MathOptAI.Affine(layer.weight, layer.bias)
     input_size = MathOptAI.output_size(p, input_size)
     σ = MathOptAI.build_predictor(layer.σ; input_size, kwargs...)
-    return MathOptAI.Pipeline(MathOptAI.AbstractPredictor[p, σ])
+    return MathOptAI.Pipeline(p, σ)
 end
 
 function MathOptAI.build_predictor(
@@ -178,7 +178,7 @@ function MathOptAI.build_predictor(
 )
     p = MathOptAI.Scale(layer.scale, layer.bias)
     σ = MathOptAI.build_predictor(layer.σ; input_size, kwargs...)
-    return MathOptAI.Pipeline(MathOptAI.AbstractPredictor[p, σ])
+    return MathOptAI.Pipeline(p, σ)
 end
 
 function _normalize_input_size(layer, ::Nothing)
@@ -204,7 +204,7 @@ function MathOptAI.build_predictor(
     )
     input_size = MathOptAI.output_size(p, input_size)
     σ = MathOptAI.build_predictor(layer.σ; input_size, kwargs...)
-    return MathOptAI.Pipeline(MathOptAI.AbstractPredictor[p, σ])
+    return MathOptAI.Pipeline(p, σ)
 end
 
 function MathOptAI.build_predictor(
@@ -253,7 +253,7 @@ function MathOptAI.build_predictor(
         bias,
     )
     λ = MathOptAI.build_predictor(layer.λ; input_size = nothing, kwargs...)
-    return MathOptAI.Pipeline(MathOptAI.AbstractPredictor[p, λ])
+    return MathOptAI.Pipeline(p, λ)
 end
 
 function _construct_hessian(chain, input_dimension, output_dimension)

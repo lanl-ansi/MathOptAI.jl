@@ -37,16 +37,11 @@ end
 Flux.@layer InputConvex trainable=(weight_x, weight_z, bias)
 
 function InputConvex(
-    ((in_z, in_x), out)::Pair{Tuple{Int, Int}, Int}, 
-    σ=identity; 
-    init=Flux.glorot_uniform, 
+    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},
+    σ = identity;
+    init = Flux.glorot_uniform,
 )
-    InputConvex(
-        init(out, in_x), 
-        init(out, in_z), 
-        init(out), 
-        σ, 
-    )
+    return InputConvex(init(out, in_x), init(out, in_z), init(out), σ)
 end
 
 function (c::InputConvex)(x)
@@ -59,10 +54,18 @@ function (c::InputConvex)(input::Tuple)
 end
 
 function Base.show(io::IO, l::InputConvex)
-    print(io, "InputConvex((", size(l.weight_z, 2), ", ", size(l.weight_x, 2), ") => ", size(l.weight_x, 1))
+    print(
+        io,
+        "InputConvex((",
+        size(l.weight_z, 2),
+        ", ",
+        size(l.weight_x, 2),
+        ") => ",
+        size(l.weight_x, 1),
+    )
     l.σ == identity || print(io, ", ", l.σ)
     l.bias == false && print(io, "; bias=false")
-    print(io, ")")
+    return print(io, ")")
 end
 
 # Next, we define a custom `Chain` to build the ICNN.
@@ -78,7 +81,7 @@ InputConvexChain(layers...) = InputConvexChain(Chain(layers))
 function Base.show(io::IO, l::InputConvexChain)
     println(io, "InputConvexChain(")
     println.(io, "\t", l.chain)
-    println(io, ")")
+    return println(io, ")")
 end
 
 # ## Building the Predictor
@@ -103,7 +106,10 @@ function MathOptAI.build_predictor(
     push!(p.layers, Affine(layer1.weight_x, layer1.bias))
     push!(p.layers, build_predictor(layer1.σ; config))
     for layer in predictor.chain[2:end]
-        push!(p.layers, Affine([softplus(layer.weight_z) layer.weight_x], layer.bias))
+        push!(
+            p.layers,
+            Affine([softplus(layer.weight_z) layer.weight_x], layer.bias),
+        )
         push!(p.layers, build_predictor(layer.σ; config))
     end
     return InputConvexChainPredictor(p)
@@ -113,7 +119,7 @@ function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
     predictor::InputConvexChain,
     x::Vector;
-    reduced_space::Bool = false, 
+    reduced_space::Bool = false,
     kwargs...,
 )::Tuple{<:Vector,<:AbstractFormulation}
     predictor = build_predictor(predictor; kwargs...)
@@ -139,8 +145,8 @@ end
 # Let us build a small ICNN first.
 
 predictor = InputConvexChain(
-    InputConvex((8, 8) => 2, relu), 
-    InputConvex((2, 8) => 1, relu), 
+    InputConvex((8, 8) => 2, relu),
+    InputConvex((2, 8) => 1, relu),
 )
 
 # We can embed `predictor` into a JuMP model now.
@@ -148,10 +154,8 @@ predictor = InputConvexChain(
 model = Model();
 @variable(model, x[1:8]);
 
-z, formulation = add_predictor(
-    model, predictor, x; 
-    config=Dict(relu => ReLUSOS1)
-);
+z, formulation =
+    add_predictor(model, predictor, x; config = Dict(relu => ReLUSOS1));
 
 z
 
@@ -165,7 +169,8 @@ formulation
 model = Model();
 @variable(model, x[1:8]);
 
-z, formulation = add_predictor(model, predictor, x; config=Dict(relu => ReLUEpigraph));
+z, formulation =
+    add_predictor(model, predictor, x; config = Dict(relu => ReLUEpigraph));
 
 z
 

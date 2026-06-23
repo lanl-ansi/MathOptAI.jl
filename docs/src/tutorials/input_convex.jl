@@ -90,7 +90,7 @@ end
 # for `InputConvexChain` in order to be able to embed 
 # this network into JuMP.
 
-struct InputConvexChainPredictor <: AbstractPredictor
+struct InputConvexChainPredictor <: MathOptAI.AbstractPredictor
     p::Pipeline
 end
 

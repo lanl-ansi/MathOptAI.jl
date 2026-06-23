@@ -17,7 +17,7 @@
 # This tutorial requires the following packages
 using JuMP
 using Flux
-import MathOptAI
+using MathOptAI
 
 # ## Building the ICNN
 

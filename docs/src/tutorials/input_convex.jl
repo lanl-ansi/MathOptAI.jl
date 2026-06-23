@@ -101,9 +101,10 @@ function MathOptAI.build_predictor(
     input_size::Union{Nothing,NTuple} = nothing,
 )
     layer1 = first(predictor.chain)
-    p = MathOptAI.Pipeline(AbstractPredictor[])
-    push!(p.layers, MathOptAI.Affine(layer1.weight_x, layer1.bias))
-    push!(p.layers, MathOptAI.build_predictor(layer1.σ; config))
+    p = MathOptAI.Pipeline(
+        MathOptAI.Affine(layer1.weight_x, layer1.bias),
+        MathOptAI.build_predictor(layer1.σ; config),
+    )
     for layer in predictor.chain[2:end]
         push!(
             p.layers,
@@ -176,7 +177,7 @@ formulation
 model = Model();
 @variable(model, x[1:8]);
 z, formulation = MathOptAI.add_predictor(
-    model, 
+    model,
     predictor,
     x;
     config = Dict(Flux.relu => MathOptAI.ReLUEpigraph),

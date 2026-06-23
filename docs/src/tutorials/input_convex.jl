@@ -6,26 +6,22 @@
 
 # # Input Convex Neural Networks with Flux.jl
 
-# This tutorial shows how to 
-# embed an input convex neural 
-# network (ICNN) model from 
-# [Flux.jl](https://github.com/FluxML/Flux.jl) 
-# into JuMP.
+# This tutorial shows how to embed an input convex neural network (ICNN) model
+# from [Flux.jl](https://github.com/FluxML/Flux.jl) into JuMP.
 
 # ## Required packages
 
-# This tutorial requires the following packages
+# This tutorial requires the following packages:
+
 using JuMP
-using Flux
-using MathOptAI
+import Flux
+import MathOptAI
 
 # ## Building the ICNN
 
-# The following custom layer can be used to 
-# build ICNNs. This layer has two forward methods.
-# One that takes a single input and the other takes 
-# a `Tuple`. They both return the result of the 
-# forward pass as well as the original input.
+# The following custom layer can be used to build ICNNs. This layer has two
+# forward methods. One that takes a single input and the other takes  a `Tuple`.
+# They both return the result of the forward pass as well as the original input.
 
 struct InputConvex{T,F}
     weight_x::Matrix{T}
@@ -50,7 +46,7 @@ end
 
 function (c::InputConvex)(input::Tuple)
     z, x = input
-    return c.σ.(softplus.(c.weight_z) * z .+ c.weight_x * x .+ c.bias), x
+    return c.σ.(Flux.softplus.(c.weight_z) * z .+ c.weight_x * x .+ c.bias), x
 end
 
 function Base.show(io::IO, l::InputConvex)
@@ -63,8 +59,12 @@ function Base.show(io::IO, l::InputConvex)
         ") => ",
         size(l.weight_x, 1),
     )
-    l.σ == identity || print(io, ", ", l.σ)
-    l.bias == false && print(io, "; bias=false")
+    if l.σ != identity
+        print(io, ", ", l.σ)
+    end
+    if l.bias == false
+        print(io, "; bias=false")
+    end
     return print(io, ")")
 end
 
@@ -74,7 +74,7 @@ struct InputConvexChain{T<:Flux.Chain}
     chain::T
 end
 
-InputConvexChain(layers...) = InputConvexChain(Chain(layers))
+InputConvexChain(layers...) = InputConvexChain(Flux.Chain(layers))
 
 (model::InputConvexChain)(x) = model.chain(x)
 
@@ -86,12 +86,11 @@ end
 
 # ## Building the Predictor
 
-# We need to implement `build_predictor` and `add_predictor` 
-# for `InputConvexChain` in order to be able to embed 
-# this network into JuMP.
+# We need to implement [`build_predictor`](@ref) and [`add_predictor`](@ref) for
+# `InputConvexChain` in order to be able to embed this network into JuMP.
 
 struct InputConvexChainPredictor <: MathOptAI.AbstractPredictor
-    p::Pipeline
+    p::MathOptAI.Pipeline
 end
 
 function MathOptAI.build_predictor(
@@ -102,15 +101,18 @@ function MathOptAI.build_predictor(
     input_size::Union{Nothing,NTuple} = nothing,
 )
     layer1 = first(predictor.chain)
-    p = Pipeline(AbstractPredictor[])
-    push!(p.layers, Affine(layer1.weight_x, layer1.bias))
-    push!(p.layers, build_predictor(layer1.σ; config))
+    p = MathOptAI.Pipeline(AbstractPredictor[])
+    push!(p.layers, MathOptAI.Affine(layer1.weight_x, layer1.bias))
+    push!(p.layers, MathOptAI.build_predictor(layer1.σ; config))
     for layer in predictor.chain[2:end]
         push!(
             p.layers,
-            Affine([softplus(layer.weight_z) layer.weight_x], layer.bias),
+            MathOptAI.Affine(
+                [Flux.softplus(layer.weight_z) layer.weight_x],
+                layer.bias,
+            ),
         )
-        push!(p.layers, build_predictor(layer.σ; config))
+        push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
     end
     return InputConvexChainPredictor(p)
 end
@@ -119,19 +121,18 @@ function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
     predictor::InputConvexChain,
     x::Vector;
-    reduced_space::Bool = false,
     kwargs...,
-)::Tuple{<:Vector,<:AbstractFormulation}
-    predictor = build_predictor(predictor; kwargs...)
+)::Tuple{<:Vector,<:MathOptAI.AbstractFormulation}
+    predictor = MathOptAI.build_predictor(predictor; kwargs...)
     layer1 = first(predictor.p.layers)
-    formulation = PipelineFormulation(predictor, [])
-    z, inner_formulation = add_predictor(model, layer1, x)
+    formulation = MathOptAI.PipelineFormulation(predictor, [])
+    z, inner_formulation = MathOptAI.add_predictor(model, layer1, x)
     push!(formulation.layers, inner_formulation)
     for layer in predictor.p.layers[2:end]
-        if layer isa Affine
-            z, inner_formulation = add_predictor(model, layer, [z; x])
+        z, inner_formulation = if layer isa MathOptAI.Affine
+            MathOptAI.add_predictor(model, layer, [z; x])
         else
-            z, inner_formulation = add_predictor(model, layer, z)
+            MathOptAI.add_predictor(model, layer, z)
         end
         push!(formulation.layers, inner_formulation)
     end
@@ -145,33 +146,46 @@ end
 # Let us build a small ICNN first.
 
 predictor = InputConvexChain(
-    InputConvex((8, 8) => 2, relu),
-    InputConvex((2, 8) => 1, relu),
+    InputConvex((8, 8) => 2, Flux.relu),
+    InputConvex((2, 8) => 1, Flux.relu),
 )
 
 # We can embed `predictor` into a JuMP model now.
 
-model = Model();
-@variable(model, x[1:8]);
+model = Model()
+@variable(model, x[1:8])
+z, formulation = MathOptAI.add_predictor(
+    model,
+    predictor,
+    x;
+    config = Dict(Flux.relu => MathOptAI.ReLUSOS1),
+);
 
-z, formulation =
-    add_predictor(model, predictor, x; config = Dict(relu => ReLUSOS1));
+#-
 
 z
+
+#-
 
 formulation
 
-# The nice thing about ICNNs is that we can 
-# formulate their epigraph and avoid adding binary 
-# variables to the model. For that, we can use
-# `ReLUEpigraph`.
+# The nice thing about ICNNs is that we can formulate their epigraph and avoid
+# adding binary variables to the model. For that, we can use
+# [`ReLUEpigraph`](@ref).
 
 model = Model();
 @variable(model, x[1:8]);
+z, formulation = MathOptAI.add_predictor(
+    model, 
+    predictor,
+    x;
+    config = Dict(Flux.relu => MathOptAI.ReLUEpigraph),
+);
 
-z, formulation =
-    add_predictor(model, predictor, x; config = Dict(relu => ReLUEpigraph));
+#-
 
 z
+
+#-
 
 formulation

@@ -147,6 +147,7 @@ Documenter.makedocs(;
             "tutorials/pytorch.md",
             "tutorials/gaussian.md",
             "tutorials/graph_neural_networks.md",
+            "tutorials/input_convex.md",
         ],
         "Developers" =>
             ["developers/checklists.md", "developers/design_principles.md"],

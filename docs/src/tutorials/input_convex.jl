@@ -15,7 +15,9 @@
 
 using JuMP
 import Flux
+import HiGHS
 import MathOptAI
+import Plots
 
 # ## Building the ICNN
 
@@ -174,23 +176,29 @@ z
 
 formulation
 
+# ## Epigraph formulations
+
 # The nice thing about ICNNs is that we can formulate their epigraph and avoid
 # adding binary variables to the model. For that, we can use
 # [`ReLUEpigraph`](@ref).
 
-model = Model()
-@variable(model, x[1:8])
-z, formulation = MathOptAI.add_predictor(
-    model,
-    predictor,
-    x;
-    config = Dict(Flux.relu => MathOptAI.ReLUEpigraph),
-);
+chain = InputConvexChain(
+    InputConvex((1, 1) => 3, Flux.relu),
+    InputConvex((3, 1) => 1, Flux.relu),
+)
+model = Model(HiGHS.Optimizer)
+set_silent(model)
+@variable(model, x[1:1])
+config = Dict(Flux.relu => MathOptAI.ReLUEpigraph)
+y, _ = MathOptAI.add_predictor(model, chain, x; config)
+@objective(model, Min, only(y))
+x_value, y_value = -20:10, Float64[]
+for xi in x_value
+    fix(x[1], xi)
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    push!(y_value, objective_value(model))
+end
+Plots.plot(x_value, y_value)
 
-#-
-
-z
-
-#-
-
-formulation
+# As expected, the value of `y` is convex with respect to `x`.

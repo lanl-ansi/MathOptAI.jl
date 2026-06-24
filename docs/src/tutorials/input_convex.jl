@@ -192,7 +192,7 @@ set_silent(model)
 config = Dict(Flux.relu => MathOptAI.ReLUEpigraph)
 y, _ = MathOptAI.add_predictor(model, chain, x; config)
 @objective(model, Min, only(y))
-x_value, y_value = -20:10, Float64[]
+x_value, y_value = -20:20, Float64[]
 for xi in x_value
     fix(x[1], xi)
     optimize!(model)

@@ -3,7 +3,8 @@
 import Flux
 import HiGHS
 import MathOptAI
-import Plots</code></pre><h2 id="Building-the-ICNN"><a class="docs-heading-anchor" href="#Building-the-ICNN">Building the ICNN</a><a id="Building-the-ICNN-1"></a><a class="docs-heading-anchor-permalink" href="#Building-the-ICNN" title="Permalink"></a></h2><p>The following custom layer can be used to build ICNNs. This layer has two forward methods. One that takes a single input and the other takes  a <code>Tuple</code>. They both return the result of the forward pass as well as the original input.</p><pre><code class="language-julia hljs">struct InputConvex{T,F}
+import Plots
+import Random</code></pre><h2 id="Building-the-ICNN"><a class="docs-heading-anchor" href="#Building-the-ICNN">Building the ICNN</a><a id="Building-the-ICNN-1"></a><a class="docs-heading-anchor-permalink" href="#Building-the-ICNN" title="Permalink"></a></h2><p>The following custom layer can be used to build ICNNs. This layer has two forward methods. One that takes a single input and the other takes  a <code>Tuple</code>. They both return the result of the forward pass as well as the original input.</p><pre><code class="language-julia hljs">struct InputConvex{T,F}
     weight_x::Matrix{T}
     weight_z::Matrix{T}
     bias::Vector{T}
@@ -39,13 +40,13 @@ function Base.show(io::IO, l::InputConvex)
     end
     print(io, &quot;)&quot;)
     return
-end</code></pre><p>Here&#39;s an example:</p><pre><code class="language-julia hljs">layer = InputConvex((8, 8) =&gt; 2, Flux.relu)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">InputConvex((8, 2) =&gt; 8, relu)  <span class="sgr90"># 34 parameters</span></code></pre><pre><code class="language-julia hljs">layer(rand(8))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([1.7977879757130217, 0.0], [0.8398123668248122, 0.9780271413768161, 0.6003465683801777, 0.889712363478857, 0.5143630480768123, 0.14228158827194293, 0.44214442234246376, 0.6836607460310943])</code></pre><p>Next, we define a custom <code>Chain</code> to build the ICNN.</p><pre><code class="language-julia hljs">struct InputConvexChain{T&lt;:Flux.Chain}
+end</code></pre><p>Here&#39;s an example:</p><pre><code class="language-julia hljs">layer = InputConvex((8, 8) =&gt; 2, Flux.relu)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">InputConvex((8, 2) =&gt; 8, relu)  <span class="sgr90"># 34 parameters</span></code></pre><pre><code class="language-julia hljs">layer(rand(8))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([0.0, 1.673121465795424], [0.5458150815830175, 0.1560825832055618, 0.7356196725379008, 0.9141463865081125, 0.2917664614610186, 0.49693166684537715, 0.7426989254927455, 0.2567395264762301])</code></pre><p>Next, we define a custom <code>Chain</code> to build the ICNN.</p><pre><code class="language-julia hljs">struct InputConvexChain{T&lt;:Flux.Chain}
     chain::T
 end
 
 InputConvexChain(layers...) = InputConvexChain(Flux.Chain(layers))
 
-(model::InputConvexChain)(x) = model.chain(x)
+(model::InputConvexChain)(x) = first(model.chain(x))
 
 function Base.show(io::IO, l::InputConvexChain)
     println(io, &quot;InputConvexChain(&quot;)
@@ -59,7 +60,8 @@ end</code></pre><p>Here&#39;s an example:</p><pre><code class="language-julia hl
 	InputConvex((8, 2) =&gt; 8, relu)
 	InputConvex((2, 1) =&gt; 8, relu)
 )
-</code></pre><pre><code class="language-julia hljs">chain(rand(8))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([1.230036813308639], [0.6091845454274423, 0.6154908101314321, 0.7047041178393375, 0.7729460260348961, 0.3896922264675319, 0.7046250642888429, 0.15062630377609953, 0.35489901831964454])</code></pre><h2 id="Building-the-Predictor"><a class="docs-heading-anchor" href="#Building-the-Predictor">Building the Predictor</a><a id="Building-the-Predictor-1"></a><a class="docs-heading-anchor-permalink" href="#Building-the-Predictor" title="Permalink"></a></h2><p>We need to implement <a href="../../api/#build_predictor"><code>build_predictor</code></a> and <a href="../../api/#add_predictor"><code>add_predictor</code></a> for <code>InputConvexChain</code> in order to be able to embed this network into JuMP.</p><pre><code class="language-julia hljs">struct InputConvexChainPredictor &lt;: MathOptAI.AbstractPredictor
+</code></pre><pre><code class="language-julia hljs">chain(rand(8))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1-element Vector{Float64}:
+ 0.0</code></pre><h2 id="Building-the-Predictor"><a class="docs-heading-anchor" href="#Building-the-Predictor">Building the Predictor</a><a id="Building-the-Predictor-1"></a><a class="docs-heading-anchor-permalink" href="#Building-the-Predictor" title="Permalink"></a></h2><p>We need to implement <a href="../../api/#build_predictor"><code>build_predictor</code></a> and <a href="../../api/#add_predictor"><code>add_predictor</code></a> for <code>InputConvexChain</code> in order to be able to embed this network into JuMP.</p><pre><code class="language-julia hljs">struct InputConvexChainPredictor &lt;: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
 end
 
@@ -119,8 +121,8 @@ z, formulation = MathOptAI.add_predictor(
 │ ├ moai_Affine[1]
 │ └ moai_Affine[2]
 └ constraints [2]
-  ├ 0.7191824316978455 x[1] - 0.6342033743858337 x[2] + 0.2441602349281311 x[3] - 0.0562262125313282 x[4] - 0.3329490125179291 x[5] + 0.6295601725578308 x[6] - 0.3500174283981323 x[7] - 0.619481086730957 x[8] - moai_Affine[1] = 0.8377724289894104
-  └ 0.6443735957145691 x[1] - 0.3813590109348297 x[2] + 0.5896527171134949 x[3] - 0.6462558507919312 x[4] - 0.36361539363861084 x[5] - 0.4479493498802185 x[6] + 0.6030738949775696 x[7] - 0.6777071952819824 x[8] - moai_Affine[2] = 0.9673358798027039
+  ├ 0.33542877435684204 x[1] - 0.03261713311076164 x[2] + 0.34782540798187256 x[3] - 0.4641445279121399 x[4] + 0.714346170425415 x[5] - 0.09853895753622055 x[6] - 0.2294272631406784 x[7] - 0.4710925817489624 x[8] - moai_Affine[1] = 0.7332659959793091
+  └ 0.47198495268821716 x[1] + 0.018574567511677742 x[2] + 0.22028937935829163 x[3] - 0.39811477065086365 x[4] + 0.13296160101890564 x[5] - 0.7390004396438599 x[6] + 0.25418439507484436 x[7] + 0.6007619500160217 x[8] - moai_Affine[2] = 0.3139306306838989
 MathOptAI.ReLUSOS1()
 ├ variables [4]
 │ ├ moai_ReLU[1]
@@ -140,7 +142,7 @@ Affine(A, b) [input: 10, output: 1]
 ├ variables [1]
 │ └ moai_Affine[1]
 └ constraints [1]
-  └ -0.014909327030181885 x[1] - 0.5342945456504822 x[2] - 0.03777775168418884 x[3] - 0.5602659583091736 x[4] + 0.025156453251838684 x[5] - 0.5550016760826111 x[6] - 0.20395605266094208 x[7] - 0.28891539573669434 x[8] + 0.28073278069496155 moai_ReLU[1] + 0.7957646250724792 moai_ReLU[2] - moai_Affine[1] = 1.044126033782959
+  └ 0.18674780428409576 x[1] + 0.3335989713668823 x[2] - 0.10180511325597763 x[3] + 0.16345392167568207 x[4] - 0.06637885421514511 x[5] + 0.3679632246494293 x[6] + 0.6301132440567017 x[7] + 0.3311518132686615 x[8] + 0.2715908885002136 moai_ReLU[1] + 1.2975218296051025 moai_ReLU[2] - moai_Affine[1] = -0.2570358216762543
 MathOptAI.ReLUSOS1()
 ├ variables [2]
 │ ├ moai_ReLU[1]
@@ -150,21 +152,44 @@ MathOptAI.ReLUSOS1()
   ├ moai_z[1] ≥ 0
   ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
   └ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
-</code></pre><h2 id="Epigraph-formulations"><a class="docs-heading-anchor" href="#Epigraph-formulations">Epigraph formulations</a><a id="Epigraph-formulations-1"></a><a class="docs-heading-anchor-permalink" href="#Epigraph-formulations" title="Permalink"></a></h2><p>The nice thing about ICNNs is that we can formulate their epigraph and avoid adding binary variables to the model. For that, we can use <a href="../../api/#ReLUEpigraph"><code>ReLUEpigraph</code></a>.</p><pre><code class="language-julia hljs">chain = InputConvexChain(
-    InputConvex((1, 1) =&gt; 3, Flux.relu),
-    InputConvex((3, 1) =&gt; 1, Flux.relu),
+</code></pre><h2 id="Epigraph-formulations"><a class="docs-heading-anchor" href="#Epigraph-formulations">Epigraph formulations</a><a id="Epigraph-formulations-1"></a><a class="docs-heading-anchor-permalink" href="#Epigraph-formulations" title="Permalink"></a></h2><p>The nice thing about ICNNs is that we can formulate their epigraph and avoid adding binary variables to the model. For that, we can use <a href="../../api/#ReLUEpigraph"><code>ReLUEpigraph</code></a>.</p><p>Let&#39;s first train a model to predict the relationship <span>$y = x^2$</span>. (Note that this is a very basic training loop.)</p><pre><code class="language-julia hljs">Random.seed!(1234)
+chain = InputConvexChain(
+    InputConvex((1, 1) =&gt; 10, Flux.relu),
+    InputConvex((10, 1) =&gt; 1, Flux.relu),
 )
-model = Model(HiGHS.Optimizer)
+
+begin
+    X = -2.0f0:0.1f0:2.0f0
+    optimizer_state = Flux.setup(Flux.Adam(1e-2), chain)
+    for epoch in 1:200
+        _, gradient = Flux.withgradient(chain) do model
+            return sum((only(model([x])) - x^2)^2 for x in X)
+        end
+        Flux.update!(optimizer_state, chain, only(gradient))
+    end
+end</code></pre><p>Now we can embed the trained network into a JuMP model:</p><pre><code class="language-julia hljs">model = Model(HiGHS.Optimizer)
 set_silent(model)
 @variable(model, x[1:1])
 config = Dict(Flux.relu =&gt; MathOptAI.ReLUEpigraph)
 y, _ = MathOptAI.add_predictor(model, chain, x; config)
 @objective(model, Min, only(y))
-x_value, y_value = -20:20, Float64[]
+model</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">A JuMP Model
+├ solver: HiGHS
+├ objective_sense: MIN_SENSE
+│ └ objective_function_type: JuMP.VariableRef
+├ num_variables: 23
+├ num_constraints: 33
+│ ├ JuMP.AffExpr in MOI.EqualTo{Float64}: 11
+│ ├ JuMP.AffExpr in MOI.GreaterThan{Float64}: 11
+│ └ JuMP.VariableRef in MOI.GreaterThan{Float64}: 11
+└ Names registered in the model
+  └ :x</code></pre><p>Because we used the <a href="../../api/#ReLUEpigraph"><code>ReLUEpigraph</code></a> predictor, there are no binary or integer variables in our model.</p><p>Moreover, we can show that the objective value <code>y</code> is convex with respect to <code>x</code>:</p><pre><code class="language-julia hljs">x_value, y_value = -2:0.1:2, Float64[]
 for xi in x_value
     fix(x[1], xi)
     optimize!(model)
-    assert_is_solved_and_feasible(model)
+    # To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
     push!(y_value, objective_value(model))
 end
-Plots.plot(x_value, y_value)</code></pre><img src="75899f0c.svg" alt="Example block output"/><p>As expected, the value of <code>y</code> is convex with respect to <code>x</code>.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../graph_neural_networks/">« Graph neural networks</a><a class="docs-footer-nextpage" href="../../developers/checklists/">Checklists »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 25 June 2026 05:04">Thursday 25 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+Plots.plot(x_value, y_value; xlabel = &quot;x&quot;, ylabel = &quot;y&quot;, label = &quot;Trained&quot;)
+Plots.plot!(x_value, x_value .^ 2; label = &quot;Target&quot;, linestyle = :dash)</code></pre><img src="d82958a4.svg" alt="Example block output"/><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../graph_neural_networks/">« Graph neural networks</a><a class="docs-footer-nextpage" href="../../developers/checklists/">Checklists »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 25 June 2026 23:30">Thursday 25 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

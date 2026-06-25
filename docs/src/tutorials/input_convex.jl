@@ -18,6 +18,7 @@ import Flux
 import HiGHS
 import MathOptAI
 import Plots
+import Random
 
 # ## Building the ICNN
 
@@ -182,6 +183,7 @@ formulation
 # adding binary variables to the model. For that, we can use
 # [`ReLUEpigraph`](@ref).
 
+Random.seed!(1234)
 chain = InputConvexChain(
     InputConvex((1, 1) => 3, Flux.relu),
     InputConvex((3, 1) => 1, Flux.relu),

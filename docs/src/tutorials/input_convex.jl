@@ -192,13 +192,19 @@ set_silent(model)
 config = Dict(Flux.relu => MathOptAI.ReLUEpigraph)
 y, _ = MathOptAI.add_predictor(model, chain, x; config)
 @objective(model, Min, only(y))
+model
+
+# Because we used the [`ReLUEpigraph`](@ref) predictor, there are no binary or
+# integer variables in our model.
+#
+# Moreover, we can show that the objective value `y` is convex with respect to `x`:
+
 x_value, y_value = -20:20, Float64[]
 for xi in x_value
     fix(x[1], xi)
     optimize!(model)
-    assert_is_solved_and_feasible(model)
+    ## To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
     push!(y_value, objective_value(model))
 end
-Plots.plot(x_value, y_value)
-
-# As expected, the value of `y` is convex with respect to `x`.
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", legend = false)

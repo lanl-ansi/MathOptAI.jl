@@ -18,6 +18,7 @@ import Flux
 import HiGHS
 import MathOptAI
 import Plots
+import Random
 
 # ## Building the ICNN
 
@@ -79,7 +80,7 @@ end
 
 InputConvexChain(layers...) = InputConvexChain(Flux.Chain(layers))
 
-(model::InputConvexChain)(x) = model.chain(x)
+(model::InputConvexChain)(x) = first(model.chain(x))
 
 function Base.show(io::IO, l::InputConvexChain)
     println(io, "InputConvexChain(")
@@ -182,23 +183,49 @@ formulation
 # adding binary variables to the model. For that, we can use
 # [`ReLUEpigraph`](@ref).
 
+# Let's first train a model to predict the relationship $y = x^2$. (Note that
+# this is a very basic training loop.)
+
+Random.seed!(1234)
 chain = InputConvexChain(
-    InputConvex((1, 1) => 3, Flux.relu),
-    InputConvex((3, 1) => 1, Flux.relu),
+    InputConvex((1, 1) => 10, Flux.relu),
+    InputConvex((10, 1) => 1, Flux.relu),
 )
+
+begin
+    X = -2.0f0:0.1f0:2.0f0
+    optimizer_state = Flux.setup(Flux.Adam(1e-2), chain)
+    for epoch in 1:200
+        _, gradient = Flux.withgradient(chain) do model
+            return sum((only(model([x])) - x^2)^2 for x in X)
+        end
+        Flux.update!(optimizer_state, chain, only(gradient))
+    end
+end
+
+# Now we can embed the trained network into a JuMP model:
+
 model = Model(HiGHS.Optimizer)
 set_silent(model)
 @variable(model, x[1:1])
 config = Dict(Flux.relu => MathOptAI.ReLUEpigraph)
 y, _ = MathOptAI.add_predictor(model, chain, x; config)
 @objective(model, Min, only(y))
-x_value, y_value = -20:20, Float64[]
+model
+
+# Because we used the [`ReLUEpigraph`](@ref) predictor, there are no binary or
+# integer variables in our model.
+#
+# Moreover, we can show that the objective value `y` is convex with respect to
+# `x`:
+
+x_value, y_value = -2:0.1:2, Float64[]
 for xi in x_value
     fix(x[1], xi)
     optimize!(model)
-    assert_is_solved_and_feasible(model)
+    ## To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
     push!(y_value, objective_value(model))
 end
-Plots.plot(x_value, y_value)
-
-# As expected, the value of `y` is convex with respect to `x`.
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
+Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)

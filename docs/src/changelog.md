@@ -7,7 +7,20 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Version 0.2.4 (March 16, 2025)
+## Version 0.2.5 (June 25, 2026)
+
+### Added
+
+ - Added [`ReLUEpigraph`](@ref) (#274)
+ - Updated to ExaModels@0.11 (#277)
+ - Enabled [`build_predictor`](@ref) on activation functions (#278)
+ - Added an input convex tutorial using [`ReLUEpigraph`](@ref) (#279), (#280)
+
+### Other
+
+ - Updated GitHub actions (#269), (#271), (#272)
+
+## Version 0.2.4 (March 16, 2026)
 
 ### Added
 
@@ -21,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
  - Added `ExaModels` examples to the tutorials (#264)
 
-## Version 0.2.3 (March 5, 2025)
+## Version 0.2.3 (March 5, 2026)
 
 ### Added
 

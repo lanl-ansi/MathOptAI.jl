@@ -20,7 +20,7 @@ jobs:
       JULIA_CONDAPKG_BACKEND: "Null"
       JULIA_PYTHONCALL_EXE: "python3"
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # Install pytorch
       - name: Set up Python
         uses: actions/setup-python@v6

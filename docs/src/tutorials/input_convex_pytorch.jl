@@ -37,7 +37,7 @@ write(
     import torch
     from torch.nn.parameter import Parameter
     from torch.nn import functional as F, init
-    
+
     class InputConvex(torch.nn.Module):
         def __init__(
             self,
@@ -66,7 +66,7 @@ write(
             else:
                 self.register_parameter("bias", None)
             self.reset_parameters()
-    
+
         def reset_parameters(self) -> None:
             init.kaiming_uniform_(self.weight_z, a=math.sqrt(5))
             init.kaiming_uniform_(self.weight_x, a=math.sqrt(5))
@@ -93,7 +93,7 @@ write(
                     self.bias
                 )
                 return output, input_x
-    
+
     class InputConvexChain(torch.nn.Module):
         def __init__(self, *layers):
             super(InputConvexChain, self).__init__()
@@ -115,20 +115,21 @@ filename = joinpath(dir, "icnn.pt")
 # Next, we import the network and the layers using `PythonCall.@pyexec`:
 
 predictor, InputConvex, InputConvexChain = PythonCall.@pyexec(
-    (dir, filename) => """
-    import torch
-    from torch.nn import ReLU
-    import sys
-    sys.path.insert(0, dir)
-    from icnn import InputConvexChain, InputConvex
-    predictor = InputConvexChain(
-        InputConvex(4, 4, 2), 
-        ReLU(), 
-        InputConvex(2, 4, 1), 
-        ReLU(), 
-    )
-    torch.save(predictor, filename)
-    """ => (predictor, InputConvex, InputConvexChain)
+    (dir, filename) =>
+        """
+import torch
+from torch.nn import ReLU
+import sys
+sys.path.insert(0, dir)
+from icnn import InputConvexChain, InputConvex
+predictor = InputConvexChain(
+    InputConvex(4, 4, 2), 
+    ReLU(), 
+    InputConvex(2, 4, 1), 
+    ReLU(), 
+)
+torch.save(predictor, filename)
+""" => (predictor, InputConvex, InputConvexChain)
 )
 
 # Then, we define `InputConvexChainPredictor` and implement [`add_predictor`](@ref):
@@ -149,9 +150,11 @@ function MathOptAI.add_predictor(
     push!(formulation.layers, inner_formulation)
     for layer in predictor.p.layers[2:end]
         if layer isa Affine
-            z, inner_formulation = MathOptAI.add_predictor(model, layer, [z; x]; kwargs...)
+            z, inner_formulation =
+                MathOptAI.add_predictor(model, layer, [z; x]; kwargs...)
         else
-            z, inner_formulation = MathOptAI.add_predictor(model, layer, z; kwargs...)
+            z, inner_formulation =
+                MathOptAI.add_predictor(model, layer, z; kwargs...)
         end
         push!(formulation.layers, inner_formulation)
     end
@@ -167,17 +170,27 @@ function icnn_callback(icnn::PythonCall.Py; input_size, kwargs...)
     for (i, layer) in enumerate(icnn.layers)
         if i == 1
             layer0 = icnn.layers[0]
-            w_x = pyconvert(Array{Float64}, layer.weight_x.detach().cpu().numpy())
-            b   = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
+            w_x =
+                pyconvert(Array{Float64}, layer.weight_x.detach().cpu().numpy())
+            b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
             push!(p.layers, Affine(w_x, b))
         else
             if pyisinstance(layer, InputConvex)
-                w_x = pyconvert(Array{Float64}, layer.weight_x.detach().cpu().numpy())
-                w_z = pyconvert(Array{Float64}, layer.weight_z.detach().cpu().numpy())
-                b   = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
+                w_x = pyconvert(
+                    Array{Float64},
+                    layer.weight_x.detach().cpu().numpy(),
+                )
+                w_z = pyconvert(
+                    Array{Float64},
+                    layer.weight_z.detach().cpu().numpy(),
+                )
+                b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
                 push!(p.layers, Affine([softplus.(w_z) w_x], b))
             else
-                append!(p.layers, MathOptAI.build_predictor(nn.Sequential(layer); kwargs...).layers)
+                append!(
+                    p.layers,
+                    MathOptAI.build_predictor(nn.Sequential(layer); kwargs...).layers,
+                )
             end
         end
     end
@@ -191,8 +204,5 @@ model = Model()
 
 #-
 
-config = Dict(
-    :ReLU => ReLUEpigraph, 
-    InputConvexChain => icnn_callback, 
-)
+config = Dict(:ReLU => ReLUEpigraph, InputConvexChain => icnn_callback)
 y, formulation = MathOptAI.add_predictor(model, predictor, x; config)

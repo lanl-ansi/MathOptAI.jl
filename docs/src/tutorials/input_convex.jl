@@ -114,12 +114,12 @@ function MathOptAI.build_predictor(
     config::Dict = Dict{Any,Any}(),
     kwargs...,
 )
-    layer1 = first(predictor.chain)
+    (layer1, layers) = Iterators.peel(predictor.chain)
     p = MathOptAI.Pipeline(
         MathOptAI.Affine(layer1.weight_x, layer1.bias),
         MathOptAI.build_predictor(layer1.σ; config),
     )
-    for layer in predictor.chain[2:end]
+    for layer in layers
         weights = hcat(Flux.softplus(layer.weight_z), layer.weight_x)
         push!(p.layers, MathOptAI.Affine(weights, layer.bias))
         push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
@@ -158,16 +158,13 @@ predictor = InputConvexChain(
     InputConvex((2, 8) => 1, Flux.relu),
 )
 
-# We can embed `predictor` into a JuMP model now.
+# We can now embed `predictor` into a JuMP model. We choose to embed the
+# `Flux.relu` using [`ReLUSOS1`](@ref):
 
 model = Model()
 @variable(model, x[1:8])
-z, formulation = MathOptAI.add_predictor(
-    model,
-    predictor,
-    x;
-    config = Dict(Flux.relu => MathOptAI.ReLUSOS1),
-);
+config = Dict(Flux.relu => MathOptAI.ReLUSOS1)
+z, formulation = MathOptAI.add_predictor(model, predictor, x; config);
 
 #-
 

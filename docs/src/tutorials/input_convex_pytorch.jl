@@ -21,6 +21,8 @@ using JuMP
 using HiGHS
 using MathOptAI
 using PythonCall
+import Plots
+import Random
 
 # ## Building the ICNN
 
@@ -84,7 +86,7 @@ write(
             if len(args) == 1:
                 input_x = args[0]
                 output = self.activation(input_x @ self.weight_x.T + self.bias)
-                return output, input_x  # Returns a tuple to nn.Sequential
+                return output, input_x
             elif len(args) == 2:
                 input_z, input_x = args
                 output = self.activation(
@@ -97,7 +99,7 @@ write(
     class InputConvexChain(torch.nn.Module):
         def __init__(self, *layers):
             super(InputConvexChain, self).__init__()
-            self.layers = layers
+            self.layers = torch.nn.ModuleList(layers)
         def forward(self, x):
             layer1 = self.layers[0]
             z, x = layer1(x)
@@ -117,22 +119,67 @@ filename = joinpath(dir, "icnn.pt")
 predictor, InputConvex, InputConvexChain = PythonCall.@pyexec(
     (dir, filename) =>
         """
-import torch
-from torch.nn import ReLU
-import sys
-sys.path.insert(0, dir)
-from icnn import InputConvexChain, InputConvex
-predictor = InputConvexChain(
-    InputConvex(4, 4, 2), 
-    ReLU(), 
-    InputConvex(2, 4, 1), 
-    ReLU(), 
-)
-torch.save(predictor, filename)
-""" => (predictor, InputConvex, InputConvexChain)
+        import torch
+        from torch.nn import ReLU
+        import sys
+        sys.path.insert(0, dir)
+        from icnn import InputConvexChain, InputConvex
+        predictor = InputConvexChain(
+            InputConvex(32, 32, 8), 
+            ReLU(), 
+            InputConvex( 8, 32, 1), 
+            ReLU(), 
+        )
+        torch.save(predictor, filename)
+        """ => (predictor, InputConvex, InputConvexChain)
 )
 
-# Then, we define `InputConvexChainPredictor` and implement [`add_predictor`](@ref):
+# Let's test the ICNN
+torch = PythonCall.pyimport("torch")
+predictor(torch.rand(32))
+
+# ## Building the Predictor
+
+# To provide a description for embedding `InputConvexChain`
+# into JuMP, we create the following callback function:
+
+function icnn_callback(icnn::PythonCall.Py; input_size, kwargs...)
+    p = Pipeline(AbstractPredictor[])
+    softplus = SoftPlus()
+    nn = PythonCall.pyimport("torch.nn")
+    for (i, layer) in enumerate(icnn.layers)
+        if i == 1
+            w_x =
+                pyconvert(Array{Float64}, layer.weight_x.detach().cpu().numpy())
+            b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
+            push!(p.layers, Affine(w_x, b))
+        else
+            if pyisinstance(layer, InputConvex)
+                w_x = pyconvert(
+                    Array{Float64},
+                    layer.weight_x.detach().cpu().numpy(),
+                )
+                w_z = pyconvert(
+                    Array{Float64},
+                    layer.weight_z.detach().cpu().numpy(),
+                )
+                b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
+                push!(p.layers, Affine([softplus.(w_z) w_x], b))
+            else
+                append!(
+                    p.layers,
+                    MathOptAI.build_predictor(nn.Sequential(layer); kwargs...).layers,
+                )
+            end
+        end
+    end
+    return InputConvexChainPredictor(p)
+end
+
+# In addition, we need to implement and [`add_predictor`](@ref) for
+# `InputConvexChain` in order to be able to embed this network into JuMP.
+# For this purpose, we define `InputConvexChainPredictor` and implement
+# [`add_predictor`](@ref):
 
 struct InputConvexChainPredictor <: MathOptAI.AbstractPredictor
     p::Pipeline
@@ -161,48 +208,92 @@ function MathOptAI.add_predictor(
     return z, formulation
 end
 
-# Lastly, we create a callback function to describe how to build predictor for the imported `InputConvexChain`:
-
-function icnn_callback(icnn::PythonCall.Py; input_size, kwargs...)
-    p = Pipeline(AbstractPredictor[])
-    softplus = SoftPlus()
-    nn = PythonCall.pyimport("torch.nn")
-    for (i, layer) in enumerate(icnn.layers)
-        if i == 1
-            layer0 = icnn.layers[0]
-            w_x =
-                pyconvert(Array{Float64}, layer.weight_x.detach().cpu().numpy())
-            b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
-            push!(p.layers, Affine(w_x, b))
-        else
-            if pyisinstance(layer, InputConvex)
-                w_x = pyconvert(
-                    Array{Float64},
-                    layer.weight_x.detach().cpu().numpy(),
-                )
-                w_z = pyconvert(
-                    Array{Float64},
-                    layer.weight_z.detach().cpu().numpy(),
-                )
-                b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
-                push!(p.layers, Affine([softplus.(w_z) w_x], b))
-            else
-                append!(
-                    p.layers,
-                    MathOptAI.build_predictor(nn.Sequential(layer); kwargs...).layers,
-                )
-            end
-        end
-    end
-    return InputConvexChainPredictor(p)
-end
-
-# Let's test the formulation in JuMP:
+# ## Embed ICNN into JuMP
 
 model = Model()
-@variable(model, x[1:4])
+@variable(model, x[1:32])
 
 #-
 
+config = Dict(:ReLU => ReLUSOS1, InputConvexChain => icnn_callback)
+z, formulation = MathOptAI.add_predictor(model, predictor, x; config)
+
+#-
+
+z
+
+#-
+
+formulation
+
+# ## Epigraph formulations
+
+# The nice thing about ICNNs is that we can formulate their epigraph and avoid
+# adding binary variables to the model. For that, we can use
+# [`ReLUEpigraph`](@ref).
+
+# Let's create a PyTorch model with scalar input:
+
+predictor = PythonCall.@pyexec(
+    (dir, filename) =>
+        """
+        import torch
+        from torch.nn import ReLU
+        import sys
+        sys.path.insert(0, dir)
+        from icnn import InputConvexChain, InputConvex
+        torch.manual_seed(61)
+        predictor = InputConvexChain(
+            InputConvex(1, 1, 8), 
+            ReLU(), 
+            InputConvex(8, 1, 1), 
+            ReLU(), 
+        )
+
+        loss_fn = torch.nn.MSELoss()
+        optimizer = torch.optim.SGD(predictor.parameters(), lr=0.01, momentum=.9)
+        predictor.train()
+        X = torch.unsqueeze(torch.arange(-2, 2, step=.1), 1)
+        Y = torch.pow(X, 2)
+        epochs = 100
+        running_loss = 0.
+        for e in range(epochs):
+            optimizer.zero_grad()
+            Y_hat = predictor(X)
+            loss = loss_fn(Y_hat, Y)
+            loss.backward()
+            optimizer.step()
+            if e % 10 == 9:
+                last_loss = running_loss # loss per batch
+                print(f'  batch {e + 1} loss: {loss.item()}')
+
+        torch.save(predictor, filename)
+        """ => predictor
+)
+
+# Next, we use [`ReLUEpigraph`](@ref) to embed this ICNN into JuMP.
+
+model = Model(HiGHS.Optimizer)
+set_silent(model)
+@variable(model, x[1:1])
 config = Dict(:ReLU => ReLUEpigraph, InputConvexChain => icnn_callback)
-y, formulation = MathOptAI.add_predictor(model, predictor, x; config)
+y, _ = MathOptAI.add_predictor(model, predictor, x; config)
+@objective(model, Min, only(y))
+model
+
+# Because we used the [`ReLUEpigraph`](@ref) predictor, there are no binary or
+# integer variables in our model.
+#
+# Moreover, we can show that the objective value `y` is convex with respect to
+# `x`:
+
+x_value, y_value = -2:0.1:2, Float64[]
+for xi in x_value
+    fix(x[1], xi)
+    optimize!(model)
+    ## To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
+    push!(y_value, objective_value(model))
+end
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
+Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)

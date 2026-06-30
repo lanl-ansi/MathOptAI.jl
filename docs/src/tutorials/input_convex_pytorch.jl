@@ -6,8 +6,8 @@
 
 # # Input Convex Neural Networks with PyTorch
 
-# The purpose of this tutorial is to explain how to embed an input convex
-# neural network model from [PyTorch](https://pytorch.org) into JuMP.
+# This tutorial shows how to embed an input convex neural network (ICNN) model
+# from [PyTorch](https://pytorch.org) into JuMP.
 
 # !!! info
 #     To use PyTorch from MathOptAI, you must first follow the
@@ -18,11 +18,10 @@
 # This tutorial requires the following packages
 
 using JuMP
-using HiGHS
-using MathOptAI
-using PythonCall
+import HiGHS
+import MathOptAI
 import Plots
-import Random
+import PythonCall
 
 # ## Building the ICNN
 
@@ -30,8 +29,7 @@ import Random
 # forward methods. One that takes a single input and the other takes  a `Tuple`.
 # They both return the result of the forward pass as well as the original input.
 
-dir = mktempdir(".")
-
+dir = mktempdir()
 write(
     joinpath(dir, "icnn.py"),
     """
@@ -47,7 +45,7 @@ write(
             in_features_x: int,
             out_features: int,
             bias: bool = True,
-            activation = F.relu, 
+            activation = F.relu,
             device=None,
             dtype=None,
         ):
@@ -79,7 +77,7 @@ write(
                 bound_x = 1 / math.sqrt(fan_in_x) if fan_in_x > 0 else 0
                 init.uniform_(self.bias, -bound_z, bound_z)
                 init.uniform_(self.bias, -bound_x, bound_x)
-                
+
         def forward(self, *args):
             if len(args) == 1 and isinstance(args[0], tuple):
                 args = args[0]
@@ -90,8 +88,8 @@ write(
             elif len(args) == 2:
                 input_z, input_x = args
                 output = self.activation(
-                    input_z @ F.softplus(self.weight_z).T + 
-                    input_x @ self.weight_x.T + 
+                    input_z @ F.softplus(self.weight_z).T +
+                    input_x @ self.weight_x.T +
                     self.bias
                 )
                 return output, input_x
@@ -125,64 +123,52 @@ predictor, InputConvex, InputConvexChain = PythonCall.@pyexec(
         sys.path.insert(0, dir)
         from icnn import InputConvexChain, InputConvex
         predictor = InputConvexChain(
-            InputConvex(32, 32, 8), 
-            ReLU(), 
-            InputConvex( 8, 32, 1), 
-            ReLU(), 
+            InputConvex(8, 8, 2),
+            ReLU(),
+            InputConvex(2, 8, 1),
+            ReLU(),
         )
         torch.save(predictor, filename)
         """ => (predictor, InputConvex, InputConvexChain)
 )
 
-# Let's test the ICNN
+# Let's test the ICNN:
+
 torch = PythonCall.pyimport("torch")
-predictor(torch.rand(32))
+predictor(torch.rand(8))
 
 # ## Building the Predictor
 
-# To provide a description for embedding `InputConvexChain`
-# into JuMP, we create the following callback function:
+# To embed `InputConvexChain` into JuMP, we create the following callback
+# function:
+
+_array(x) = PythonCall.pyconvert(Array{Float64}, x.detach().cpu().numpy())
 
 function icnn_callback(icnn::PythonCall.Py; input_size, kwargs...)
-    p = Pipeline(AbstractPredictor[])
-    softplus = SoftPlus()
+    softplus = MathOptAI.SoftPlus()
     nn = PythonCall.pyimport("torch.nn")
-    for (i, layer) in enumerate(icnn.layers)
-        if i == 1
-            w_x =
-                pyconvert(Array{Float64}, layer.weight_x.detach().cpu().numpy())
-            b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
-            push!(p.layers, Affine(w_x, b))
+    (layer1, layers) = Iterators.peel(icnn.layers)
+    p = MathOptAI.Pipeline(
+        MathOptAI.Affine(_array(layer1.weight_x), _array(layer1.bias)),
+    )
+    for layer in layers
+        if PythonCall.pyisinstance(layer, InputConvex)
+            w = hcat(softplus.(_array(layer.weight_z)), _array(layer.weight_x))
+            push!(p.layers, MathOptAI.Affine(w, _array(layer.bias)))
         else
-            if pyisinstance(layer, InputConvex)
-                w_x = pyconvert(
-                    Array{Float64},
-                    layer.weight_x.detach().cpu().numpy(),
-                )
-                w_z = pyconvert(
-                    Array{Float64},
-                    layer.weight_z.detach().cpu().numpy(),
-                )
-                b = pyconvert(Array{Float64}, layer.bias.detach().cpu().numpy())
-                push!(p.layers, Affine([softplus.(w_z) w_x], b))
-            else
-                append!(
-                    p.layers,
-                    MathOptAI.build_predictor(nn.Sequential(layer); kwargs...).layers,
-                )
-            end
+            push!(p.layers, MathOptAI.build_predictor(layer; kwargs...))
         end
     end
     return InputConvexChainPredictor(p)
 end
 
 # In addition, we need to implement and [`add_predictor`](@ref) for
-# `InputConvexChain` in order to be able to embed this network into JuMP.
-# For this purpose, we define `InputConvexChainPredictor` and implement
+# `InputConvexChain` in order to be able to embed this network into JuMP. For
+# this purpose, we define `InputConvexChainPredictor` and implement
 # [`add_predictor`](@ref):
 
 struct InputConvexChainPredictor <: MathOptAI.AbstractPredictor
-    p::Pipeline
+    p::MathOptAI.Pipeline
 end
 
 function MathOptAI.add_predictor(
@@ -190,33 +176,32 @@ function MathOptAI.add_predictor(
     predictor::InputConvexChainPredictor,
     x::Vector;
     kwargs...,
-)::Tuple{<:Vector,<:AbstractFormulation}
-    layer1 = first(predictor.p.layers)
-    formulation = PipelineFormulation(predictor, [])
-    z, inner_formulation = MathOptAI.add_predictor(model, layer1, x; kwargs...)
-    push!(formulation.layers, inner_formulation)
-    for layer in predictor.p.layers[2:end]
-        if layer isa Affine
-            z, inner_formulation =
-                MathOptAI.add_predictor(model, layer, [z; x]; kwargs...)
+)
+    layers = predictor.p.layers
+    z, inner = MathOptAI.add_predictor(model, first(layers), x; kwargs...)
+    formulation = MathOptAI.PipelineFormulation(predictor, Any[inner])
+    for layer in layers[2:end]
+        z, inner = if layer isa MathOptAI.Affine
+            MathOptAI.add_predictor(model, layer, [z; x]; kwargs...)
         else
-            z, inner_formulation =
-                MathOptAI.add_predictor(model, layer, z; kwargs...)
+            MathOptAI.add_predictor(model, layer, z; kwargs...)
         end
-        push!(formulation.layers, inner_formulation)
+        push!(formulation.layers, inner)
     end
     return z, formulation
 end
 
+# With that, we are now ready to embed these networks into JuMP.
+
 # ## Embed ICNN into JuMP
 
+# We can now embed `predictor` into a JuMP model. We choose to embed the
+# `nn.ReLU` predictor using [`ReLUSOS1`](@ref):
+
 model = Model()
-@variable(model, x[1:32])
-
-#-
-
-config = Dict(:ReLU => ReLUSOS1, InputConvexChain => icnn_callback)
-z, formulation = MathOptAI.add_predictor(model, predictor, x; config)
+@variable(model, x[1:8])
+config = Dict(:ReLU => MathOptAI.ReLUSOS1, InputConvexChain => icnn_callback)
+z, formulation = MathOptAI.add_predictor(model, predictor, x; config);
 
 #-
 
@@ -232,7 +217,8 @@ formulation
 # adding binary variables to the model. For that, we can use
 # [`ReLUEpigraph`](@ref).
 
-# Let's create a PyTorch model with scalar input:
+# Let's first train a model to predict the relationship $y = x^2$. (Note that
+# this is a very basic training loop.)
 
 predictor = PythonCall.@pyexec(
     (dir, filename) =>
@@ -244,10 +230,10 @@ predictor = PythonCall.@pyexec(
         from icnn import InputConvexChain, InputConvex
         torch.manual_seed(61)
         predictor = InputConvexChain(
-            InputConvex(1, 1, 8), 
-            ReLU(), 
-            InputConvex(8, 1, 1), 
-            ReLU(), 
+            InputConvex(1, 1, 10),
+            ReLU(),
+            InputConvex(10, 1, 1),
+            ReLU(),
         )
 
         loss_fn = torch.nn.MSELoss()
@@ -271,12 +257,15 @@ predictor = PythonCall.@pyexec(
         """ => predictor
 )
 
-# Next, we use [`ReLUEpigraph`](@ref) to embed this ICNN into JuMP.
+# Now we can embed the trained network into a JuMP model:
 
 model = Model(HiGHS.Optimizer)
 set_silent(model)
 @variable(model, x[1:1])
-config = Dict(:ReLU => ReLUEpigraph, InputConvexChain => icnn_callback)
+config = Dict(
+    :ReLU => MathOptAI.ReLUEpigraph,
+    InputConvexChain => icnn_callback,
+)
 y, _ = MathOptAI.add_predictor(model, predictor, x; config)
 @objective(model, Min, only(y))
 model

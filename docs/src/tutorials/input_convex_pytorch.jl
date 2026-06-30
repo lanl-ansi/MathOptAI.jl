@@ -262,10 +262,8 @@ predictor = PythonCall.@pyexec(
 model = Model(HiGHS.Optimizer)
 set_silent(model)
 @variable(model, x[1:1])
-config = Dict(
-    :ReLU => MathOptAI.ReLUEpigraph,
-    InputConvexChain => icnn_callback,
-)
+config =
+    Dict(:ReLU => MathOptAI.ReLUEpigraph, InputConvexChain => icnn_callback)
 y, _ = MathOptAI.add_predictor(model, predictor, x; config)
 @objective(model, Min, only(y))
 model

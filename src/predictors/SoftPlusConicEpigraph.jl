@@ -89,7 +89,7 @@ function MathOptAI.add_predictor(
                 [-predictor.beta * y[i], 1, u2[i]] in MOI.ExponentialCone()
             )
         )
-        push!(cons, JuMP.@constraint(model, u1[i] + u2[i] ≤ 1))
+        push!(cons, JuMP.@constraint(model, u1[i] + u2[i] <= 1))
     end
     return y, Formulation(predictor, Any[y; u1; u2], cons)
 end

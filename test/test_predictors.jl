@@ -12,6 +12,7 @@ using Test
 import Distributions
 import HiGHS
 import Ipopt
+import SCS
 import MathOptAI
 
 is_test(x) = startswith(string(x), "test_")

@@ -59,23 +59,36 @@ SoftPlusConicEpigraph(1.0)
 """
 struct SoftPlusConicEpigraph <: MathOptAI.AbstractPredictor
     beta::Float64
-    SoftPlusConicEpigraph(; beta::Float64=1.0) = new(beta)
+    SoftPlusConicEpigraph(; beta::Float64 = 1.0) = new(beta)
 end
 
 output_size(::SoftPlusConicEpigraph, input_size) = input_size
 
 function MathOptAI.add_predictor(
-    model::JuMP.AbstractModel, 
-    predictor::SoftPlusConicEpigraph, 
-    x::Vector, 
+    model::JuMP.AbstractModel,
+    predictor::SoftPlusConicEpigraph,
+    x::Vector,
 )
     cons = Any[]
     u1 = add_variables(model, x, length(x), "moai_SoftPlusConicEpigraph_u1")
     u2 = add_variables(model, x, length(x), "moai_SoftPlusConicEpigraph_u2")
-    y  = add_variables(model, x, length(x), "moai_SoftPlusConicEpigraph_y")
+    y = add_variables(model, x, length(x), "moai_SoftPlusConicEpigraph_y")
     for i in 1:length(x)
-        push!(cons, JuMP.@constraint(model, [predictor.beta * (x[i] - y[i]), 1, u1[i]] in MOI.ExponentialCone()))
-        push!(cons, JuMP.@constraint(model, [-predictor.beta * y[i], 1, u2[i]] in MOI.ExponentialCone()))
+        push!(
+            cons,
+            JuMP.@constraint(
+                model,
+                [predictor.beta * (x[i] - y[i]), 1, u1[i]] in
+                MOI.ExponentialCone()
+            )
+        )
+        push!(
+            cons,
+            JuMP.@constraint(
+                model,
+                [-predictor.beta * y[i], 1, u2[i]] in MOI.ExponentialCone()
+            )
+        )
         push!(cons, JuMP.@constraint(model, u1[i] + u2[i] ≤ 1))
     end
     return y, Formulation(predictor, Any[y; u1; u2], cons)

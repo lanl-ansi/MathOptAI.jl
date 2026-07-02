@@ -466,8 +466,8 @@ function test_SoftPlusConicEpigraph()
     fix.(x, X)
     optimize!(model)
     @assert is_solved_and_feasible(model)
-    @test isapprox.(value.(y), log.(1 .+ exp.(X)); atol=1e-3)
-    @test isapprox(objective_value(model), sum(log.(1 .+ exp.(X))); atol=1e-3)
+    @test isapprox.(value.(y), log.(1 .+ exp.(X)); atol = 1e-3)
+    @test isapprox(objective_value(model), sum(log.(1 .+ exp.(X))); atol = 1e-3)
     return
 end
 

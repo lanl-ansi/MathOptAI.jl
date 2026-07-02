@@ -457,7 +457,7 @@ function test_SoftPlusConicEpigraph()
     model = Model(SCS.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
-    y, formulation = MathOptAI.add_predictor(model, MathOptAI.SoftPlus(), x)
+    y, formulation = MathOptAI.add_predictor(model, MathOptAI.SoftPlusConicEpigraph(), x)
     @test MathOptAI.output_size(MathOptAI.SoftPlusConicEpigraph(), (10,)) == (10,)
     @test length(y) == 2
     @test num_variables(model) == 8

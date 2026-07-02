@@ -5,7 +5,7 @@
 # in the LICENSE.md file.
 
 """
-    SoftPlusConicEpigraph() <: AbstractPredictor
+    SoftPlusConicEpigraph(; beta::Float64 = 1.0) <: AbstractPredictor
 
 An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math

@@ -475,7 +475,7 @@ function test_SoftPlusConicEpigraph()
 end
 
 function test_SoftPlusConicEpigraph_beta4()
-    beta = 4
+    beta = 4.0
     model = Model(SCS.Optimizer)
     set_silent(model)
     @variable(model, x[1:2])
@@ -484,8 +484,10 @@ function test_SoftPlusConicEpigraph_beta4()
         MathOptAI.SoftPlusConicEpigraph(; beta = beta),
         x,
     )
-    @test MathOptAI.output_size(MathOptAI.SoftPlusConicEpigraph(), (10,)) ==
-          (10,)
+    @test MathOptAI.output_size(
+        MathOptAI.SoftPlusConicEpigraph(; beta = beta),
+        (10,),
+    ) == (10,)
     @test length(y) == 2
     @test num_variables(model) == 8
     @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0

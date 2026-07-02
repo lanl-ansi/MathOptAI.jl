@@ -12,6 +12,7 @@ using Test
 import Distributions
 import HiGHS
 import Ipopt
+import SCS
 import MathOptAI
 
 is_test(x) = startswith(string(x), "test_")
@@ -449,6 +450,62 @@ function test_SoftPlus_bounds()
             @test !has_upper_bound(y[1])
         end
     end
+    return
+end
+
+function test_SoftPlusConicEpigraph()
+    model = Model(SCS.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y, formulation =
+        MathOptAI.add_predictor(model, MathOptAI.SoftPlusConicEpigraph(), x)
+    @test MathOptAI.output_size(MathOptAI.SoftPlusConicEpigraph(), (10,)) ==
+          (10,)
+    @test length(y) == 2
+    @test num_variables(model) == 8
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
+    @objective(model, Min, sum(y))
+    X = [-1.0, 2.0]
+    fix.(x, X)
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test isapprox.(value.(y), log.(1 .+ exp.(X)); atol = 1e-3)
+    @test isapprox(objective_value(model), sum(log.(1 .+ exp.(X))); atol = 1e-3)
+    return
+end
+
+function test_SoftPlusConicEpigraph_beta4()
+    beta = 4.0
+    model = Model(SCS.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    y, formulation = MathOptAI.add_predictor(
+        model,
+        MathOptAI.SoftPlusConicEpigraph(; beta = beta),
+        x,
+    )
+    @test MathOptAI.output_size(
+        MathOptAI.SoftPlusConicEpigraph(; beta = beta),
+        (10,),
+    ) == (10,)
+    @test length(y) == 2
+    @test num_variables(model) == 8
+    @test num_constraints(model, NonlinearExpr, MOI.EqualTo{Float64}) == 0
+    @objective(model, Min, sum(y))
+    X = [-1.0, 2.0]
+    fix.(x, X)
+    optimize!(model)
+    @assert is_solved_and_feasible(model)
+    @test isapprox.(
+        value.(y),
+        (1 / beta) .* log.(1 .+ exp.(beta .* X));
+        atol = 1e-3,
+    )
+    @test isapprox(
+        objective_value(model),
+        sum((1 / beta) .* log.(1 .+ exp.(beta .* X)));
+        atol = 1e-3,
+    )
     return
 end
 

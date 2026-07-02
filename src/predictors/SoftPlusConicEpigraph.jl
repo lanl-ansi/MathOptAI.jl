@@ -14,7 +14,7 @@ y = \\frac{1}{\\beta} \\log(1 + e^{\\beta x})
 by the reformulation:
 ```math
 \\begin{aligned}
-1 & \\ge u_1 + u_2 \\\\
+u_1 + u_2 & \\le 1 \\\\
 (u_1, 1, \\beta(x - y)) & \\in \\mathcal{K}_{\\exp} \\\\
 (u_2, 1, - \\beta y) & \\in \\mathcal{K}_{\\exp}
 \\end{aligned}

@@ -375,7 +375,7 @@ julia> output_size(MaxPool2d((3, 3); input_size = (6, 9, 1)), (6, 9, 1))
 output_size(::AbstractPredictor, ::Any) = nothing
 
 include("predictors/Affine.jl")
-include("predictors/AffineCombinnation.jl")
+include("predictors/AffineCombination.jl")
 include("predictors/AvgPool2d.jl")
 include("predictors/BinaryDecisionTree.jl")
 include("predictors/Conv2d.jl")

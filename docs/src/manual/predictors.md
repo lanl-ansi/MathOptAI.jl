@@ -39,6 +39,6 @@ The following predictors are supported. See their docstrings for details:
 | [`Sigmoid`](@ref)                     | Global nonlinear      | Yes  | Yes       |
 | [`SoftMax`](@ref)                     | Global nonlinear      | Yes  | Yes       |
 | [`SoftPlus`](@ref)                    | Global nonlinear      | Yes  | Yes       |
-| [`SoftPlusConicEpigraph`](@ref)       | Global nonlinear      | Yes  | Yes       |
+| [`SoftPlusConicEpigraph`](@ref)       | Conic                 | Yes  |           |
 | [`TAGConv`](@ref)                     | Linear                | Yes  |           |
 | [`Tanh`](@ref)                        | Global nonlinear      | Yes  | Yes       |

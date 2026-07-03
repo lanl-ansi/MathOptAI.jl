@@ -7,6 +7,17 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.6 (July 3, 2026)
+
+### Added
+
+ - Added [`SoftPlusConicEpigraph`](@ref) (#288)
+
+### Other
+
+ - Updated GitHub actions (#282)
+ - Updated documentation (#286), (#287)
+
 ## Version 0.2.5 (June 25, 2026)
 
 ### Added

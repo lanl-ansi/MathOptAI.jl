@@ -469,7 +469,7 @@ function test_SoftPlusConicEpigraph()
     optimize!(model)
     @assert is_solved_and_feasible(model)
     y_star = log.(1 .+ exp.(X))
-    @test isapprox.(value.(y), y_star; atol = 1e-3)
+    @test isapprox(value.(y), y_star; atol = 1e-3)
     @test isapprox(objective_value(model), sum(y_star); atol = 1e-3)
     return
 end
@@ -491,7 +491,7 @@ function test_SoftPlusConicEpigraph_beta4()
     optimize!(model)
     @assert is_solved_and_feasible(model)
     y_star = (1 / beta) .* log.(1 .+ exp.(beta .* X))
-    @test isapprox.(value.(y), y_star; atol = 1e-3)
+    @test isapprox(value.(y), y_star; atol = 1e-3)
     @test isapprox(objective_value(model), sum(y_star); atol = 1e-3)
     return
 end

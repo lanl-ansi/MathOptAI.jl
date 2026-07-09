@@ -807,6 +807,29 @@ function test_LeakyReLU_BigM()
     return
 end
 
+function test_LeakyReLU_Epigraph()
+    model = Model(HiGHS.Optimizer)
+    set_silent(model)
+    @variable(model, x[1:2])
+    f = MathOptAI.LeakyReLU(;
+        negative_slope = 0.123,
+        relu = MathOptAI.ReLUEpigraph(),
+    )
+    y, formulation = MathOptAI.add_predictor(model, f, x)
+    @test length(y) == 2
+    @test num_variables(model) == 6
+    @test num_constraints(model, AffExpr, MOI.EqualTo{Float64}) == 2
+    @test num_constraints(model, AffExpr, MOI.GreaterThan{Float64}) == 2
+    @test num_constraints(model, AffExpr, MOI.LessThan{Float64}) == 0
+    @objective(model, Min, sum(y))
+    fix.(x, [-1, 2])
+    optimize!(model)
+    @test is_solved_and_feasible(model; dual = true)
+    @test ≈(value.(y), [-0.123, 2.0]; atol = 1e-3)
+    @test ≈(reduced_cost.(x), [0.123, 1.0]; atol = 1e-3)
+    return
+end
+
 function test_AvgPool2d()
     model = Model(HiGHS.Optimizer)
     set_silent(model)

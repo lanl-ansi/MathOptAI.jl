@@ -824,7 +824,7 @@ function test_LeakyReLU_Epigraph()
     @objective(model, Min, sum(y))
     fix.(x, [-1, 2])
     optimize!(model)
-    @test is_solved_and_feasible(model)
+    @test is_solved_and_feasible(model; dual = true)
     @test value.(y) ≈ [-0.123, 2.0]
     @test dual.(all_constraints(model, AffExpr, MOI.GreaterThan{Float64})) ≈ [
         0.0, # since x1 is negative

@@ -826,6 +826,10 @@ function test_LeakyReLU_Epigraph()
     optimize!(model)
     @test is_solved_and_feasible(model)
     @test value.(y) ≈ [-0.123, 2.0]
+    @test dual.(all_constraints(model, AffExpr, MOI.GreaterThan{Float64})) ≈ [
+        0.0, # since x1 is negative
+        1 - f.negative_slope,
+    ]
     return
 end
 

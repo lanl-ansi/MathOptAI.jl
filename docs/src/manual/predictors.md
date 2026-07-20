@@ -32,7 +32,7 @@ The following predictors are supported. See their docstrings for details:
 | [`Quantile`](@ref)                    | Local nonlinear       | Yes  |           |
 | [`ReLU`](@ref)                        | Global nonlinear      | Yes  | Yes       |
 | [`ReLUBigM`](@ref)                    | Mixed-integer linear  | Yes  |           |
-| [`ReLUEpigraph`](@ref)                | Linear                | Yes  |           |
+| [`ReLUEpigraph`](@ref)                | Linear                | Yes  | Yes       |
 | [`ReLUQuadratic`](@ref)               | Non-convex quadratic  | Yes  |           |
 | [`ReLUSOS1`](@ref)                    | Mixed-integer linear  | Yes  |           |
 | [`Scale`](@ref)                       | Linear                | Yes  | Yes       |

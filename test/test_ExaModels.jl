@@ -180,6 +180,30 @@ function test_ReLU_AbstractVector()
     return
 end
 
+function test_ReLUEpigraph_structure()
+    p = MathOptAI.ReLUEpigraph()
+    core, x = _make_core_with_input(3)
+    (core, y), form = MathOptAI.add_predictor(core, p, x)
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 6   # 3 inputs + 3 outputs
+    @test m.meta.ncon == 3
+    @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
+    @test form isa MathOptAI.Formulation
+    return
+end
+
+function test_ReLUEpigraph_AbstractVector()
+    p = MathOptAI.ReLU()
+    core, x = _make_core_with_input(3)
+    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 6   # 3 inputs + 3 outputs
+    @test m.meta.ncon == 3
+    @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
+    @test form isa MathOptAI.Formulation
+    return
+end
+
 function test_Sigmoid_structure()
     p = MathOptAI.Sigmoid()
     core, x = _make_core_with_input(2)

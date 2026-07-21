@@ -193,7 +193,7 @@ function test_ReLUEpigraph_structure()
 end
 
 function test_ReLUEpigraph_AbstractVector()
-    p = MathOptAI.ReLU()
+    p = MathOptAI.ReLUEpigraph()
     core, x = _make_core_with_input(3)
     (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
     m = ExaModels.ExaModel(core)

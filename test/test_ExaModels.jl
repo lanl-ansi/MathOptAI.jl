@@ -563,7 +563,7 @@ function test_flux_end_to_end_gray_box()
         Flux.Dense(2 => 2, Flux.sigmoid),
         Flux.softmax,
         Flux.Dense(2 => 2, Flux.softplus),
-        Flux.Dense(2 => 2, Flux.tanh),
+        Flux.Dense(2 => 3, Flux.tanh),
     );
     core = ExaModels.ExaCore(; concrete = Val(true))
     b = [1.1, 2.3]

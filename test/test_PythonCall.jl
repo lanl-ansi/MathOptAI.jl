@@ -20,6 +20,7 @@ import ExaModels
 import HiGHS
 import Ipopt
 import MathOptAI
+import NLPModelsIpopt
 import PythonCall
 
 is_test(x) = startswith(string(x), "test_")

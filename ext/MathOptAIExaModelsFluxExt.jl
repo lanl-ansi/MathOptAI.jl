@@ -24,7 +24,7 @@ function MathOptAI.add_predictor(
     core, y, oracle = ExaModels.embed_oracle(
         core,
         x,
-        _length(x);
+        only(Flux.outputsize(p.predictor, (_length(x),)));
         f! = (ret, x) -> ret .= p.predictor(Float32.(x)),
         jvp! = (ret, x, v) -> ret .= J(x) * v,
         vjp! = (ret, x, w) -> ret .= J(x)' * w,

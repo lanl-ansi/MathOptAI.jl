@@ -23,7 +23,7 @@ The following predictors are supported. See their docstrings for details:
 | [`Conv2d`](@ref).                     | Linear                | Yes  |           |
 | [`GCNConv`](@ref)                     | Linear                | Yes  |           |
 | [`GELU`](@ref)                        | Global nonlinear      | Yes  | Yes       |
-| [`GrayBox`](@ref)                     | Local nonlinear       | Yes  |           |
+| [`GrayBox`](@ref)                     | Local nonlinear       | Yes  | Yes       |
 | [`LayerNorm`](@ref)                   | Global nonlinear      | Yes  |           |
 | [`LeakyReLU`](@ref)                   | Depends on inner ReLU | Yes  | Yes       |
 | [`MaxPool2d`](@ref)                   | Global nonlinear      | Yes  |           |

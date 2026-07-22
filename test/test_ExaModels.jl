@@ -556,6 +556,27 @@ function test_flux_end_to_end()
     return
 end
 
+function test_flux_end_to_end_gray_box()
+    chain = Flux.Chain(
+        Flux.Dense(2 => 2, Flux.relu),
+        Flux.Scale(2),
+        Flux.Dense(2 => 2, Flux.sigmoid),
+        Flux.softmax,
+        Flux.Dense(2 => 2, Flux.softplus),
+        Flux.Dense(2 => 3, Flux.tanh),
+    );
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    b = [1.1, 2.3]
+    core, x = ExaModels.add_var(core, 2; lvar = b, uvar = b)
+    (core, y), _ = MathOptAI.add_predictor(core, chain, x; gray_box = true);
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y_star = chain(Float32.(b))
+    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    return
+end
+
 end  # module
 
 TestExaModelsExt.runtests()

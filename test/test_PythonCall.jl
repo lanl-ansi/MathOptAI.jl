@@ -16,6 +16,7 @@ end
 using JuMP
 using Test
 
+import ExaModels
 import HiGHS
 import Ipopt
 import MathOptAI
@@ -983,6 +984,37 @@ function test_custom_TAGConv()
     Y_py = PythonCall.pyconvert(Array, torch_model(input).detach().numpy())
     Y = reshape(value(y), 4, 3)
     @test maximum(abs, Y - Y_py) <= 1e-5
+    return
+end
+
+function test_examodels_graybox()
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Sigmoid.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(3, 16),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(16, 2),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    predictor = MathOptAI.PytorchModel(filename)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    b = [1.1, 2.3, 4.5]
+    core, x = ExaModels.add_var(core, 3; lvar = b, uvar = b)
+    (core, y), _ = MathOptAI.add_predictor(core, predictor, x; gray_box = true)
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y_star = _evaluate_model(filename, b)
+    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
     return
 end
 

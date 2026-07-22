@@ -29,15 +29,22 @@ function MathOptAI.add_predictor(
     torch_model = torch.load(predictor.predictor.filename; weights_only = false)
     torch_model = torch_model.to(device)
     save!(ret, tensor) = ret .= _pyconvert(Vector, tensor)
-    Jvp = torch.func.jvp(torch_model).to(device)
-    vJp = torch.func.vjp(torch_model).to(device)
+    function jvp(x_in, v_in)
+        x, v = torch.tensor(x_in), torch.tensor(v_in)
+        _, jvp = torch.func.jvp(torch_model, x, v)
+        return jvp
+    end
+    function vjp(x, w)
+        _, vjp_fn = torch.func.vjp(torch_model, torch.tensor(x))
+        return vjp_fn(torch.tensor(w))
+    end
     core, y, oracle = ExaModels.embed_oracle(
         core,
         x,
         _length(x);
         f! = (ret, x) -> save!(ret, model(torch.tensor(x))),
-        jvp! = (ret, x, v) -> save!(ret, Jvp(torch.tensor(x), torch.tensor(v))),
-        vjp! = (ret, x, w) -> save!(ret, vJp(torch.tensor(x), torch.tensor(w))),
+        jvp! = (ret, x, v) -> save!(ret, jvp(x, v)),
+        vjp! = (ret, x, w) -> save!(ret, jvp(x, w)),
         # From the ExaModels docs: "Use `adapt=Val(true)` to have arrays
         # automatically copied to CPU before each callback invocation.
         adapt = Val(true),

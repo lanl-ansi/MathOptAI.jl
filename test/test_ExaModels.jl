@@ -6,12 +6,20 @@
 
 module TestExaModelsExt
 
+# To make testing easier, setup the environment variables as needed for @odow's
+# conda setup.
+if get(ENV, "LOGNAME", "") == "odow"
+    ENV["JULIA_PYTHONCALL_EXE"] = "python3"
+    ENV["JULIA_CONDAPKG_BACKEND"] = "Null"
+end
+
 using Test
 
 import ExaModels
 import Flux
 import MathOptAI
 import NLPModelsIpopt
+import PythonCall
 
 is_test(x) = startswith(string(x), "test_")
 
@@ -552,6 +560,74 @@ function test_flux_end_to_end()
     result = NLPModelsIpopt.ipopt(model; print_level = 0)
     @test result.status ∈ (:first_order, :acceptable)
     y_star = chain(Float32.(b))
+    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    return
+end
+
+function test_flux_end_to_end_gray_box()
+    chain = Flux.Chain(
+        Flux.Dense(2 => 2, Flux.relu),
+        Flux.Scale(2),
+        Flux.Dense(2 => 2, Flux.sigmoid),
+        Flux.softmax,
+        Flux.Dense(2 => 2, Flux.softplus),
+        Flux.Dense(2 => 2, Flux.tanh),
+    );
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    b = [1.1, 2.3]
+    core, x = ExaModels.add_var(core, 2; lvar = b, uvar = b)
+    (core, y), _ = MathOptAI.add_predictor(core, chain, x; gray_box = true);
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y_star = chain(Float32.(b))
+    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    return
+end
+
+function _evaluate_model(filename, x)
+    torch = PythonCall.pyimport("torch")
+    torch_model = torch.load(filename; weights_only = false)
+    input = torch.tensor(x)
+    return PythonCall.pyconvert(Vector, torch_model(input).detach().numpy())
+end
+
+function test_gray_box_sigmoid()
+    try
+        PythonCall.pyimport("torch")
+    catch err
+        if get(ENV, "CI", "false") != "false"
+            return
+        else
+            rethrow(err)
+        end
+    end
+    dir = mktempdir()
+    filename = joinpath(dir, "model_Sigmoid.pt")
+    PythonCall.pyexec(
+        """
+        import torch
+
+        model = torch.nn.Sequential(
+            torch.nn.Linear(3, 16),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(16, 2),
+        )
+
+        torch.save(model, filename)
+        """,
+        @__MODULE__,
+        (; filename = filename),
+    )
+    predictor = MathOptAI.PytorchModel(filename)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    b = [1.1, 2.3, 4.5]
+    core, x = ExaModels.add_var(core, 3; lvar = b, uvar = b)
+    (core, y), _ = MathOptAI.add_predictor(core, predictor, x; gray_box = true)
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y_star = _evaluate_model(filename, b)
     @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
     return
 end

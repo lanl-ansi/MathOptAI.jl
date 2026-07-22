@@ -40,10 +40,10 @@ SoftPlus(2.0)
 └ constraints [6]
   ├ moai_SoftPlus[1] ≥ 0.0634640055214863
   ├ moai_SoftPlus[1] ≤ 1.0634640055214863
-  ├ moai_SoftPlus[1] - (log(1 + exp(2 x[1])) / 2) = 0
+  ├ moai_SoftPlus[1] - log(1 + exp(2 x[1])) / 2 = 0
   ├ moai_SoftPlus[2] ≥ 0.0634640055214863
   ├ moai_SoftPlus[2] ≤ 2.0090749639589047
-  └ moai_SoftPlus[2] - (log(1 + exp(2 x[2])) / 2) = 0
+  └ moai_SoftPlus[2] - log(1 + exp(2 x[2])) / 2 = 0
 
 julia> y, formulation =
            MathOptAI.add_predictor(model, MathOptAI.ReducedSpace(f), x);

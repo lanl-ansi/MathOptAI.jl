@@ -1009,12 +1009,14 @@ function test_examodels_graybox()
     predictor = MathOptAI.PytorchModel(filename)
     core = ExaModels.ExaCore(; concrete = Val(true))
     b = [1.1, 2.3, 4.5]
-    core, x = ExaModels.add_var(core, 3; lvar = b, uvar = b)
+    core, x = ExaModels.add_var(core, 3; lvar = b, uvar = b .+ 1)
     (core, y), _ = MathOptAI.add_predictor(core, predictor, x; gray_box = true)
+    ExaModels.@add_obj(core, i * y[i] for i in 1:2)
     model = ExaModels.ExaModel(core)
     result = NLPModelsIpopt.ipopt(model; print_level = 0)
     @test result.status ∈ (:first_order, :acceptable)
-    y_star = _evaluate_model(filename, b)
+    x_star = ExaModels.solution(result, x)
+    y_star = _evaluate_model(filename, x_star)
     @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
     return
 end

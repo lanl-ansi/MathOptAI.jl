@@ -7,6 +7,19 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.7 (July 23, 2026)
+
+## Added
+
+ - Added gray-box support for ExaModels (#300), (#301)
+ - Add ReLUEpigraph for ExaModels (#294), (#296)
+
+### Other
+
+ - Added test for `LeakyReLU{ReLUEpigraph}` (#293)
+ - Explicitly include predictors in ExaModelsExt (#298)
+ - Updated printing because of JuMP@1.31.0 release (#299)
+
 ## Version 0.2.6 (July 3, 2026)
 
 ### Added

@@ -113,8 +113,17 @@ function MathOptAI.add_predictor(
     return MathOptAI.add_predictor(model, predictor, x)
 end
 
-for file in filter(endswith(".jl"), readdir(joinpath(@__DIR__, "ExaModels")))
-    include(joinpath(@__DIR__, "ExaModels", file))
-end
+include("ExaModels/Affine.jl")
+include("ExaModels/GELU.jl")
+include("ExaModels/LeakyReLU.jl")
+include("ExaModels/Permutation.jl")
+include("ExaModels/Pipeline.jl")
+include("ExaModels/ReLU.jl")
+include("ExaModels/ReLUEpigraph.jl")
+include("ExaModels/Scale.jl")
+include("ExaModels/Sigmoid.jl")
+include("ExaModels/SoftMax.jl")
+include("ExaModels/SoftPlus.jl")
+include("ExaModels/Tanh.jl")
 
 end  # module MathOptAIExaModelsExt

@@ -77,7 +77,7 @@ core = ExaModels.ExaCore(; concrete = Val(true))
 core, x = ExaModels.add_var(core, 2)
 (core, y), _ = MathOptAI.add_predictor(
     core,
-    chain,
+    predictor,
     x;
     config = Dict(Flux.relu => MathOptAI.ReLUEpigraph),
 );

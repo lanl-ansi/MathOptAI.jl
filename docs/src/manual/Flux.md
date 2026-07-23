@@ -105,8 +105,8 @@ end
 struct CustomPredictor <: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
 end
-function MathOptAI.build_predictor(model::CustomLayer)
-    predictor = MathOptAI.build_predictor(model.chain)
+function MathOptAI.build_predictor(model::CustomLayer; kwargs...)
+    predictor = MathOptAI.build_predictor(model.chain; kwargs...)
     return CustomPredictor(predictor)
 end
 function MathOptAI.add_predictor(

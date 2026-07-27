@@ -19,10 +19,10 @@
 
 using JuMP
 import HiGHS
-import SCS
 import MathOptAI
 import Plots
 import PythonCall
+import SCS
 
 # ## Building the ICNN
 

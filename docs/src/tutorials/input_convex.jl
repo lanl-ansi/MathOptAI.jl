@@ -16,10 +16,10 @@
 using JuMP
 import Flux
 import HiGHS
-import SCS
 import MathOptAI
 import Plots
 import Random
+import SCS
 
 # ## Building the ICNN
 

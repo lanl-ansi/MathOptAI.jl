@@ -19,6 +19,7 @@
 
 using JuMP
 import HiGHS
+import SCS
 import MathOptAI
 import Plots
 import PythonCall
@@ -45,13 +46,11 @@ write(
             in_features_x: int,
             out_features: int,
             bias: bool = True,
-            activation = F.relu,
             device=None,
             dtype=None,
         ):
             factory_kwargs = {"device": device, "dtype": dtype}
             super().__init__()
-            self.activation = activation
             self.in_features_z = in_features_z
             self.in_features_x = in_features_x
             self.out_features = out_features
@@ -83,15 +82,11 @@ write(
                 args = args[0]
             if len(args) == 1:
                 input_x = args[0]
-                output = self.activation(input_x @ self.weight_x.T + self.bias)
+                output = input_x @ self.weight_x.T + self.bias
                 return output, input_x
             elif len(args) == 2:
                 input_z, input_x = args
-                output = self.activation(
-                    input_z @ F.softplus(self.weight_z).T +
-                    input_x @ self.weight_x.T +
-                    self.bias
-                )
+                output = input_z @ F.softplus(self.weight_z).T + input_x @ self.weight_x.T + self.bias
                 return output, input_x
 
     class InputConvexChain(torch.nn.Module):
@@ -146,7 +141,6 @@ _array(x) = PythonCall.pyconvert(Array{Float64}, x.detach().cpu().numpy())
 
 function icnn_callback(icnn::PythonCall.Py; input_size, kwargs...)
     softplus = MathOptAI.SoftPlus()
-    nn = PythonCall.pyimport("torch.nn")
     (layer1, layers) = Iterators.peel(icnn.layers)
     p = MathOptAI.Pipeline(
         MathOptAI.Affine(_array(layer1.weight_x), _array(layer1.bias)),
@@ -230,10 +224,10 @@ predictor = PythonCall.@pyexec(
         from icnn import InputConvexChain, InputConvex
         torch.manual_seed(61)
         predictor = InputConvexChain(
-            InputConvex(1, 1, 10),
-            ReLU(),
-            InputConvex(10, 1, 1),
-            ReLU(),
+            InputConvex(1, 1, 10), 
+            ReLU(), 
+            InputConvex(10, 1, 1), 
+            ReLU(), 
         )
 
         loss_fn = torch.nn.MSELoss()
@@ -241,7 +235,7 @@ predictor = PythonCall.@pyexec(
         predictor.train()
         X = torch.unsqueeze(torch.arange(-2, 2, step=.1), 1)
         Y = torch.pow(X, 2)
-        epochs = 100
+        epochs = 200
         running_loss = 0.
         for e in range(epochs):
             optimizer.zero_grad()
@@ -273,6 +267,77 @@ model
 #
 # Moreover, we can show that the objective value `y` is convex with respect to
 # `x`:
+
+x_value, y_value = -2:0.1:2, Float64[]
+for xi in x_value
+    fix(x[1], xi)
+    optimize!(model)
+    ## To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
+    push!(y_value, objective_value(model))
+end
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
+Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
+
+# ## Conic Formulation
+
+# Now, let us replace the activation functions with
+# `Softplus`.
+
+predictor = PythonCall.@pyexec(
+    (dir, filename) =>
+        """
+        import torch
+        from torch.nn import ReLU, Softplus
+        import sys
+        sys.path.insert(0, dir)
+        from icnn import InputConvexChain, InputConvex
+        torch.manual_seed(61)
+        predictor = InputConvexChain(
+            InputConvex(1, 1, 10), 
+            ReLU(), 
+            InputConvex(10, 1, 1), 
+            Softplus(),
+        )
+
+        loss_fn = torch.nn.MSELoss()
+        optimizer = torch.optim.SGD(predictor.parameters(), lr=0.01, momentum=.9)
+        predictor.train()
+        X = torch.unsqueeze(torch.arange(-2, 2, step=.1), 1)
+        Y = torch.pow(X, 2)
+        epochs = 200
+        running_loss = 0.
+        for e in range(epochs):
+            optimizer.zero_grad()
+            Y_hat = predictor(X)
+            loss = loss_fn(Y_hat, Y)
+            loss.backward()
+            optimizer.step()
+            if e % 10 == 9:
+                last_loss = running_loss # loss per batch
+                print(f'  batch {e + 1} loss: {loss.item()}')
+
+        torch.save(predictor, filename)
+        """ => predictor
+)
+
+# Next, we use [`SoftPlusConicEpigraph`](@ref) to 
+# embed this new network into a conic formulation.
+
+model = Model(SCS.Optimizer)
+set_silent(model)
+@variable(model, x[1:1])
+config =
+    Dict(
+        :ReLU => MathOptAI.ReLUEpigraph, 
+        :SoftPlus => MathOptAI.SoftPlusConicEpigraph, 
+        InputConvexChain => icnn_callback
+    )
+y, _ = MathOptAI.add_predictor(model, predictor, x; config)
+@objective(model, Min, only(y))
+model
+
+# Now, we can check the fit and compare with `ReLU`.
 
 x_value, y_value = -2:0.1:2, Float64[]
 for xi in x_value

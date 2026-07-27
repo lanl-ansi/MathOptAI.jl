@@ -16,6 +16,7 @@
 using JuMP
 import Flux
 import HiGHS
+import SCS
 import MathOptAI
 import Plots
 import Random
@@ -191,8 +192,8 @@ chain = InputConvexChain(
 
 begin
     X = -2.0f0:0.1f0:2.0f0
-    optimizer_state = Flux.setup(Flux.Adam(1e-2), chain)
-    for epoch in 1:200
+    optimizer_state = Flux.setup(Flux.Adam(5e-2), chain)
+    for epoch in 1:1000
         _, gradient = Flux.withgradient(chain) do model
             return sum((only(model([x])) - x^2)^2 for x in X)
         end
@@ -215,6 +216,53 @@ model
 #
 # Moreover, we can show that the objective value `y` is convex with respect to
 # `x`:
+
+x_value, y_value = -2:0.1:2, Float64[]
+for xi in x_value
+    fix(x[1], xi)
+    optimize!(model)
+    ## To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
+    push!(y_value, objective_value(model))
+end
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
+Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
+
+## Conic Formulation
+
+# We can also use [`SoftPlusConicEpigraph`](@ref) in the activation functions.
+# The resulting conic formulation can be solved using `SCS` or any other conic
+# solver.
+
+Random.seed!(1234)
+chain = InputConvexChain(
+    InputConvex((1, 1) => 10, Flux.softplus),
+    InputConvex((10, 1) => 1, Flux.softplus),
+)
+
+begin
+    X = -2.0f0:0.1f0:2.0f0
+    optimizer_state = Flux.setup(Flux.Adam(5e-2), chain)
+    for epoch in 1:1000
+        _, gradient = Flux.withgradient(chain) do model
+            return sum((only(model([x])) - x^2)^2 for x in X)
+        end
+        Flux.update!(optimizer_state, chain, only(gradient))
+    end
+end
+
+# Next, we embed the neural network using [`SoftPlusConicEpigraph`](@ref).
+
+model = Model(SCS.Optimizer)
+set_silent(model)
+@variable(model, x[1:1])
+config = Dict(Flux.softplus => MathOptAI.SoftPlusConicEpigraph)
+y, _ = MathOptAI.add_predictor(model, chain, x; config)
+@objective(model, Min, only(y))
+model
+
+# Let's draw the same plot to see 
+# the differences in fit with `softplus`.
 
 x_value, y_value = -2:0.1:2, Float64[]
 for xi in x_value

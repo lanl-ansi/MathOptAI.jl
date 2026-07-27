@@ -228,7 +228,7 @@ end
 Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
 Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
 
-## Conic Formulation
+# ## Conic Formulation
 
 # We can also use [`SoftPlusConicEpigraph`](@ref) in the activation functions.
 # The resulting conic formulation can be solved using `SCS` or any other conic

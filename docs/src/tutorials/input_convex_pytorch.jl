@@ -224,10 +224,10 @@ predictor = PythonCall.@pyexec(
         from icnn import InputConvexChain, InputConvex
         torch.manual_seed(61)
         predictor = InputConvexChain(
-            InputConvex(1, 1, 10), 
-            ReLU(), 
-            InputConvex(10, 1, 1), 
-            ReLU(), 
+            InputConvex(1, 1, 10),
+            ReLU(),
+            InputConvex(10, 1, 1),
+            ReLU(),
         )
 
         loss_fn = torch.nn.MSELoss()
@@ -281,8 +281,7 @@ Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
 
 # ## Conic Formulation
 
-# Now, let us replace the activation functions with
-# `Softplus`.
+# Now, let us replace the activation functions with `Softplus`.
 
 predictor = PythonCall.@pyexec(
     (dir, filename) =>
@@ -294,9 +293,9 @@ predictor = PythonCall.@pyexec(
         from icnn import InputConvexChain, InputConvex
         torch.manual_seed(61)
         predictor = InputConvexChain(
-            InputConvex(1, 1, 10), 
-            ReLU(), 
-            InputConvex(10, 1, 1), 
+            InputConvex(1, 1, 10),
+            ReLU(),
+            InputConvex(10, 1, 1),
             Softplus(),
         )
 
@@ -321,8 +320,8 @@ predictor = PythonCall.@pyexec(
         """ => predictor
 )
 
-# Next, we use [`SoftPlusConicEpigraph`](@ref) to 
-# embed this new network into a conic formulation.
+# Next, we use [`SoftPlusConicEpigraph`](@ref) to  embed this new network into a
+# conic formulation.
 
 model = Model(SCS.Optimizer)
 set_silent(model)

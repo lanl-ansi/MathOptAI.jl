@@ -320,7 +320,7 @@ function test_AvgPool2d_against_flux()
         (3, 5, 2, (2, 3), 1, (1, 1)),
         (20, 20, 2, (4, 4), 0, (4, 4)),
     ]
-        x = rand(Float32, H, W, C, 1);
+        x = rand(Float32, H, W, C, 1)
         f = Flux.MeanPool(kernel; pad, stride)
         g = MathOptAI.AvgPool2d(
             kernel;
@@ -347,7 +347,7 @@ function test_Conv2d_against_flux()
         (3, 5, 2 => 2, (2, 3), 1, (1, 1)),
         (20, 20, 2 => 3, (4, 4), 0, (4, 4)),
     ]
-        x = rand(Float32, H, W, first(C), 1);
+        x = rand(Float32, H, W, first(C), 1)
         f = Flux.Conv(kernel, C, identity; pad, stride)
         g = MathOptAI.Conv2d(
             f.weight,
@@ -375,7 +375,7 @@ function test_MaxPool_against_flux()
         (3, 5, 2, (2, 3), 1, (1, 1)),
         (20, 20, 2, (4, 4), 0, (4, 4)),
     ]
-        x = rand(Float32, H, W, C, 1);
+        x = rand(Float32, H, W, C, 1)
         f = Flux.MaxPool(kernel; pad, stride)
         g = MathOptAI.MaxPool2d(
             kernel;

@@ -543,11 +543,11 @@ function test_flux_end_to_end()
         Flux.softmax,
         Flux.Dense(2 => 2, Flux.softplus),
         Flux.Dense(2 => 2, Flux.tanh),
-    );
+    )
     core = ExaModels.ExaCore(; concrete = Val(true))
     b = [1.1, 2.3]
     core, x = ExaModels.add_var(core, 2; lvar = b, uvar = b)
-    (core, y), _ = MathOptAI.add_predictor(core, chain, x);
+    (core, y), _ = MathOptAI.add_predictor(core, chain, x)
     model = ExaModels.ExaModel(core)
     result = NLPModelsIpopt.ipopt(model; print_level = 0)
     @test result.status ∈ (:first_order, :acceptable)
@@ -564,11 +564,11 @@ function test_flux_end_to_end_gray_box()
         Flux.softmax,
         Flux.Dense(2 => 2, Flux.softplus),
         Flux.Dense(2 => 3, Flux.tanh),
-    );
+    )
     core = ExaModels.ExaCore(; concrete = Val(true))
     b = [1.1, 2.3]
     core, x = ExaModels.add_var(core, 2; lvar = b, uvar = b)
-    (core, y), _ = MathOptAI.add_predictor(core, chain, x; gray_box = true);
+    (core, y), _ = MathOptAI.add_predictor(core, chain, x; gray_box = true)
     model = ExaModels.ExaModel(core)
     result = NLPModelsIpopt.ipopt(model; print_level = 0)
     @test result.status ∈ (:first_order, :acceptable)

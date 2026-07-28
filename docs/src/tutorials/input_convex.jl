@@ -261,8 +261,7 @@ y, _ = MathOptAI.add_predictor(model, chain, x; config)
 @objective(model, Min, only(y))
 model
 
-# Let's draw the same plot to see 
-# the differences in fit with `softplus`.
+# Let's draw the same plot to see  the differences in fit with `softplus`.
 
 x_value, y_value = -2:0.1:2, Float64[]
 for xi in x_value

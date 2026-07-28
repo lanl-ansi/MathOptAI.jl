@@ -9,7 +9,7 @@
 
 An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-y = \\frac{1}{\\beta} \\log(1 + e^{\\beta x})
+y \\ge \\frac{1}{\\beta} \\log(1 + e^{\\beta x})
 ```
 by the reformulation:
 ```math

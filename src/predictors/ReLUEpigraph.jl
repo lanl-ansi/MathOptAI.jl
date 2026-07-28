@@ -9,7 +9,7 @@
 
 An [`AbstractPredictor`](@ref) that represents the relationship:
 ```math
-y \ge \\max\\{0, x\\}
+y \\ge \\max\\{0, x\\}
 ```
 by the reformulation:
 ```math

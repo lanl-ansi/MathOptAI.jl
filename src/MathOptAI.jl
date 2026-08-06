@@ -400,6 +400,7 @@ include("predictors/Sigmoid.jl")
 include("predictors/SoftMax.jl")
 include("predictors/SoftPlus.jl")
 include("predictors/SoftPlusConicEpigraph.jl")
+include("predictors/SoftPlusEpigraph.jl")
 include("predictors/TAGConv.jl")
 include("predictors/Tanh.jl")
 

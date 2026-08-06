@@ -23,6 +23,7 @@ ExaModels supports the following predictors:
  * [`Sigmoid`](@ref)
  * [`SoftMax`](@ref)
  * [`SoftPlus`](@ref)
+ * [`SoftPlusEpigraph`](@ref)
  * [`Tanh`](@ref)
 
 ## Basic example

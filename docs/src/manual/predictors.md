@@ -40,5 +40,6 @@ The following predictors are supported. See their docstrings for details:
 | [`SoftMax`](@ref)                     | Global nonlinear      | Yes  | Yes       |
 | [`SoftPlus`](@ref)                    | Global nonlinear      | Yes  | Yes       |
 | [`SoftPlusConicEpigraph`](@ref)       | Conic                 | Yes  |           |
+| [`SoftPlusEpigraph`](@ref)            | Global nonlinear      | Yes  | Yes       |
 | [`TAGConv`](@ref)                     | Linear                | Yes  |           |
 | [`Tanh`](@ref)                        | Global nonlinear      | Yes  | Yes       |

@@ -333,6 +333,18 @@ function test_SoftPlus_AbstractVector()
     return
 end
 
+function test_SoftPlusEpigraph_AbstractVector()
+    p = MathOptAI.SoftPlusEpigraph()
+    core, x = _make_core_with_input(2)
+    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
+    m = ExaModels.ExaModel(core)
+    @test m.meta.nvar == 4
+    @test m.meta.ncon == 2
+    @test all(m.meta.lvar[3:4] .== 0.0)
+    @test form isa MathOptAI.Formulation
+    return
+end
+
 function test_GELU_structure()
     p = MathOptAI.GELU()
     core, x = _make_core_with_input(2)

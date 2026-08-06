@@ -40,10 +40,10 @@ SoftPlusEpigraph(2.0)
 └ constraints [6]
   ├ moai_SoftPlusEpigraph[1] ≥ 0
   ├ moai_SoftPlusEpigraph[1] ≤ 1
-  ├ moai_SoftPlusEpigraph[1] - (log(1 + exp(2 x[1])) / 2) ≥ 0
+  ├ moai_SoftPlusEpigraph[1] - log(1 + exp(2 x[1])) / 2 ≥ 0
   ├ moai_SoftPlusEpigraph[2] ≥ 0
   ├ moai_SoftPlusEpigraph[2] ≤ 2
-  └ moai_SoftPlusEpigraph[2] - (log(1 + exp(2 x[2])) / 2) ≥ 0
+  └ moai_SoftPlusEpigraph[2] - log(1 + exp(2 x[2])) / 2 ≥ 0
 ```
 """
 struct SoftPlusEpigraph <: MathOptAI.AbstractPredictor

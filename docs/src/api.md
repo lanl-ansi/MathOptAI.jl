@@ -176,6 +176,11 @@ SoftPlus
 SoftPlusConicEpigraph
 ```
 
+## `SoftPlusEpigraph`
+```@docs
+SoftPlusEpigraph
+```
+
 ## `TAGConv`
 ```@docs
 TAGConv

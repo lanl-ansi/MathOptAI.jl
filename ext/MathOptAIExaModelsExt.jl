@@ -124,6 +124,7 @@ include("ExaModels/Scale.jl")
 include("ExaModels/Sigmoid.jl")
 include("ExaModels/SoftMax.jl")
 include("ExaModels/SoftPlus.jl")
+include("ExaModels/SoftPlusEpigraph.jl")
 include("ExaModels/Tanh.jl")
 
 end  # module MathOptAIExaModelsExt

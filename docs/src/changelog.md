@@ -7,9 +7,22 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Verision 0.2.8 (August 10, 2026)
+
+### Added
+
+ - Added [`SoftPlusEpigraph`](@ref) (#310), (#312)
+
+### Other
+
+ - Documentation updates (#303), (#305), (#307)
+ - Bumped actions/setup-python from 6 to 7 (#304)
+ - Fixed formatting for latest JuliaFormatter (#306)
+ - Added more tests for ExaModels (#311)
+
 ## Version 0.2.7 (July 23, 2026)
 
-## Added
+### Added
 
  - Added gray-box support for ExaModels (#300), (#301)
  - Add ReLUEpigraph for ExaModels (#294), (#296)

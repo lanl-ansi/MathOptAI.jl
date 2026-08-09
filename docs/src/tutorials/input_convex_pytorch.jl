@@ -19,6 +19,7 @@
 
 using JuMP
 import HiGHS
+import Ipopt
 import MathOptAI
 import Plots
 import PythonCall
@@ -336,6 +337,37 @@ y, _ = MathOptAI.add_predictor(model, predictor, x; config)
 model
 
 # Now, we can check the fit and compare with `ReLU`.
+
+x_value, y_value = -2:0.1:2, Float64[]
+for xi in x_value
+    fix(x[1], xi)
+    optimize!(model)
+    ## To prove we are solving an LP and not a MIP, require dual solutions.
+    assert_is_solved_and_feasible(model; dual = true)
+    push!(y_value, objective_value(model))
+end
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
+Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
+
+# ## Nonlinear Formulation
+
+# We can also use [`SoftPlusEpigraph`](@ref) in the activation functions.
+# The resulting global nonlinear formulation can be solved using `Ipopt` or any
+# other nonlinear solver.
+
+model = Model(Ipopt.Optimizer)
+set_silent(model)
+@variable(model, x[1:1])
+config = Dict(
+    :ReLU => MathOptAI.ReLUEpigraph,
+    :SoftPlus => MathOptAI.SoftPlusEpigraph,
+    InputConvexChain => icnn_callback,
+)
+y, _ = MathOptAI.add_predictor(model, predictor, x; config)
+@objective(model, Min, only(y))
+model
+
+# Let's draw the same plot to see  the differences in fit with `softplus`.
 
 x_value, y_value = -2:0.1:2, Float64[]
 for xi in x_value

@@ -204,6 +204,21 @@ function test_ReLUEpigraph_AbstractVector()
     return
 end
 
+function test_ReLUEpigraph_end_to_end()
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    core, x = ExaModels.add_var(core, 3)
+    p = MathOptAI.ReLUEpigraph()
+    (core, y), _ = MathOptAI.add_predictor(core, p, x)
+    x0 = [-2.0, 1.5, 3.0]
+    core, _ = ExaModels.add_con(core, x[i] for i in 1:3; lcon = x0, ucon = x0)
+    core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
+    m = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(m; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    @test isapprox(ExaModels.solution(result, y), max.(0, x0); atol = 1e-4)
+    return
+end
+
 function test_Sigmoid_structure()
     p = MathOptAI.Sigmoid()
     core, x = _make_core_with_input(2)
@@ -399,6 +414,21 @@ function test_GELU_derivative_correctness()
     return
 end
 
+function test_GELU_end_to_end()
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    core, x = ExaModels.add_var(core, 3)
+    p = MathOptAI.GELU()
+    (core, y), _ = MathOptAI.add_predictor(core, p, x)
+    x0 = [-2.0, 1.5, 3.0]
+    core, _ = ExaModels.add_con(core, x[i] for i in 1:3; lcon = x0, ucon = x0)
+    core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
+    m = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(m; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    @test isapprox(ExaModels.solution(result, y), p.(x0); atol = 1e-4)
+    return
+end
+
 function test_LeakyReLU_structure()
     p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
     core, x = _make_core_with_input(3)
@@ -432,6 +462,22 @@ function test_LeakyReLU_AbstractVector()
     @test m.meta.ncon == 6   # 3 relu + 3 leaky
     @test form isa MathOptAI.Formulation
     @test form.predictor === p
+    return
+end
+
+function test_LeakyReLU_end_to_end()
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    core, x = ExaModels.add_var(core, 3)
+    p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
+    (core, y), _ = MathOptAI.add_predictor(core, p, x)
+    x0 = [-2.0, 1.5, 3.0]
+    core, _ = ExaModels.add_con(core, x[i] for i in 1:3; lcon = x0, ucon = x0)
+    core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
+    m = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(m; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y0 = 0.01 .* min.(0, x0) + max.(0, x0)
+    @test isapprox(ExaModels.solution(result, y), y0; atol = 1e-4)
     return
 end
 

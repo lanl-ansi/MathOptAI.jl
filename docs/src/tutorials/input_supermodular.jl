@@ -48,7 +48,11 @@ end
 
 Flux.@layer(InputSupermodular, trainable = (weight_x, weight_z, bias))
 
-function InputSupermodular(    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},σ = identity;init = Flux.glorot_uniform,)
+function InputSupermodular(
+    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},
+    σ = identity;
+    init = Flux.glorot_uniform,
+)
     return InputSupermodular(init(out, in_x), init(out, in_z), init(out), σ)
 end
 
@@ -57,7 +61,11 @@ function (c::InputSupermodular)(x::AbstractVector)
 end
 
 function (c::InputSupermodular)((z, x)::Tuple)
-    return c.σ.(Flux.softplus(c.weight_z) * z .+ Flux.softplus(c.weight_x) * x .+ c.bias), x
+    return c.σ.(
+        Flux.softplus(c.weight_z) * z .+ Flux.softplus(c.weight_x) * x .+
+        c.bias,
+    ),
+    x
 end
 
 function Base.show(io::IO, l::InputSupermodular)
@@ -109,7 +117,11 @@ end
 
 Flux.@layer(InputConvex, trainable = (weight_x, weight_z, bias))
 
-function InputConvex(    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},σ = identity;init = Flux.glorot_uniform)
+function InputConvex(
+    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},
+    σ = identity;
+    init = Flux.glorot_uniform,
+)
     return InputConvex(init(out, in_x), init(out, in_z), init(out), σ)
 end
 
@@ -137,9 +149,9 @@ end
 # Here's an example:
 
 chain = InputSupermodularChain(
-    InputSupermodular((4, 4) => 4, Flux.relu), 
-    InputSupermodular((4, 4) => 4, Flux.relu), 
-    InputConvex((4, 4) => 1), 
+    InputSupermodular((4, 4) => 4, Flux.relu),
+    InputSupermodular((4, 4) => 4, Flux.relu),
+    InputConvex((4, 4) => 1),
 )
 
 #-
@@ -158,10 +170,7 @@ begin
     X = [Float32[x1, x2] for x1 in 0:0.05:1, x2 in 0:0.05:1]
     for epoch in 1:1000
         _, gradient = Flux.withgradient(chain) do model
-            return sum(
-                (only(model([x; 1 .- x])) - ϕ(x))^2
-                for x in X
-            )
+            return sum((only(model([x; 1 .- x])) - ϕ(x))^2 for x in X)
         end
         Flux.update!(optimizer_state, chain, only(gradient))
     end
@@ -169,19 +178,25 @@ end
 
 # Let us visualize the true and the fitted function side by side:
 
-p1 = Plots.plot3d(dpi=400, size=(800, 400))
+p1 = Plots.plot3d(; dpi = 400, size = (800, 400))
 Plots.surface!(
-    0:0.05:1, 0:0.05:1, (x1, x2) -> ϕ([x1, x2]), 
-    camera = (105, 15), colorbar=false
+    0:0.05:1,
+    0:0.05:1,
+    (x1, x2) -> ϕ([x1, x2]);
+    camera = (105, 15),
+    colorbar = false,
 )
 
-p2 = Plots.plot3d(dpi=400, size=(800, 400))
+p2 = Plots.plot3d(; dpi = 400, size = (800, 400))
 Plots.surface!(
-    0:0.05:1, 0:0.05:1, (x1, x2) -> chain([x1, x2, 1 - x1, 1 - x2]) |> only, 
-    camera = (105, 15), colorbar=false
+    0:0.05:1,
+    0:0.05:1,
+    (x1, x2) -> chain([x1, x2, 1 - x1, 1 - x2]) |> only;
+    camera = (105, 15),
+    colorbar = false,
 )
 
-Plots.plot(p1, p2, layout = (1, 2), size = (800, 400))
+Plots.plot(p1, p2; layout = (1, 2), size = (800, 400))
 
 # ## Building the predictor
 
@@ -203,7 +218,8 @@ function MathOptAI.build_predictor(
         MathOptAI.build_predictor(layer1.σ; config),
     )
     for layer in layers
-        weights = hcat(Flux.softplus(layer.weight_z), Flux.softplus(layer.weight_x))
+        weights =
+            hcat(Flux.softplus(layer.weight_z), Flux.softplus(layer.weight_x))
         push!(p.layers, MathOptAI.Affine(weights, layer.bias))
         push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
     end

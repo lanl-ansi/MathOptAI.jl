@@ -149,6 +149,7 @@ Documenter.makedocs(;
             "tutorials/graph_neural_networks.md",
             "tutorials/input_convex.md",
             "tutorials/input_convex_pytorch.md",
+            "tutorials/input_supermodular.md",
         ],
         "Developers" =>
             ["developers/checklists.md", "developers/design_principles.md"],

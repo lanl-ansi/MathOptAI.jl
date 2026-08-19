@@ -6,10 +6,19 @@
 
 # # Input Supermodular Neural Networks with Flux.jl
 
-# This tutorial shows how to embed an input supermodular neural network (ISNN) 
+# This tutorial shows how to embed an input supermodular neural network (ISNN)
 # model from [Flux.jl](https://github.com/FluxML/Flux.jl) into JuMP. The content
-# is mostly taken from the paper ["Learning to Solve Bilevel Programs with Binary
-# Tender"](https://arxiv.org/pdf/2407.16914).
+# is mostly taken from the paper ["Learning to Solve Bilevel Programs with
+# Binary Tender"](https://arxiv.org/pdf/2407.16914).
+
+# The tutorial is similar to [Input Convex Neural Networks with Flux.jl](@ref),
+# except that the structure of the neural network is slightly different (the
+# weight matrix on `x` is non-negative). More generally, the two tutorials
+# demonstrate how you can leverage structure in the function you are fitting to
+# design and train custom layers, and then embed these into a JuMP model using
+# MathOptAI.
+
+# ## Required packages
 
 # This tutorial requires the following packages:
 
@@ -32,9 +41,9 @@ import Random
 # \end{aligned}
 # ```
 
-# where $x$ is the input the network and 
-# $\tilde{x} := [x^\top, (\mathbf{1} - x)^\top]^\top$. If the weights 
-# $W_{1:(K+1)}$ and $D_{2:K}$ are non-negative and $\sigma$ is a convex 
+# where $x$ is the input the network and
+# $\tilde{x} := [x^\top, (\mathbf{1} - x)^\top]^\top$. If the weights
+# $W_{1:(K+1)}$ and $D_{2:K}$ are non-negative and $\sigma$ is a convex
 # activation function then the network is said to be supermodular.
 
 # We can implemnt an ISNN in Flux.jl as follows:
@@ -42,42 +51,30 @@ import Random
 struct InputSupermodular{T,F}
     weight_x::Matrix{T}
     weight_z::Matrix{T}
-    bias::Vector{T}
+    b::Vector{T}
     σ::F
 end
 
-Flux.@layer(InputSupermodular, trainable = (weight_x, weight_z, bias))
+Flux.@layer(InputSupermodular, trainable = (weight_x, weight_z, b))
 
-function InputSupermodular(
-    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},
-    σ = identity;
-    init = Flux.glorot_uniform,
-)
+function InputSupermodular(((in_z, in_x), out)::Pair{Tuple{Int,Int},Int}, σ)
+    init = Flux.glorot_uniform
     return InputSupermodular(init(out, in_x), init(out, in_z), init(out), σ)
 end
 
 function (c::InputSupermodular)(x::AbstractVector)
-    return c.σ.(Flux.softplus.(c.weight_x) * x .+ c.bias), x
+    return c.σ.(Flux.softplus.(c.weight_x) * x .+ c.b), x
 end
 
 function (c::InputSupermodular)((z, x)::Tuple)
-    return c.σ.(
-        Flux.softplus.(c.weight_z) * z .+ Flux.softplus.(c.weight_x) * x .+
-        c.bias,
-    ),
-    x
+    y = Flux.softplus.(c.weight_z) * z .+ Flux.softplus.(c.weight_x) * x .+ c.b
+    return c.σ.(y), x
 end
 
 function Base.show(io::IO, l::InputSupermodular)
     m, n = size(l.weight_x)
     print(io, "InputSupermodular((", size(l.weight_z, 2), ", $m) => $n")
-    if l.σ != identity
-        print(io, ", ", l.σ)
-    end
-    if l.bias == false
-        print(io, "; bias=false")
-    end
-    print(io, ")")
+    print(io, ", ", l.σ, ")")
     return
 end
 
@@ -111,38 +108,28 @@ end
 struct InputConvex{T,F}
     weight_x::Matrix{T}
     weight_z::Matrix{T}
-    bias::Vector{T}
+    b::Vector{T}
     σ::F
 end
 
-Flux.@layer(InputConvex, trainable = (weight_x, weight_z, bias))
+Flux.@layer(InputConvex, trainable = (weight_x, weight_z, b))
 
-function InputConvex(
-    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},
-    σ = identity;
-    init = Flux.glorot_uniform,
-)
+function InputConvex(((in_z, in_x), out)::Pair{Tuple{Int,Int},Int}, σ)
+    init = Flux.glorot_uniform
     return InputConvex(init(out, in_x), init(out, in_z), init(out), σ)
 end
 
 function (c::InputConvex)(x::AbstractVector)
-    return c.σ.(c.weight_x * x .+ c.bias), x
+    return c.σ.(c.weight_x * x .+ c.b), x
 end
 
 function (c::InputConvex)((z, x)::Tuple)
-    return c.σ.(Flux.softplus.(c.weight_z) * z .+ c.weight_x * x .+ c.bias), x
+    return c.σ.(Flux.softplus.(c.weight_z) * z .+ c.weight_x * x .+ c.b), x
 end
 
 function Base.show(io::IO, l::InputConvex)
     m, n = size(l.weight_x)
-    print(io, "InputConvex((", size(l.weight_z, 2), ", $m) => $n")
-    if l.σ != identity
-        print(io, ", ", l.σ)
-    end
-    if l.bias == false
-        print(io, "; bias=false")
-    end
-    print(io, ")")
+    print(io, "InputConvex((", size(l.weight_z, 2), ", $m) => $n, ", l.σ, ")")
     return
 end
 
@@ -151,12 +138,14 @@ end
 chain = InputSupermodularChain(
     InputSupermodular((4, 4) => 4, Flux.relu),
     InputSupermodular((4, 4) => 4, Flux.relu),
-    InputConvex((4, 4) => 1),
+    InputConvex((4, 4) => 1, identity),
 )
 
 #-
 
-# # Training the network
+chain(Float32[0, 1, 1, 0])
+
+# ## Training the network
 
 # We will use the example from the paper to fit the following function:
 
@@ -166,11 +155,15 @@ chain = InputSupermodularChain(
 
 Random.seed!(61)
 begin
-    optimizer_state = Flux.setup(Flux.Adam(0.05), chain)
-    X = [Float32[x1, x2] for x1 in 0:0.05:1, x2 in 0:0.05:1]
-    for epoch in 1:1000
-        _, gradient = Flux.withgradient(chain) do model
+    x = [0.0f0, 1.0f0]
+    optimizer_state = Flux.setup(Flux.Adam(; eta = 1e-3, beta = (1e-3,)), chain)
+    X = [[x1, x2] for x1 in x, x2 in x]
+    for epoch in 1:2_000
+        loss, gradient = Flux.withgradient(chain) do model
             return sum((only(model([x; 1 .- x])) - ϕ(x))^2 for x in X)
+        end
+        if epoch % 200 == 0
+            println("Epoch $epoch, loss = $loss")
         end
         Flux.update!(optimizer_state, chain, only(gradient))
     end
@@ -178,25 +171,17 @@ end
 
 # Let us visualize the true and the fitted function side by side:
 
-p1 = Plots.plot3d(; dpi = 400, size = (800, 400))
-Plots.surface!(
-    0:0.05:1,
-    0:0.05:1,
-    (x1, x2) -> ϕ([x1, x2]);
-    camera = (105, 15),
-    colorbar = false,
+function plot_surface(f)
+    x = 0.0:0.01:1
+    zlims = (-1.0, 0.0)
+    return Plots.surface(x, x, f; camera = (105, 15), colorbar = false, zlims)
+end
+Plots.plot(
+    plot_surface((x1, x2) -> ϕ([x1, x2])),
+    plot_surface((x1, x2) -> chain([x1, x2, 1 - x1, 1 - x2]) |> only);
+    layout = (1, 2),
+    size = (800, 400),
 )
-
-p2 = Plots.plot3d(; dpi = 400, size = (800, 400))
-Plots.surface!(
-    0:0.05:1,
-    0:0.05:1,
-    (x1, x2) -> chain([x1, x2, 1 - x1, 1 - x2]) |> only;
-    camera = (105, 15),
-    colorbar = false,
-)
-
-Plots.plot(p1, p2; layout = (1, 2), size = (800, 400))
 
 # ## Building the predictor
 
@@ -214,13 +199,13 @@ function MathOptAI.build_predictor(
 )
     (layer1, layers) = Iterators.peel(predictor.chain)
     p = MathOptAI.Pipeline(
-        MathOptAI.Affine(Flux.softplus.(layer1.weight_x), layer1.bias),
+        MathOptAI.Affine(Flux.softplus.(layer1.weight_x), layer1.b),
         MathOptAI.build_predictor(layer1.σ; config),
     )
     for layer in layers
         weights =
             hcat(Flux.softplus.(layer.weight_z), Flux.softplus.(layer.weight_x))
-        push!(p.layers, MathOptAI.Affine(weights, layer.bias))
+        push!(p.layers, MathOptAI.Affine(weights, layer.b))
         push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
     end
     return InputSupermodularChainPredictor(p)
@@ -250,18 +235,17 @@ end
 
 # ## Embed ISNN into JuMP
 
-# We are going to build a JuMP model with binary decision variables which will 
+# We are going to build a JuMP model with binary decision variables which will
 # be he inputs of the ISNN.
 
 model = Model(HiGHS.Optimizer)
 set_silent(model)
-@variable(model, x[1:2], Bin)
+@variable(model, x[1:4], Bin)
+@constraint(model, x[1:2] .== 1 .- x[3:4])
 config = Dict(Flux.relu => MathOptAI.ReLUSOS1)
-y, formulation = MathOptAI.add_predictor(model, chain, [x; 1 .- x]; config)
+y, formulation = MathOptAI.add_predictor(model, chain, x; config);
 
-chain
-
-#- 
+#-
 
 y
 
@@ -269,12 +253,14 @@ y
 
 formulation
 
-# We can now solve the model and compare the solutions for both minimization 
+# We can now solve the model and compare the solutions for both minimization
 # and maximization.:
 
 @objective(model, Max, only(y))
 optimize!(model)
 println("Maximizer: x* = $(value.(x))")
+
+#-
 
 @objective(model, Min, only(y))
 optimize!(model)

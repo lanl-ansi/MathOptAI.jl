@@ -57,12 +57,12 @@ function InputSupermodular(
 end
 
 function (c::InputSupermodular)(x::AbstractVector)
-    return c.σ.(Flux.softplus(c.weight_x) * x .+ c.bias), x
+    return c.σ.(Flux.softplus.(c.weight_x) * x .+ c.bias), x
 end
 
 function (c::InputSupermodular)((z, x)::Tuple)
     return c.σ.(
-        Flux.softplus(c.weight_z) * z .+ Flux.softplus(c.weight_x) * x .+
+        Flux.softplus.(c.weight_z) * z .+ Flux.softplus.(c.weight_x) * x .+
         c.bias,
     ),
     x
@@ -219,7 +219,7 @@ function MathOptAI.build_predictor(
     )
     for layer in layers
         weights =
-            hcat(Flux.softplus(layer.weight_z), Flux.softplus(layer.weight_x))
+            hcat(Flux.softplus.(layer.weight_z), Flux.softplus.(layer.weight_x))
         push!(p.layers, MathOptAI.Affine(weights, layer.bias))
         push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
     end

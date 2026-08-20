@@ -190,17 +190,10 @@ set_silent(model)
 @variable(model, x[1:2], Bin)
 config = Dict(Flux.relu => MathOptAI.ReLUSOS1)
 y, formulation = MathOptAI.add_predictor(model, chain, x; config);
-
-#-
-
 y
 
-#-
-
-formulation
-
 # We can now solve the model and compare the solutions for both minimization
-# and maximization.:
+# and maximization:
 
 @objective(model, Max, only(y))
 optimize!(model)

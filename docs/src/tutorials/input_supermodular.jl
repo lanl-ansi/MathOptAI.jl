@@ -156,7 +156,7 @@ chain(Float32[0, 1, 1, 0])
 Random.seed!(61)
 begin
     x = [0.0f0, 1.0f0]
-    optimizer_state = Flux.setup(Flux.Adam(; eta = 1e-3, beta = (1e-3,)), chain)
+    optimizer_state = Flux.setup(Flux.Adam(; eta = 1e-2, beta = (1e-2,)), chain)
     X = [[x1, x2] for x1 in x, x2 in x]
     for epoch in 1:2_000
         loss, gradient = Flux.withgradient(chain) do model

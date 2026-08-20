@@ -9,6 +9,9 @@
 # This tutorial shows how to embed an input convex neural network (ICNN) model
 # from [Flux.jl](https://github.com/FluxML/Flux.jl) into JuMP.
 
+# See also [Input Supermodular Neural Networks with Flux.jl](@ref) for a
+# different way to implement a very similar model.
+
 # ## Required packages
 
 # This tutorial requires the following packages:

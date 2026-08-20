@@ -9,6 +9,9 @@
 # This tutorial shows how to embed an input convex neural network (ICNN) model
 # from [PyTorch](https://pytorch.org) into JuMP.
 
+# See [Input Convex Neural Networks with Flux.jl](@ref) for the equivalent
+# tutorial using Flux.jl.
+
 # !!! info
 #     To use PyTorch from MathOptAI, you must first follow the
 #     [Python integration](@ref) instructions.

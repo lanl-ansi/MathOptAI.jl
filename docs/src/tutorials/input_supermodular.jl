@@ -28,6 +28,7 @@ import HiGHS
 import MathOptAI
 import Plots
 import Random
+Random.seed!(1234)
 
 # # Building the ISNN
 
@@ -35,115 +36,62 @@ import Random
 
 # ```math
 # \begin{aligned}
-# z_1 & = \sigma(W_1 \tilde{x} + b_1) \\
-# z_k & = \sigma(W_k z_{k-1} + b_k + D_k \tilde{x}), \ \forall k = 2, \ldots, K, \\
-# \tilde{\phi} & = W_{K + 1} z_{K} + b_{K + 1} + D_{K + 1} \tilde{x}.
+# z_1 & = \sigma_1(D_1 \tilde{x} + b_1) \\
+# z_k & = \sigma_k(W_{k-1} z_{k-1} + b_k + D_k \tilde{x}), \ \forall k = 2, \ldots, K, \\
+# \tilde{\phi} & = W_{K} z_{K} + b_{K + 1} + D_{K + 1} \tilde{x}.
 # \end{aligned}
 # ```
 
 # where $x$ is the input the network and
 # $\tilde{x} := [x^\top, (\mathbf{1} - x)^\top]^\top$. If the weights
-# $W_{1:(K+1)}$ and $D_{2:K}$ are non-negative and $\sigma$ is a convex
-# activation function then the network is said to be supermodular.
+# $W_{1:K}$ and $D_{2:K}$ are non-negative and $\sigma$ is a convex activation
+# function then the network is said to be supermodular.
 
-# We can implemnt an ISNN in Flux.jl as follows:
+# We can implement an ISNN in Flux.jl as follows:
 
-struct InputSupermodular{T,F}
-    weight_x::Matrix{T}
-    weight_z::Matrix{T}
-    b::Vector{T}
-    σ::F
+struct InputSupermodularNN{T}
+    D::Vector{Matrix{T}}
+    W::Vector{Matrix{T}}
+    b::Vector{Vector{T}}
+    σ::Vector{Function}
 end
 
-Flux.@layer(InputSupermodular, trainable = (weight_x, weight_z, b))
+Flux.@layer(InputSupermodularNN, trainable = (D, W, b))
 
-function InputSupermodular(((in_z, in_x), out)::Pair{Tuple{Int,Int},Int}, σ)
-    init = Flux.glorot_uniform
-    return InputSupermodular(init(out, in_x), init(out, in_z), init(out), σ)
+function InputSupermodularNN(
+    (dim_in, dim_out)::Tuple{Int,Int},
+    layers::Pair{Int,<:Function}...;
+    init = Flux.glorot_uniform,
+)
+    dims, K = first.(layers), length(layers)
+    D = [init(dims[k], 2 * dim_in) for k in 1:K]
+    W = [init(dims[k], dims[k-1]) for k in 2:K]
+    b = [init(dims[k]) for k in 1:K]
+    push!(D, init(dim_out, 2 * dim_in))
+    push!(W, init(dim_out, dims[end]))
+    push!(b, init(dim_out))
+    return InputSupermodularNN(D, W, b, Function[l for l in last.(layers)])
 end
 
-function (c::InputSupermodular)(x::AbstractVector)
-    return c.σ.(Flux.softplus.(c.weight_x) * x .+ c.b), x
-end
-
-function (c::InputSupermodular)((z, x)::Tuple)
-    y = Flux.softplus.(c.weight_z) * z .+ Flux.softplus.(c.weight_x) * x .+ c.b
-    return c.σ.(y), x
-end
-
-function Base.show(io::IO, l::InputSupermodular)
-    m, n = size(l.weight_x)
-    print(io, "InputSupermodular((", size(l.weight_z, 2), ", $m) => $n")
-    print(io, ", ", l.σ, ")")
-    return
-end
-
-# We can build an `InputSupermodular` layer as follows:
-
-layer = InputSupermodular((8, 8) => 2, Flux.relu)
-
-#-
-
-layer(rand(8))
-
-# We can then define a `Chain` and build an ISNN.
-
-struct InputSupermodularChain{T<:Flux.Chain}
-    chain::T
-end
-
-InputSupermodularChain(layers...) = InputSupermodularChain(Flux.Chain(layers))
-
-(model::InputSupermodularChain)(x) = first(model.chain(x))
-
-function Base.show(io::IO, l::InputSupermodularChain)
-    println(io, "InputSupermodularChain(")
-    println.(io, "\t", l.chain)
-    println(io, ")")
-    return
-end
-
-# We also define an `InputConvex` layer for the last layer of the ISNN.
-
-struct InputConvex{T,F}
-    weight_x::Matrix{T}
-    weight_z::Matrix{T}
-    b::Vector{T}
-    σ::F
-end
-
-Flux.@layer(InputConvex, trainable = (weight_x, weight_z, b))
-
-function InputConvex(((in_z, in_x), out)::Pair{Tuple{Int,Int},Int}, σ)
-    init = Flux.glorot_uniform
-    return InputConvex(init(out, in_x), init(out, in_z), init(out), σ)
-end
-
-function (c::InputConvex)(x::AbstractVector)
-    return c.σ.(c.weight_x * x .+ c.b), x
-end
-
-function (c::InputConvex)((z, x)::Tuple)
-    return c.σ.(Flux.softplus.(c.weight_z) * z .+ c.weight_x * x .+ c.b), x
-end
-
-function Base.show(io::IO, l::InputConvex)
-    m, n = size(l.weight_x)
-    print(io, "InputConvex((", size(l.weight_z, 2), ", $m) => $n, ", l.σ, ")")
-    return
+function (nn::InputSupermodularNN)(x::AbstractVector)
+    x = [x; 1 .- x]
+    z = nn.σ[1].(nn.D[1] * x + nn.b[1])
+    for k in 2:(length(nn.D)-1)
+        z = nn.σ[k].(
+            Flux.softplus.(nn.W[k-1]) * z .+ nn.b[k] .+
+            Flux.softplus.(nn.D[k]) * x,
+        )
+    end
+    return Flux.softplus.(nn.W[end]) * z .+ nn.b[end] .+ nn.D[end] * x
 end
 
 # Here's an example:
 
-chain = InputSupermodularChain(
-    InputSupermodular((4, 4) => 4, Flux.relu),
-    InputSupermodular((4, 4) => 4, Flux.relu),
-    InputConvex((4, 4) => 1, identity),
-)
+chain = InputSupermodularNN((2, 1), 4 => Flux.relu)
 
 #-
 
-chain(Float32[0, 1, 1, 0])
+chain(Float32[0, 1])
 
 # ## Training the network
 
@@ -153,14 +101,13 @@ chain(Float32[0, 1, 1, 0])
 
 # We use the following training loop to train our model:
 
-Random.seed!(61)
 begin
     x = [0.0f0, 1.0f0]
     optimizer_state = Flux.setup(Flux.Adam(; eta = 1e-3, beta = (1e-3,)), chain)
     X = [[x1, x2] for x1 in x, x2 in x]
-    for epoch in 1:2_000
+    for epoch in 1:1_000
         loss, gradient = Flux.withgradient(chain) do model
-            return sum((only(model([x; 1 .- x])) - ϕ(x))^2 for x in X)
+            return sum((only(model(x)) - ϕ(x))^2 for x in X)
         end
         if epoch % 200 == 0
             println("Epoch $epoch, loss = $loss")
@@ -171,61 +118,56 @@ end
 
 # Let us visualize the true and the fitted function side by side:
 
-function plot_surface(f)
+function surface(f; kwargs...)
     x = 0.0:0.01:1
-    zlims = (-1.0, 0.0)
-    return Plots.surface(x, x, f; camera = (105, 15), colorbar = false, zlims)
+    g = (x...) -> x |> collect |> f |> only
+    return Plots.surface(x, x, g; camera = (105, 15), kwargs...)
 end
-Plots.plot(
-    plot_surface((x1, x2) -> ϕ([x1, x2])),
-    plot_surface((x1, x2) -> chain([x1, x2, 1 - x1, 1 - x2]) |> only);
-    layout = (1, 2),
-    size = (800, 400),
-)
+Plots.plot(surface(ϕ), surface(chain); zlims = (-1, 0), colorbar = false)
 
 # ## Building the predictor
 
 # We need to implement [`build_predictor`](@ref) and [`add_predictor`](@ref) for
 # `InputSupermodularChain` in order to be able to embed this network into JuMP.
 
-struct InputSupermodularChainPredictor <: MathOptAI.AbstractPredictor
+struct InputSupermodularPredictor <: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
 end
 
 function MathOptAI.build_predictor(
-    predictor::InputSupermodularChain;
+    nn::InputSupermodularNN;
     config::Dict = Dict{Any,Any}(),
     kwargs...,
 )
-    (layer1, layers) = Iterators.peel(predictor.chain)
     p = MathOptAI.Pipeline(
-        MathOptAI.Affine(Flux.softplus.(layer1.weight_x), layer1.b),
-        MathOptAI.build_predictor(layer1.σ; config),
+        MathOptAI.Affine(nn.D[1], nn.b[1]),
+        MathOptAI.build_predictor(nn.σ[1]; config),
     )
-    for layer in layers
-        weights =
-            hcat(Flux.softplus.(layer.weight_z), Flux.softplus.(layer.weight_x))
-        push!(p.layers, MathOptAI.Affine(weights, layer.b))
-        push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
+    for k in 2:(length(nn.D)-1)
+        weights = Flux.softplus.([nn.W[k-1] nn.D[k]])
+        push!(p.layers, MathOptAI.Affine(weights, nn.b[k]))
+        push!(p.layers, MathOptAI.build_predictor(nn.σ[k]; config))
     end
-    return InputSupermodularChainPredictor(p)
+    weights = [Flux.softplus.(nn.W[end]) nn.D[end]]
+    push!(p.layers, MathOptAI.Affine(weights, nn.b[end]))
+    return InputSupermodularPredictor(p)
 end
 
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
-    predictor::InputSupermodularChainPredictor,
+    predictor::InputSupermodularPredictor,
     x::Vector;
     kwargs...,
 )
-    layers = predictor.p.layers
-    z, inner = MathOptAI.add_predictor(model, first(layers), x)
+    x = [x; 1 .- x]
+    (layer1, layers) = Iterators.peel(predictor.p.layers)
+    z, inner = MathOptAI.add_predictor(model, layer1, x)
     formulation = MathOptAI.PipelineFormulation(predictor, Any[inner])
-    for layer in layers[2:end]
-        z, inner = if layer isa MathOptAI.Affine
-            MathOptAI.add_predictor(model, layer, [z; x])
-        else
-            MathOptAI.add_predictor(model, layer, z)
+    for layer in layers
+        if layer isa MathOptAI.Affine
+            z = [z; x]
         end
+        z, inner = MathOptAI.add_predictor(model, layer, z)
         push!(formulation.layers, inner)
     end
     return z, formulation
@@ -240,28 +182,22 @@ end
 
 model = Model(HiGHS.Optimizer)
 set_silent(model)
-@variable(model, x[1:4], Bin)
-@constraint(model, x[1:2] .== 1 .- x[3:4])
+@variable(model, x[1:2], Bin)
 config = Dict(Flux.relu => MathOptAI.ReLUSOS1)
 y, formulation = MathOptAI.add_predictor(model, chain, x; config);
-
-#-
-
 y
 
-#-
-
-formulation
-
 # We can now solve the model and compare the solutions for both minimization
-# and maximization.:
+# and maximization:
 
 @objective(model, Max, only(y))
 optimize!(model)
-println("Maximizer: x* = $(value.(x))")
+assert_is_solved_and_feasible(model)
+value.(x)
 
 #-
 
 @objective(model, Min, only(y))
 optimize!(model)
-println("Minimizer: x* = $(value.(x))")
+assert_is_solved_and_feasible(model)
+value.(x)

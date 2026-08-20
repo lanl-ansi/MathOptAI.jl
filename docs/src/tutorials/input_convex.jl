@@ -87,7 +87,7 @@ function MathOptAI.add_predictor(
     x::Vector;
     kwargs...,
 )
-    formulation = MathOptAI.PipelineFormulation(predictor, Any[])
+    formulation = MathOptAI.PipelineFormulation(nn, Any[])
     p = MathOptAI.Affine(nn.D[1], nn.b[1])
     z, inner = MathOptAI.add_predictor(model, p, x)
     push!(formulation.layers, inner)

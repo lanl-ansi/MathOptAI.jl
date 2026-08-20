@@ -76,10 +76,9 @@ end
 function (nn::InputSupermodularNN)(x::AbstractVector)
     x = [x; 1 .- x]
     z = nn.σ[1].(nn.D[1] * x + nn.b[1])
-    for k in 2:length(nn.D) - 1
+    for k in 2:(length(nn.D)-1)
         z = nn.σ[k].(
-            Flux.softplus.(nn.W[k-1]) * z .+
-            nn.b[k] .+
+            Flux.softplus.(nn.W[k-1]) * z .+ nn.b[k] .+
             Flux.softplus.(nn.D[k]) * x,
         )
     end
@@ -149,7 +148,7 @@ function MathOptAI.build_predictor(
         MathOptAI.Affine(nn.D[1], nn.b[1]),
         MathOptAI.build_predictor(nn.σ[1]; config),
     )
-    for k in 2:length(nn.D) - 1
+    for k in 2:(length(nn.D)-1)
         weights = Flux.softplus.([nn.W[k-1] nn.D[k]])
         push!(p.layers, MathOptAI.Affine(weights, nn.b[k]))
         push!(p.layers, MathOptAI.build_predictor(nn.σ[k]; config))

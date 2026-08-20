@@ -8,6 +8,7 @@ import AbstractGPs
 import DataFrames
 import DecisionTree
 import Documenter
+import DocumenterCodeBlocks
 import EvoTrees
 import ExaModels
 import Flux
@@ -169,6 +170,7 @@ Documenter.makedocs(;
     ],
     checkdocs = :exports,
     doctest = true,
+    plugins = [DocumenterCodeBlocks.CodeBlocks(; line_counter = :named)],
 )
 
 # ==============================================================================

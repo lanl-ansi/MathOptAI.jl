@@ -87,7 +87,7 @@ end
 
 # Here's an example:
 
-chain = InputSupermodularNN((2, 1), 8 => Flux.relu, 4 => Flux.relu)
+chain = InputSupermodularNN((2, 1), 4 => Flux.relu)
 
 #-
 

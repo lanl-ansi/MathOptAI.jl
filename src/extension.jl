@@ -43,8 +43,10 @@ end
 
 """
     get_variable_bounds(x::JuMP.AbstractVariableRef)
+    get_variable_bounds(x::JuMP.GenericAffExpr{<:Real})
 
-Return a tuple corresponding to the `(lower, upper)` variable bounds of `x`.
+Return a tuple corresponding to the `(lower, upper)` variable bounds of `x`. If
+`x` is an expression, map variable bounds through the expression.
 
 If there is no bound, the value returned is `missing`.
 
@@ -71,6 +73,16 @@ function get_variable_bounds(x::JuMP.AbstractVariableRef)
         T = JuMP.value_type(typeof(x))
         lb = coalesce(max(lb, zero(T)), zero(T))
         ub = coalesce(min(ub, one(T)), one(T))
+    end
+    return lb, ub
+end
+
+function get_variable_bounds(f::JuMP.GenericAffExpr{<:Real})
+    lb, ub = f.constant, f.constant
+    for (x, c) in f.terms
+        l, u = get_variable_bounds(x)
+        lb += c * (c > 0 ? l : u)
+        ub += c * (c > 0 ? u : l)
     end
     return lb, ub
 end

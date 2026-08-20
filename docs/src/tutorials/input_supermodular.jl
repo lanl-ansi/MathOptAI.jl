@@ -118,17 +118,12 @@ end
 
 # Let us visualize the true and the fitted function side by side:
 
-function plot_surface(f)
+function surface(f; kwargs...)
     x = 0.0:0.01:1
-    zlims = (-1.0, 0.0)
-    return Plots.surface(x, x, f; camera = (105, 15), colorbar = false, zlims)
+    g = (x...) -> x |> collect |> f |> only
+    return Plots.surface(x, x, g; camera = (105, 15), kwargs...)
 end
-Plots.plot(
-    plot_surface((x1, x2) -> ϕ([x1, x2])),
-    plot_surface((x1, x2) -> chain([x1, x2]) |> only);
-    layout = (1, 2),
-    size = (800, 400),
-)
+Plots.plot(surface(ϕ), surface(chain); zlims = (-1, 0), colorbar = false)
 
 # ## Building the predictor
 

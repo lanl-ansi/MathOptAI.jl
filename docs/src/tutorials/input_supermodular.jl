@@ -128,7 +128,7 @@ Plots.plot(surface(ϕ), surface(chain); zlims = (-1, 0), colorbar = false)
 # ## Building the predictor
 
 # We need to implement [`build_predictor`](@ref) and [`add_predictor`](@ref) for
-# `InputSupermodularChain` in order to be able to embed this network into JuMP.
+# `InputSupermodularNN` in order to be able to embed this network into JuMP.
 
 struct InputSupermodularPredictor <: MathOptAI.AbstractPredictor
     p::MathOptAI.Pipeline
@@ -178,7 +178,7 @@ end
 # ## Embed ISNN into JuMP
 
 # We are going to build a JuMP model with binary decision variables which will
-# be he inputs of the ISNN.
+# be the inputs of the ISNN.
 
 model = Model(HiGHS.Optimizer)
 set_silent(model)

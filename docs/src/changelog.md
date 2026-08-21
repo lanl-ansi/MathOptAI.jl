@@ -7,6 +7,13 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 0.2.9 (August 22, 2026)
+
+### Other
+
+- Documentation updates (#315), (#316), (#318), (#319), (#320), (#321)
+- Update minimum Julia version to v1.10 (#322)
+
 ## Verision 0.2.8 (August 10, 2026)
 
 ### Added

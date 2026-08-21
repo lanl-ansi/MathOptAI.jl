@@ -18,10 +18,12 @@
 # This tutorial requires the following packages:
 
 using JuMP
+import ExaModels
 import Flux
 import HiGHS
 import Ipopt
 import MathOptAI
+import NLPModelsIpopt
 import Plots
 import Random
 import SCS
@@ -243,5 +245,56 @@ for xi in x_value
     assert_is_solved_and_feasible(model; dual = true)
     push!(y_value, objective_value(model))
 end
+Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
+Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
+
+# ## ExaModels
+
+# We can do a similar thing with ExaModels:
+
+function MathOptAI.add_predictor(
+    core::ExaModels.ExaCore,
+    nn::InputConvexNN,
+    x::Any;
+    kwargs...,
+)
+    formulation = MathOptAI.PipelineFormulation(nn, Any[])
+    p = MathOptAI.Affine(nn.D[1], nn.b[1])
+    (core, z), inner = MathOptAI.add_predictor(core, p, x)
+    push!(formulation.layers, inner)
+    (core, z), inner = MathOptAI.add_predictor(core, nn.σ[1], z; kwargs...)
+    push!(formulation.layers, inner)
+    for k in 2:length(nn.D)
+        p = MathOptAI.Affine(Flux.softplus(nn.W[k-1]), nn.b[k])
+        (core, y), inner = MathOptAI.add_predictor(core, p, z)
+        push!(formulation.layers, inner)
+        ## This part is slightly complicated because it's hard to represent
+        ## [z; x] in ExaModels. Instead, we add the `x` terms separately. Note
+        ## the `-D` because ExaModels does `y - (Ax + b) == 0`.
+        c, (m, n) = only(inner.constraints), size(nn.D[k])
+        D = [(i, j, -nn.D[k][i, j]) for i in 1:m for j in 1:n]
+        core, _ = ExaModels.add_con!(core, c, i => v * x[j] for (i, j, v) in D)
+        (core, z), inner = MathOptAI.add_predictor(core, nn.σ[k], y; kwargs...)
+        push!(formulation.layers, inner)
+    end
+    return (core, z), formulation
+end
+
+function solve_fixed(chain, x_value)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    core, x = ExaModels.add_var(core, 1; lvar = x_value, uvar = x_value)
+    config = Dict(Flux.softplus => MathOptAI.SoftPlusEpigraph)
+    (core, y), _ = MathOptAI.add_predictor(core, chain, x; config)
+    core, _ = ExaModels.add_obj(core, y[i] for i in 1:1)
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @assert result.status ∈ (:first_order, :acceptable)
+    return result.objective
+end
+
+# Let's draw the same plot to see  the differences in fit with `softplus`.
+
+x_value = -2:0.1:2
+y_value = Float64[solve_fixed(chain, xi) for xi in x_value]
 Plots.plot(x_value, y_value; xlabel = "x", ylabel = "y", label = "Trained")
 Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)

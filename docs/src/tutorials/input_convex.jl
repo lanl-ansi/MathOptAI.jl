@@ -11,7 +11,7 @@
 
 # See [Input Convex Neural Networks with PyTorch](@ref) for this tutorial using
 # PyTorch, and see [Input Supermodular Neural Networks with Flux.jl](@ref) for a
-# related form of network..
+# related form of network.
 
 # ## Required packages
 

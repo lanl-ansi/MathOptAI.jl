@@ -37,7 +37,8 @@ import SCS
 # \end{aligned}
 # ```
 # If the weights $W$ are non-negative and $\sigma$ is a convex activation
-# function then the output of the network $z_K$ is convex with respect to $x$.
+# function then the output of the network $z_K$ is convex with respect to $x$,
+# and we say that the network is an Input Convex Neural Network (ICNN).
 
 struct InputConvexNN{T} <: MathOptAI.AbstractPredictor
     D::Vector{Matrix{T}}

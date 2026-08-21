@@ -41,11 +41,11 @@ Random.seed!(1234)
 # \tilde{\phi} & = W_{K} z_{K} + b_{K + 1} + D_{K + 1} \tilde{x}.
 # \end{aligned}
 # ```
-
 # where $x$ is the input the network and
 # $\tilde{x} := [x^\top, (\mathbf{1} - x)^\top]^\top$. If the weights
 # $W_{1:K}$ and $D_{2:K}$ are non-negative and $\sigma$ is a convex activation
-# function then the network is said to be supermodular.
+# function then the output of the network is supermodular with respect to $x$,
+# and we say that the network is an Input Supermoduler Neural Network (ISNN).
 
 # We can implement an ISNN in Flux.jl as follows:
 

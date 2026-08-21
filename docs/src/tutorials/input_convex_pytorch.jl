@@ -4,6 +4,12 @@
 # Use of this source code is governed by a BSD-style license that can be    #src
 # found in the LICENSE.md file.                                             #src
 
+# To make it easier to run locally...           #src
+if get(ENV, "LOGNAME", "") == "odow"            #src
+    ENV["JULIA_PYTHONCALL_EXE"] = "python3"     #src
+    ENV["JULIA_CONDAPKG_BACKEND"] = "Null"      #src
+end                                             #src
+
 # # Input Convex Neural Networks with PyTorch
 
 # This tutorial shows how to embed an input convex neural network (ICNN) model
@@ -30,6 +36,18 @@ import SCS
 
 # ## Building the ICNN
 
+# Consider a neural network with the following structure:
+
+# ```math
+# \begin{aligned}
+# z_1 & = \sigma_1(D_1 x + b_1) \\
+# z_k & = \sigma_k(W_{k-1} z_{k-1} + b_k + D_k x), \ \forall k = 2, \ldots, K
+# \end{aligned}
+# ```
+# If the weights $W$ are non-negative and $\sigma$ is a convex activation
+# function then the output of the network $z_K$ is convex with respect to $x$,
+# and we say that the network is an Input Convex Neural Network (ICNN).
+
 # The following custom layer can be used to build ICNNs. This layer has two
 # forward methods. One that takes a single input and the other takes  a `Tuple`.
 # They both return the result of the forward pass as well as the original input.
@@ -40,71 +58,32 @@ write(
     """
     import math
     import torch
-    from torch.nn.parameter import Parameter
-    from torch.nn import functional as F, init
 
     class InputConvex(torch.nn.Module):
-        def __init__(
-            self,
-            in_features_z: int,
-            in_features_x: int,
-            out_features: int,
-            bias: bool = True,
-            device=None,
-            dtype=None,
-        ):
-            factory_kwargs = {"device": device, "dtype": dtype}
+        def __init__(self, dim_z: int, dim_x: int, dim_out: int):
             super().__init__()
-            self.in_features_z = in_features_z
-            self.in_features_x = in_features_x
-            self.out_features = out_features
-            self.weight_z = Parameter(
-                torch.empty((out_features, in_features_z), **factory_kwargs)
-            )
-            self.weight_x = Parameter(
-                torch.empty((out_features, in_features_x), **factory_kwargs)
-            )
-            if bias:
-                self.bias = Parameter(torch.empty(out_features, **factory_kwargs))
-            else:
-                self.register_parameter("bias", None)
-            self.reset_parameters()
+            self.dim_z = dim_z
+            self.dim_x = dim_x
+            self.dim_out = dim_out
+            self.W = torch.nn.parameter.Parameter(torch.empty((dim_out, dim_z)))
+            torch.nn.init.kaiming_uniform_(self.W, a=math.sqrt(5))
+            self.D = torch.nn.parameter.Parameter(torch.empty((dim_out, dim_x)))
+            torch.nn.init.kaiming_uniform_(self.D, a=math.sqrt(5))
+            self.b = torch.nn.parameter.Parameter(torch.empty(dim_out))
+            torch.nn.init.normal_(self.b)
+            return
 
-        def reset_parameters(self) -> None:
-            init.kaiming_uniform_(self.weight_z, a=math.sqrt(5))
-            init.kaiming_uniform_(self.weight_x, a=math.sqrt(5))
-            if self.bias is not None:
-                fan_in_z, _ = init._calculate_fan_in_and_fan_out(self.weight_z)
-                fan_in_x, _ = init._calculate_fan_in_and_fan_out(self.weight_x)
-                bound_z = 1 / math.sqrt(fan_in_z) if fan_in_z > 0 else 0
-                bound_x = 1 / math.sqrt(fan_in_x) if fan_in_x > 0 else 0
-                init.uniform_(self.bias, -bound_z, bound_z)
-                init.uniform_(self.bias, -bound_x, bound_x)
-
-        def forward(self, *args):
-            if len(args) == 1 and isinstance(args[0], tuple):
-                args = args[0]
-            if len(args) == 1:
-                input_x = args[0]
-                output = input_x @ self.weight_x.T + self.bias
-                return output, input_x
-            elif len(args) == 2:
-                input_z, input_x = args
-                output = input_z @ F.softplus(self.weight_z).T + input_x @ self.weight_x.T + self.bias
-                return output, input_x
+        def forward(self, z, x):
+            return z @ torch.nn.functional.softplus(self.W).T + x @ self.D.T + self.b
 
     class InputConvexChain(torch.nn.Module):
         def __init__(self, *layers):
             super(InputConvexChain, self).__init__()
             self.layers = torch.nn.ModuleList(layers)
         def forward(self, x):
-            layer1 = self.layers[0]
-            z, x = layer1(x)
-            for layer in self.layers[1:]:
-                if isinstance(layer, InputConvex):
-                    z, x = layer(z, x)
-                else:
-                    z = layer(z)
+            z = x
+            for layer in self.layers:
+                z = layer(z, x) if isinstance(layer, InputConvex) else layer(z)
             return z
     """,
 )
@@ -122,9 +101,9 @@ predictor, InputConvex, InputConvexChain = PythonCall.@pyexec(
         sys.path.insert(0, dir)
         from icnn import InputConvexChain, InputConvex
         predictor = InputConvexChain(
-            InputConvex(8, 8, 2),
+            torch.nn.Linear(8, 2),
             ReLU(),
-            InputConvex(2, 8, 1),
+            InputConvex(dim_z=2, dim_x=8, dim_out=1),
             ReLU(),
         )
         torch.save(predictor, filename)
@@ -145,14 +124,11 @@ _array(x) = PythonCall.pyconvert(Array{Float64}, x.detach().cpu().numpy())
 
 function icnn_callback(icnn::PythonCall.Py; input_size, kwargs...)
     softplus = MathOptAI.SoftPlus()
-    (layer1, layers) = Iterators.peel(icnn.layers)
-    p = MathOptAI.Pipeline(
-        MathOptAI.Affine(_array(layer1.weight_x), _array(layer1.bias)),
-    )
-    for layer in layers
+    p = MathOptAI.Pipeline(Any[])
+    for layer in icnn.layers
         if PythonCall.pyisinstance(layer, InputConvex)
-            w = hcat(softplus.(_array(layer.weight_z)), _array(layer.weight_x))
-            push!(p.layers, MathOptAI.Affine(w, _array(layer.bias)))
+            w = [softplus.(_array(layer.W)) _array(layer.D)]
+            push!(p.layers, MathOptAI.Affine(w, _array(layer.b)))
         else
             push!(p.layers, MathOptAI.build_predictor(layer; kwargs...))
         end
@@ -228,9 +204,9 @@ predictor = PythonCall.@pyexec(
         from icnn import InputConvexChain, InputConvex
         torch.manual_seed(61)
         predictor = InputConvexChain(
-            InputConvex(1, 1, 10),
+            torch.nn.Linear(1, 10),
             ReLU(),
-            InputConvex(10, 1, 1),
+            InputConvex(dim_z=10, dim_x=1, dim_out=1),
             ReLU(),
         )
 
@@ -297,9 +273,9 @@ predictor = PythonCall.@pyexec(
         from icnn import InputConvexChain, InputConvex
         torch.manual_seed(61)
         predictor = InputConvexChain(
-            InputConvex(1, 1, 10),
+            torch.nn.Linear(1, 10),
             ReLU(),
-            InputConvex(10, 1, 1),
+            InputConvex(dim_z=10, dim_x=1, dim_out=1),
             Softplus(),
         )
 

@@ -143,14 +143,14 @@ function MathOptAI.add_predictor(
     push!(formulation.layers, inner)
     z, inner = MathOptAI.add_predictor(model, nn.σ[1], z; kwargs...)
     push!(formulation.layers, inner)
-    for k in 2:length(nn.D)
+    for k in 2:(length(nn.D)-1)
         p = MathOptAI.Affine(Flux.softplus.([nn.W[k-1] nn.D[k]]), nn.b[k])
         z, inner = MathOptAI.add_predictor(model, p, [z; x])
         push!(formulation.layers, inner)
         z, inner = MathOptAI.add_predictor(model, nn.σ[k], z; kwargs...)
         push!(formulation.layers, inner)
     end
-    p = MathOptAI.Affine([Flux.softplus.(nn.W[k-1]) nn.D[k]], nn.b[k])
+    p = MathOptAI.Affine([Flux.softplus.(nn.W[end]) nn.D[end]], nn.b[end])
     z, inner = MathOptAI.add_predictor(model, p, [z; x])
     push!(formulation.layers, inner)
     return z, formulation

@@ -41,15 +41,15 @@ Random.seed!(1234)
 # \tilde{\phi} & = W_{K} z_{K} + b_{K + 1} + D_{K + 1} \tilde{x}.
 # \end{aligned}
 # ```
-
 # where $x$ is the input the network and
 # $\tilde{x} := [x^\top, (\mathbf{1} - x)^\top]^\top$. If the weights
 # $W_{1:K}$ and $D_{2:K}$ are non-negative and $\sigma$ is a convex activation
-# function then the network is said to be supermodular.
+# function then the output of the network is supermodular with respect to $x$,
+# and we say that the network is an Input Supermoduler Neural Network (ISNN).
 
 # We can implement an ISNN in Flux.jl as follows:
 
-struct InputSupermodularNN{T}
+struct InputSupermodularNN{T} <: MathOptAI.AbstractPredictor
     D::Vector{Matrix{T}}
     W::Vector{Matrix{T}}
     b::Vector{Vector{T}}
@@ -127,49 +127,32 @@ Plots.plot(surface(ϕ), surface(chain); zlims = (-1, 0), colorbar = false)
 
 # ## Building the predictor
 
-# We need to implement [`build_predictor`](@ref) and [`add_predictor`](@ref) for
-# `InputSupermodularNN` in order to be able to embed this network into JuMP.
-
-struct InputSupermodularPredictor <: MathOptAI.AbstractPredictor
-    p::MathOptAI.Pipeline
-end
-
-function MathOptAI.build_predictor(
-    nn::InputSupermodularNN;
-    config::Dict = Dict{Any,Any}(),
-    kwargs...,
-)
-    p = MathOptAI.Pipeline(
-        MathOptAI.Affine(nn.D[1], nn.b[1]),
-        MathOptAI.build_predictor(nn.σ[1]; config),
-    )
-    for k in 2:(length(nn.D)-1)
-        weights = Flux.softplus.([nn.W[k-1] nn.D[k]])
-        push!(p.layers, MathOptAI.Affine(weights, nn.b[k]))
-        push!(p.layers, MathOptAI.build_predictor(nn.σ[k]; config))
-    end
-    weights = [Flux.softplus.(nn.W[end]) nn.D[end]]
-    push!(p.layers, MathOptAI.Affine(weights, nn.b[end]))
-    return InputSupermodularPredictor(p)
-end
+# We need to implement [`add_predictor`](@ref) for `InputSupermodularNN` in
+# order to be able to embed this network into JuMP.
 
 function MathOptAI.add_predictor(
     model::JuMP.AbstractModel,
-    predictor::InputSupermodularPredictor,
+    nn::InputSupermodularNN,
     x::Vector;
     kwargs...,
 )
     x = [x; 1 .- x]
-    (layer1, layers) = Iterators.peel(predictor.p.layers)
-    z, inner = MathOptAI.add_predictor(model, layer1, x)
-    formulation = MathOptAI.PipelineFormulation(predictor, Any[inner])
-    for layer in layers
-        if layer isa MathOptAI.Affine
-            z = [z; x]
-        end
-        z, inner = MathOptAI.add_predictor(model, layer, z)
+    formulation = MathOptAI.PipelineFormulation(nn, Any[])
+    p = MathOptAI.Affine(nn.D[1], nn.b[1])
+    z, inner = MathOptAI.add_predictor(model, p, x)
+    push!(formulation.layers, inner)
+    z, inner = MathOptAI.add_predictor(model, nn.σ[1], z; kwargs...)
+    push!(formulation.layers, inner)
+    for k in 2:(length(nn.D)-1)
+        p = MathOptAI.Affine(Flux.softplus.([nn.W[k-1] nn.D[k]]), nn.b[k])
+        z, inner = MathOptAI.add_predictor(model, p, [z; x])
+        push!(formulation.layers, inner)
+        z, inner = MathOptAI.add_predictor(model, nn.σ[k], z; kwargs...)
         push!(formulation.layers, inner)
     end
+    p = MathOptAI.Affine([Flux.softplus.(nn.W[end]) nn.D[end]], nn.b[end])
+    z, inner = MathOptAI.add_predictor(model, p, [z; x])
+    push!(formulation.layers, inner)
     return z, formulation
 end
 

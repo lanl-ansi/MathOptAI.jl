@@ -426,7 +426,7 @@ function test_matrix_errors()
         @variable(model, x[i in 1:16, j in 1:16])
         @test_throws(
             ErrorException(
-                "You must specifiy the `input_size` kwarg when using a layer of type $(typeof(layer))",
+                "You must specify the `input_size` kwarg when using a layer of type $(typeof(layer))",
             ),
             MathOptAI.add_predictor(model, cnn, vec(x)),
         )

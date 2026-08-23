@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation updates (#315), (#316), (#318), (#319), (#320), (#321)
 - Update minimum Julia version to v1.10 (#322)
 
-## Verision 0.2.8 (August 10, 2026)
+## Version 0.2.8 (August 10, 2026)
 
 ### Added
 

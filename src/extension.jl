@@ -148,7 +148,7 @@ end
 
 Get the primal starting value of `x`, or return `missing` if one is not set.
 
-The return value of this function is propogated through the various
+The return value of this function is propagated through the various
 [`AbstractPredictor`](@ref)s, and the primal start of new output variables is
 set using [`set_variable_start`](@ref).
 
@@ -176,7 +176,7 @@ get_variable_start(x::Real) = x
 Set the primal starting value of `x` to `start`, or do nothing if `start` is
 `missing`.
 
-The input value `start` of this function is computed by propogating the primal
+The input value `start` of this function is computed by propagating the primal
 start of the input variables (obtained with [`get_variable_start`](@ref))
 through the various [`AbstractPredictor`](@ref)s.
 

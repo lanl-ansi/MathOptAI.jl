@@ -182,7 +182,7 @@ function MathOptAI.build_predictor(
 end
 
 function _normalize_input_size(layer, ::Nothing)
-    msg = "You must specifiy the `input_size` kwarg when using a layer of type $(typeof(layer))"
+    msg = "You must specify the `input_size` kwarg when using a layer of type $(typeof(layer))"
     return error(msg)
 end
 

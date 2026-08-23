@@ -645,7 +645,7 @@ function test_model_input_size_error()
     @variable(model, x[1:8])
     @test_throws(
         ErrorException(
-            "You must specifiy the `input_size` kwarg when using nn.AvgPool2d",
+            "You must specify the `input_size` kwarg when using nn.AvgPool2d",
         ),
         MathOptAI.add_predictor(model, MathOptAI.PytorchModel(filename), x),
     )

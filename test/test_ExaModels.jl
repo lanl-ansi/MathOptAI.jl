@@ -97,8 +97,8 @@ function test_ReducedSpace_Affine_structure()
     @test form.predictor === p
     @test isempty(form.variables)
     @test isempty(form.constraints)
-    @test y isa AbstractVector
-    @test length(y) == 2
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -115,8 +115,8 @@ function test_ReducedSpace_Affine_kwarg()
     @test form.predictor === p
     @test isempty(form.variables)
     @test isempty(form.constraints)
-    @test y isa AbstractVector
-    @test length(y) == 2
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -141,7 +141,8 @@ function test_ReducedSpace_Scale_structure()
     @test m.meta.ncon == 0
     @test isempty(form.variables)
     @test isempty(form.constraints)
-    @test length(y) == 2
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -164,19 +165,8 @@ function test_ReducedSpace_ReLU_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
-    @test length(y) == 3
-    return
-end
-
-function test_ReLU_AbstractVector()
-    p = MathOptAI.ReLU()
-    core, x = _make_core_with_input(3)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 6   # 3 inputs + 3 outputs
-    @test m.meta.ncon == 3
-    @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
-    @test form isa MathOptAI.Formulation
+    @test y isa ExaModels.Expression
+    @test y.length == 3
     return
 end
 
@@ -184,18 +174,6 @@ function test_ReLUEpigraph_structure()
     p = MathOptAI.ReLUEpigraph()
     core, x = _make_core_with_input(3)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 6   # 3 inputs + 3 outputs
-    @test m.meta.ncon == 3
-    @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
-    @test form isa MathOptAI.Formulation
-    return
-end
-
-function test_ReLUEpigraph_AbstractVector()
-    p = MathOptAI.ReLUEpigraph()
-    core, x = _make_core_with_input(3)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 6   # 3 inputs + 3 outputs
     @test m.meta.ncon == 3
@@ -239,20 +217,8 @@ function test_ReducedSpace_Sigmoid_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
-    @test length(y) == 2
-    return
-end
-
-function test_Sigmoid_AbstractVector()
-    p = MathOptAI.Sigmoid()
-    core, x = _make_core_with_input(2)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 4
-    @test m.meta.ncon == 2
-    @test all(m.meta.lvar[3:4] .== 0.0)
-    @test all(m.meta.uvar[3:4] .== 1.0)
-    @test form isa MathOptAI.Formulation
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -296,20 +262,8 @@ function test_ReducedSpace_Tanh_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
-    @test length(y) == 2
-    return
-end
-
-function test_Tanh_AbstractVector()
-    p = MathOptAI.Tanh()
-    core, x = _make_core_with_input(2)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 4
-    @test m.meta.ncon == 2
-    @test all(m.meta.lvar[3:4] .== -1.0)
-    @test all(m.meta.uvar[3:4] .== 1.0)
-    @test form isa MathOptAI.Formulation
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -332,31 +286,8 @@ function test_ReducedSpace_SoftPlus_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
-    @test length(y) == 2
-    return
-end
-
-function test_SoftPlus_AbstractVector()
-    p = MathOptAI.SoftPlus()
-    core, x = _make_core_with_input(2)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 4
-    @test m.meta.ncon == 2
-    @test all(m.meta.lvar[3:4] .== 0.0)
-    @test form isa MathOptAI.Formulation
-    return
-end
-
-function test_SoftPlusEpigraph_AbstractVector()
-    p = MathOptAI.SoftPlusEpigraph()
-    core, x = _make_core_with_input(2)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 4
-    @test m.meta.ncon == 2
-    @test all(m.meta.lvar[3:4] .== 0.0)
-    @test form isa MathOptAI.Formulation
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -378,18 +309,8 @@ function test_ReducedSpace_GELU_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
-    @test length(y) == 2
-    return
-end
-
-function test_GELU_AbstractVector()
-    p = MathOptAI.GELU()
-    core, x = _make_core_with_input(2)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:2])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 4
-    @test m.meta.ncon == 2
-    @test form isa MathOptAI.Formulation
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     return
 end
 
@@ -445,23 +366,12 @@ function test_ReducedSpace_LeakyReLU_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.LeakyReLU(; negative_slope = 0.01))
     core, x = _make_core_with_input(3)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
-    @test length(y) == 3
+    @test y isa ExaModels.Expression
+    @test y.length == 3
     @test form.predictor isa MathOptAI.ReducedSpace{<:MathOptAI.LeakyReLU}
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
-    return
-end
-
-function test_LeakyReLU_AbstractVector()
-    p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
-    core, x = _make_core_with_input(3)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 9   # 3 input + 3 relu + 3 leaky
-    @test m.meta.ncon == 6   # 3 relu + 3 leaky
-    @test form isa MathOptAI.Formulation
-    @test form.predictor === p
     return
 end
 
@@ -486,7 +396,11 @@ function test_Permutation_structure()
     core, x = _make_core_with_input(3)
     (core, y), form =
         MathOptAI.add_predictor(core, MathOptAI.ReducedSpace(perm), x)
-    @test length(y) == 3
+    @test y isa ExaModels.Expression
+    @test y.length == 3
+    @test y[1] == x[3]
+    @test y[2] == x[1]
+    @test y[3] == x[2]
     @test form.predictor isa MathOptAI.ReducedSpace{MathOptAI.Permutation}
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
@@ -498,29 +412,6 @@ function test_SoftMax_structure()
     p = MathOptAI.SoftMax()
     core, x = _make_core_with_input(3)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 7   # 3 input + 1 denom + 3 y
-    @test m.meta.ncon == 4   # 1 denom + 3 y
-    @test form isa MathOptAI.Formulation
-    @test form.predictor === p
-    return
-end
-
-function test_ReducedSpace_SoftMax_structure()
-    p = MathOptAI.ReducedSpace(MathOptAI.SoftMax())
-    core, x = _make_core_with_input(3)
-    (core, y), form = MathOptAI.add_predictor(core, p, x)
-    @test length(y) == 3
-    m = ExaModels.ExaModel(core)
-    @test m.meta.nvar == 4   # 3 input + 1 denom
-    @test m.meta.ncon == 1   # 1 denom
-    return
-end
-
-function test_SoftMax_AbstractVector()
-    p = MathOptAI.SoftMax()
-    core, x = _make_core_with_input(3)
-    (core, y), form = MathOptAI.add_predictor(core, p, [x[i] for i in 1:3])
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 7   # 3 input + 1 denom + 3 y
     @test m.meta.ncon == 4   # 1 denom + 3 y
@@ -559,7 +450,8 @@ function test_ReducedSpace_Pipeline_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
-    @test length(y) == 2
+    @test y isa ExaModels.Expression
+    @test y.length == 2
     @test form isa MathOptAI.PipelineFormulation
     return
 end
@@ -647,6 +539,23 @@ function test_SoftPlusEpigraph_AbstractVariable()
     @test result.status ∈ (:first_order, :acceptable)
     y_star = log.(1 .+ exp.(2.0 .* x0)) ./ 2.0
     @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    return
+end
+
+function test_ReducedSpace_SoftMax_structure()
+    predictor = MathOptAI.ReducedSpace(MathOptAI.SoftMax())
+    core, x = _make_core_with_input(3)
+    @test_throws(
+        ErrorException(
+            """
+            Unsupported predictor: `$predictor`.
+
+            ExaModels does not support the reduced-space formulation of this \
+            predictor.
+            """,
+        ),
+        MathOptAI.add_predictor(core, predictor, x),
+    )
     return
 end
 

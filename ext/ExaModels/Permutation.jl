@@ -7,8 +7,8 @@
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.ReducedSpace{MathOptAI.Permutation},
-    x,
+    x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    y = [x[p.predictor.p[i]] for i in eachindex(p.predictor.p)]
+    core, y = ExaModels.add_expr(core, x[i] for i in p.predictor.p)
     return (core, y), MathOptAI.Formulation(p)
 end

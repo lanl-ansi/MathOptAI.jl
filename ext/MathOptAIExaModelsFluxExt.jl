@@ -10,21 +10,17 @@ import ExaModels
 import Flux
 import MathOptAI
 
-_length(x::Union{ExaModels.Variable,ExaModels.Expression}) = x.length
-
-_length(x::AbstractVector) = length(x)
-
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.GrayBox{<:Flux.Chain},
-    x::Any;
+    x::Union{ExaModels.Variable,ExaModels.Expression};
     kwargs...,
 )
     J(x) = only(Flux.jacobian(p.predictor, Float32.(x)))
     core, y, oracle = ExaModels.embed_oracle(
         core,
         x,
-        only(Flux.outputsize(p.predictor, (_length(x),)));
+        only(Flux.outputsize(p.predictor, (x.length,)));
         f! = (ret, x) -> ret .= p.predictor(Float32.(x)),
         jvp! = (ret, x, v) -> ret .= J(x) * v,
         vjp! = (ret, x, w) -> ret .= J(x)' * w,

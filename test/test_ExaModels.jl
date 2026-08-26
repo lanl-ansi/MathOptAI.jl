@@ -635,6 +635,21 @@ function test_flux_end_to_end_gray_box()
     return
 end
 
+function test_SoftPlusEpigraph_AbstractVariable()
+    p = MathOptAI.SoftPlusEpigraph(; beta = 2.0)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, length(x0); lvar = x0, uvar = x0)
+    (core, y), form = MathOptAI.add_predictor(core, p, x)
+    core, _ = ExaModels.add_obj(core, y[i] for i in 1:2)
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    y_star = log.(1 .+ exp.(2.0 .* x0)) ./ 2.0
+    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    return
+end
+
 end  # module
 
 TestExaModelsExt.runtests()

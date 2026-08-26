@@ -10,10 +10,6 @@ import ExaModels
 import MathOptAI
 import PythonCall
 
-_length(x::Union{ExaModels.Variable,ExaModels.Expression}) = x.length
-
-_length(x::AbstractVector) = length(x)
-
 function _pyconvert(::Type{T}, tensor) where {T}
     return PythonCall.pyconvert(T, tensor.detach().cpu().numpy())
 end
@@ -21,13 +17,13 @@ end
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.GrayBox{MathOptAI.PytorchModel},
-    x::Any;
+    x::Union{ExaModels.Variable,ExaModels.Expression};
     kwargs...,
 )
     torch = PythonCall.pyimport("torch")
     torch_model = torch.load(p.predictor.filename; weights_only = false)
     torch_model = torch_model.to(p.device)
-    y = torch_model(torch.zeros(_length(x); p.device))
+    y = torch_model(torch.zeros(x.length; p.device))
     output_dimension = PythonCall.pyconvert(Int, PythonCall.pybuiltins.len(y))
     save!(ret, tensor) = ret .= _pyconvert(Vector, tensor)
     function jvp!(ret, x_in, v_in)

@@ -23,7 +23,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.Sigmoid,
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     core, y = ExaModels.add_var(core, n; lvar = 0.0, uvar = 1.0)
     core, c1 = ExaModels.add_con(
         core,
@@ -39,6 +39,6 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{<:MathOptAI.Sigmoid},
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    core, y = ExaModels.add_expr(core, _sigmoid(x[i]) for i in 1:_length(x))
+    core, y = ExaModels.add_expr(core, _sigmoid(x[i]) for i in 1:x.length)
     return (core, y), MathOptAI.Formulation(p)
 end

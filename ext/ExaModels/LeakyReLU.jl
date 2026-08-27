@@ -10,7 +10,7 @@ function MathOptAI.add_predictor(
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
     (core, y_relu), f_relu = MathOptAI.add_predictor(core, p.relu, x)
-    n = _length(x)
+    n = x.length
     η = p.negative_slope
     core, y = ExaModels.add_var(core, n)
     core, cons = ExaModels.add_con(
@@ -37,7 +37,7 @@ function MathOptAI.add_predictor(
     η = p.predictor.negative_slope
     core, y = ExaModels.add_expr(
         core,
-        η * x[i] + (1 - η) * y_relu[i] for i in 1:_length(x)
+        η * x[i] + (1 - η) * y_relu[i] for i in 1:x.length
     )
     return (core, y), MathOptAI.Formulation(p)
 end

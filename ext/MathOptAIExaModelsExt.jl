@@ -12,12 +12,6 @@ import MathOptAI
 # This is a bug with ExaModels.
 using ExaModels: Constant
 
-function _length(x::Union{ExaModels.Variable,ExaModels.Expression})
-    return x.length
-end
-
-_length(x::AbstractVector) = length(x)
-
 """
     add_predictor(
         model::ExaModels.ExaCore,

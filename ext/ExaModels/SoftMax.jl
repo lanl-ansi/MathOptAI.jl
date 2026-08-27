@@ -9,7 +9,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.SoftMax,
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     core, denom = ExaModels.add_var(core, 1; lvar = 0.0)
     core, y = ExaModels.add_var(core, n; lvar = 0.0, uvar = 1.0)
     # denom[1] - sum_j exp(x[j]) = 0

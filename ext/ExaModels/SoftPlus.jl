@@ -9,7 +9,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.SoftPlus,
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     β = p.beta
     core, y = ExaModels.add_var(core, n; lvar = 0.0)
     core, c1 = ExaModels.add_con(
@@ -29,7 +29,7 @@ function MathOptAI.add_predictor(
     β = p.predictor.beta
     core, y = ExaModels.add_expr(
         core,
-        log(1 + exp(β * x[i])) / β for i in 1:_length(x)
+        log(1 + exp(β * x[i])) / β for i in 1:x.length
     )
     return (core, y), MathOptAI.Formulation(p)
 end

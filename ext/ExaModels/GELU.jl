@@ -65,7 +65,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.GELU,
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     core, y = ExaModels.add_var(core, n)
     core, c1 = ExaModels.add_con(
         core,
@@ -81,6 +81,6 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{<:MathOptAI.GELU},
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    core, y = ExaModels.add_expr(core, _gelu(x[i]) for i in 1:_length(x))
+    core, y = ExaModels.add_expr(core, _gelu(x[i]) for i in 1:x.length)
     return (core, y), MathOptAI.Formulation(p)
 end

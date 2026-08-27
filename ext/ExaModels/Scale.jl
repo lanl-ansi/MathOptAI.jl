@@ -9,7 +9,7 @@ function MathOptAI.add_predictor(
     p::MathOptAI.Scale,
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     core, y = ExaModels.add_var(core, n)
     core, c1 = ExaModels.add_con(
         core,

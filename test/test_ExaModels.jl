@@ -472,6 +472,21 @@ function test_Permutation_structure()
     @test m.meta.ncon == 0
     # https://github.com/madsuite-org/ExaModels.jl/issues/293
     # _test_solution(x -> x[perm.p], core, x, y)
+    core, z = ExaModels.add_var(core, y.length)
+    core, _ = ExaModels.add_con(
+        core,
+        y[i] - z[i] for i in 1:y.length;
+        lcon = 0,
+        ucon = 0,
+    )
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    @test_broken isapprox(
+        ExaModels.solution(result, y),
+        fn(ExaModels.solution(result, x));
+        atol = 1e-6,
+    )
     return
 end
 

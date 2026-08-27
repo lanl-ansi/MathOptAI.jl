@@ -25,10 +25,10 @@ function MathOptAI.add_predictor(
 )
     m, n = size(p.predictor.A)
     core, A = ExaModels.add_par(core, p.predictor.A)
-    iter = enumerate(p.predictor.b)
+    core, b = ExaModels.add_par(core, p.predictor.b)
     core, y = ExaModels.add_expr(
         core,
-        sum(A[i, j] * x[j] for j in 1:n) + bi for (i, bi) in iter
+        sum(A[i, j] * x[j] for j in 1:n) + b[i] for i in 1:m
     )
     return (core, y), MathOptAI.Formulation(p)
 end

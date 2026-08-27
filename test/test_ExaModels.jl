@@ -22,17 +22,37 @@ function runtests()
     return
 end
 
-function _make_core_with_input(n)
-    core = ExaModels.ExaCore(; concrete = Val(true))
-    core, x = ExaModels.add_var(core, n)
-    return core, x
+function _test_solution(fn, core, x, y::ExaModels.Variable)
+    model = ExaModels.ExaModel(core)
+    result = NLPModelsIpopt.ipopt(model; print_level = 0)
+    @test result.status ∈ (:first_order, :acceptable)
+    @test isapprox(
+        ExaModels.solution(result, y),
+        fn(ExaModels.solution(result, x));
+        atol = 1e-6,
+    )
+    return
+end
+
+function _test_solution(fn, core, x, y::ExaModels.Expression)
+    core, z = ExaModels.add_var(core, y.length)
+    core, _ = ExaModels.add_con(
+        core,
+        y[i] - z[i] for i in 1:y.length;
+        lcon = 0,
+        ucon = 0,
+    )
+    _test_solution(fn, core, x, z)
+    return
 end
 
 function test_Affine_structure()
     A = [1.0 2.0; 3.0 4.0]
     b = [0.5, -0.5]
     p = MathOptAI.Affine(A, b)
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4   # 2 inputs + 2 outputs
@@ -42,6 +62,7 @@ function test_Affine_structure()
     @test length(form.variables) == 1
     @test form.variables[1] === y
     @test length(form.constraints) == 1
+    _test_solution(x -> A * x + b, core, x, y)
     return
 end
 
@@ -49,7 +70,9 @@ function test_Affine_reduced_space_false()
     A = [1.0 2.0; 3.0 4.0]
     b = [0.5, -0.5]
     p = MathOptAI.Affine(A, b)
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x; reduced_space = false)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4   # 2 inputs + 2 outputs
@@ -59,6 +82,7 @@ function test_Affine_reduced_space_false()
     @test length(form.variables) == 1
     @test form.variables[1] === y
     @test length(form.constraints) == 1
+    _test_solution(x -> A * x + b, core, x, y)
     return
 end
 
@@ -81,6 +105,7 @@ function test_Affine_end_to_end()
     y_opt = sol[3:4]
     @test isapprox(y_opt, [0.0, 0.0]; atol = 1.0e-5)
     @test isapprox(x_opt, [-1.0, -2.0]; atol = 1.0e-5)
+    _test_solution(x -> A * x + b, core, x, y)
     return
 end
 
@@ -88,7 +113,9 @@ function test_ReducedSpace_Affine_structure()
     A = [2.0 0.0; 0.0 3.0]
     b = [1.0, -1.0]
     p = MathOptAI.ReducedSpace(MathOptAI.Affine(A, b))
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2   # only the 2 inputs, no new variables
@@ -99,6 +126,7 @@ function test_ReducedSpace_Affine_structure()
     @test isempty(form.constraints)
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> A * x + b, core, x, y)
     return
 end
 
@@ -106,7 +134,9 @@ function test_ReducedSpace_Affine_kwarg()
     A = [2.0 0.0; 0.0 3.0]
     b = [1.0, -1.0]
     p = MathOptAI.ReducedSpace(MathOptAI.Affine(A, b))
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x; reduced_space = true)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2   # only the 2 inputs, no new variables
@@ -117,24 +147,30 @@ function test_ReducedSpace_Affine_kwarg()
     @test isempty(form.constraints)
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> A * x + b, core, x, y)
     return
 end
 
 function test_Scale_structure()
     p = MathOptAI.Scale([2.0, 3.0], [1.0, -1.0])
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4
     @test m.meta.ncon == 2
     @test form isa MathOptAI.Formulation
     @test form.predictor === p
+    _test_solution(x -> p.scale .* x .+ p.bias, core, x, y)
     return
 end
 
 function test_ReducedSpace_Scale_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.Scale([2.0, 3.0], [1.0, -1.0]))
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
@@ -143,63 +179,72 @@ function test_ReducedSpace_Scale_structure()
     @test isempty(form.constraints)
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> p.predictor.scale .* x .+ p.predictor.bias, core, x, y)
     return
 end
 
 function test_ReLU_structure()
     p = MathOptAI.ReLU()
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 0.5, 2.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 6   # 3 inputs + 3 outputs
     @test m.meta.ncon == 3
     @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
     @test form isa MathOptAI.Formulation
+    _test_solution(x -> max.(0, x), core, x, y)
     return
 end
 
 function test_ReducedSpace_ReLU_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.ReLU())
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 0.5, 2.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
     @test y isa ExaModels.Expression
     @test y.length == 3
+    _test_solution(x -> max.(0, x), core, x, y)
     return
 end
 
 function test_ReLUEpigraph_structure()
     p = MathOptAI.ReLUEpigraph()
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 0.5, 2.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 6   # 3 inputs + 3 outputs
     @test m.meta.ncon == 3
     @test all(m.meta.lvar[4:6] .== 0.0)   # output bounded below by 0
     @test form isa MathOptAI.Formulation
+    core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
+    _test_solution(x -> max.(0, x), core, x, y)
     return
 end
 
 function test_ReLUEpigraph_end_to_end()
     core = ExaModels.ExaCore(; concrete = Val(true))
-    core, x = ExaModels.add_var(core, 3)
+    x0 = [-2.0, 1.5, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     p = MathOptAI.ReLUEpigraph()
     (core, y), _ = MathOptAI.add_predictor(core, p, x)
-    x0 = [-2.0, 1.5, 3.0]
-    core, _ = ExaModels.add_con(core, x[i] for i in 1:3; lcon = x0, ucon = x0)
     core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
-    m = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(m; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    @test isapprox(ExaModels.solution(result, y), max.(0, x0); atol = 1e-4)
+    _test_solution(x -> max.(0, x), core, x, y)
     return
 end
 
 function test_Sigmoid_structure()
     p = MathOptAI.Sigmoid()
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4
@@ -207,18 +252,22 @@ function test_Sigmoid_structure()
     @test all(m.meta.lvar[3:4] .== 0.0)
     @test all(m.meta.uvar[3:4] .== 1.0)
     @test form isa MathOptAI.Formulation
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_ReducedSpace_Sigmoid_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.Sigmoid())
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> p.predictor.(x), core, x, y)
     return
 end
 
@@ -244,7 +293,9 @@ end
 
 function test_Tanh_structure()
     p = MathOptAI.Tanh()
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4
@@ -252,65 +303,81 @@ function test_Tanh_structure()
     @test all(m.meta.lvar[3:4] .== -1.0)
     @test all(m.meta.uvar[3:4] .== 1.0)
     @test form isa MathOptAI.Formulation
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_ReducedSpace_Tanh_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.Tanh())
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> p.predictor.(x), core, x, y)
     return
 end
 
 function test_SoftPlus_structure()
     p = MathOptAI.SoftPlus()
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4
     @test m.meta.ncon == 2
     @test all(m.meta.lvar[3:4] .== 0.0)
     @test form isa MathOptAI.Formulation
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_ReducedSpace_SoftPlus_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.SoftPlus())
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> p.predictor.(x), core, x, y)
     return
 end
 
 function test_GELU_structure()
     p = MathOptAI.GELU()
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 4
     @test m.meta.ncon == 2
     @test form isa MathOptAI.Formulation
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_ReducedSpace_GELU_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.GELU())
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
     @test m.meta.ncon == 0
     @test y isa ExaModels.Expression
     @test y.length == 2
+    _test_solution(x -> p.predictor.(x), core, x, y)
     return
 end
 
@@ -337,34 +404,35 @@ end
 
 function test_GELU_end_to_end()
     core = ExaModels.ExaCore(; concrete = Val(true))
-    core, x = ExaModels.add_var(core, 3)
+    x0 = [-2.0, 1.5, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     p = MathOptAI.GELU()
     (core, y), _ = MathOptAI.add_predictor(core, p, x)
-    x0 = [-2.0, 1.5, 3.0]
-    core, _ = ExaModels.add_con(core, x[i] for i in 1:3; lcon = x0, ucon = x0)
     core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
-    m = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(m; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    @test isapprox(ExaModels.solution(result, y), p.(x0); atol = 1e-4)
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_LeakyReLU_structure()
     p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 9   # 3 input + 3 relu + 3 leaky
     @test m.meta.ncon == 6   # 3 relu + 3 leaky
     @test form isa MathOptAI.Formulation
     @test form.predictor === p
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_ReducedSpace_LeakyReLU_structure()
     p = MathOptAI.ReducedSpace(MathOptAI.LeakyReLU(; negative_slope = 0.01))
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     @test y isa ExaModels.Expression
     @test y.length == 3
@@ -372,28 +440,25 @@ function test_ReducedSpace_LeakyReLU_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
+    _test_solution(x -> p.predictor.(x), core, x, y)
     return
 end
 
 function test_LeakyReLU_end_to_end()
     core = ExaModels.ExaCore(; concrete = Val(true))
-    core, x = ExaModels.add_var(core, 3)
+    x0 = [-2.0, 1.5, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     p = MathOptAI.LeakyReLU(; negative_slope = 0.01)
     (core, y), _ = MathOptAI.add_predictor(core, p, x)
-    x0 = [-2.0, 1.5, 3.0]
-    core, _ = ExaModels.add_con(core, x[i] for i in 1:3; lcon = x0, ucon = x0)
-    core, _ = ExaModels.add_obj(core, y[i] for i in 1:3)
-    m = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(m; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    y0 = 0.01 .* min.(0, x0) + max.(0, x0)
-    @test isapprox(ExaModels.solution(result, y), y0; atol = 1e-4)
+    _test_solution(x -> p.(x), core, x, y)
     return
 end
 
 function test_Permutation_structure()
     perm = MathOptAI.Permutation([3, 1, 2])
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form =
         MathOptAI.add_predictor(core, MathOptAI.ReducedSpace(perm), x)
     @test y isa ExaModels.Expression
@@ -405,18 +470,23 @@ function test_Permutation_structure()
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
+    # https://github.com/madsuite-org/ExaModels.jl/issues/293
+    # _test_solution(x -> x[perm.p], core, x, y)
     return
 end
 
 function test_SoftMax_structure()
     p = MathOptAI.SoftMax()
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-1.0, 2.0, 3.0]
+    core, x = ExaModels.add_var(core, 3; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 7   # 3 input + 1 denom + 3 y
     @test m.meta.ncon == 4   # 1 denom + 3 y
     @test form isa MathOptAI.Formulation
     @test form.predictor === p
+    _test_solution(x -> p(collect(x)), core, x, y)
     return
 end
 
@@ -426,7 +496,9 @@ function test_Pipeline_structure()
         MathOptAI.ReLU(),
         MathOptAI.Affine([1.0 0.0; 0.0 1.0], [0.0, 0.0]),
     )
-    core, x = _make_core_with_input(2)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     # x(2) + Affine_out(2) + ReLU_out(2) + Affine_out(2) = 8 vars
@@ -435,17 +507,16 @@ function test_Pipeline_structure()
     @test m.meta.ncon == 6
     @test form isa MathOptAI.PipelineFormulation
     @test length(form.layers) == 3
+    _test_solution(x -> max.(0, p.layers[1].A * x + p.layers[1].b), core, x, y)
     return
 end
 
 function test_ReducedSpace_Pipeline_structure()
-    p = MathOptAI.ReducedSpace(
-        MathOptAI.Pipeline(
-            MathOptAI.Affine([2.0 0.0; 0.0 3.0], [1.0, -1.0]),
-            MathOptAI.ReLU(),
-        ),
-    )
-    core, x = _make_core_with_input(2)
+    aff = MathOptAI.Affine([2.0 0.0; 0.0 3.0], [1.0, -1.0])
+    p = MathOptAI.ReducedSpace(MathOptAI.Pipeline(aff, MathOptAI.ReLU()))
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    x0 = [-2.0, 1.5]
+    core, x = ExaModels.add_var(core, 2; lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 2
@@ -453,6 +524,7 @@ function test_ReducedSpace_Pipeline_structure()
     @test y isa ExaModels.Expression
     @test y.length == 2
     @test form isa MathOptAI.PipelineFormulation
+    _test_solution(x -> max.(0, aff.A * x + aff.b), core, x, y)
     return
 end
 
@@ -498,11 +570,7 @@ function test_flux_end_to_end()
     b = [1.1, 2.3]
     core, x = ExaModels.add_var(core, 2; lvar = b, uvar = b)
     (core, y), _ = MathOptAI.add_predictor(core, chain, x)
-    model = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(model; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    y_star = chain(Float32.(b))
-    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    _test_solution(x -> chain(Float32.(x)), core, x, y)
     return
 end
 
@@ -519,11 +587,7 @@ function test_flux_end_to_end_gray_box()
     b = [1.1, 2.3]
     core, x = ExaModels.add_var(core, 2; lvar = b, uvar = b)
     (core, y), _ = MathOptAI.add_predictor(core, chain, x; gray_box = true)
-    model = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(model; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    y_star = chain(Float32.(b))
-    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    _test_solution(x -> chain(Float32.(x)), core, x, y)
     return
 end
 
@@ -534,17 +598,14 @@ function test_SoftPlusEpigraph_AbstractVariable()
     core, x = ExaModels.add_var(core, length(x0); lvar = x0, uvar = x0)
     (core, y), form = MathOptAI.add_predictor(core, p, x)
     core, _ = ExaModels.add_obj(core, y[i] for i in 1:2)
-    model = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(model; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    y_star = log.(1 .+ exp.(2.0 .* x0)) ./ 2.0
-    @test isapprox(ExaModels.solution(result, y), y_star; atol = 1e-6)
+    _test_solution(x -> MathOptAI.SoftPlus(; beta = 2.0).(x), core, x, y)
     return
 end
 
 function test_ReducedSpace_SoftMax_structure()
     predictor = MathOptAI.ReducedSpace(MathOptAI.SoftMax())
-    core, x = _make_core_with_input(3)
+    core = ExaModels.ExaCore(; concrete = Val(true))
+    core, x = ExaModels.add_var(core, 3)
     @test_throws(
         ErrorException(
             """

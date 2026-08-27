@@ -25,7 +25,8 @@ function MathOptAI.add_predictor(
     p::MathOptAI.ReducedSpace{<:MathOptAI.Scale},
     x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    iter = enumerate(zip(p.predictor.scale, p.predictor.bias))
-    core, y = ExaModels.add_expr(core, si * x[i] + bi for (i, (si, bi)) in iter)
+    core, s = ExaModels.add_par(core, p.predictor.scale)
+    core, b = ExaModels.add_par(core, p.predictor.bias)
+    core, y = ExaModels.add_expr(core, s[i] * x[i] + b[i] for i in 1:x.length)
     return (core, y), MathOptAI.Formulation(p)
 end

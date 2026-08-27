@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Input Convex Neural Networks with Flux.jl · MathOptAI.jl</title><meta name="title" content="Input Convex Neural Networks with Flux.jl · MathOptAI.jl"/><meta property="og:title" content="Input Convex Neural Networks with Flux.jl · MathOptAI.jl"/><meta property="twitter:title" content="Input Convex Neural Networks with Flux.jl · MathOptAI.jl"/><meta name="description" content="Documentation for MathOptAI.jl."/><meta property="og:description" content="Documentation for MathOptAI.jl."/><meta property="twitter:description" content="Documentation for MathOptAI.jl."/><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../search_index.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><div class="docs-package-name"><span class="docs-autofit"><a href="../../">MathOptAI.jl</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../../">MathOptAI.jl</a></li><li><input class="collapse-toggle" id="menuitem-2" type="checkbox"/><label class="tocitem" for="menuitem-2"><span class="docs-label">Manual</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../manual/predictors/">Predictors</a></li><li><a class="tocitem" href="../../manual/AbstractGPs/">AbstractGPs.jl</a></li><li><a class="tocitem" href="../../manual/DecisionTree/">DecisionTree.jl</a></li><li><a class="tocitem" href="../../manual/EvoTrees/">EvoTrees.jl</a></li><li><a class="tocitem" href="../../manual/ExaModels/">ExaModels.jl</a></li><li><a class="tocitem" href="../../manual/Flux/">Flux.jl</a></li><li><a class="tocitem" href="../../manual/GLM/">GLM.jl</a></li><li><a class="tocitem" href="../../manual/Lux/">Lux.jl</a></li><li><a class="tocitem" href="../../manual/PythonCall/">Python integration</a></li><li><a class="tocitem" href="../../manual/PyTorch/">PyTorch</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox" checked/><label class="tocitem" for="menuitem-3"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../student_enrollment/">Logistic regression with GLM.jl</a></li><li><a class="tocitem" href="../decision_trees/">Classification problems with DecisionTree.jl</a></li><li><a class="tocitem" href="../mnist/">Adversarial machine learning with Flux.jl</a></li><li><a class="tocitem" href="../mnist_lux/">Adversarial machine learning with Lux.jl</a></li><li><a class="tocitem" href="../pytorch/">Function fitting with PyTorch</a></li><li><a class="tocitem" href="../gaussian/">Function fitting with AbstractGPs</a></li><li><a class="tocitem" href="../graph_neural_networks/">Graph neural networks</a></li><li class="is-active"><a class="tocitem" href>Input Convex Neural Networks with Flux.jl</a><ul class="internal"><li><a class="tocitem" href="#Required-packages"><span>Required packages</span></a></li><li><a class="tocitem" href="#Building-the-ICNN"><span>Building the ICNN</span></a></li><li><a class="tocitem" href="#Building-the-Predictor"><span>Building the Predictor</span></a></li><li><a class="tocitem" href="#Embed-ICNN-into-JuMP"><span>Embed ICNN into JuMP</span></a></li><li><a class="tocitem" href="#Epigraph-formulations"><span>Epigraph formulations</span></a></li></ul></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">Developers</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../developers/checklists/">Checklists</a></li><li><a class="tocitem" href="../../developers/design_principles/">Design principles</a></li></ul></li><li><a class="tocitem" href="../../api/">API Reference</a></li><li><a class="tocitem" href="../../release_notes/">Release notes</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li class="is-active"><a href>Input Convex Neural Networks with Flux.jl</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Input Convex Neural Networks with Flux.jl</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/lanl-ansi/MathOptAI.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/lanl-ansi/MathOptAI.jl/blob/main/docs/src/tutorials/input_convex.jl" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="Input-Convex-Neural-Networks-with-Flux.jl"><a class="docs-heading-anchor" href="#Input-Convex-Neural-Networks-with-Flux.jl">Input Convex Neural Networks with Flux.jl</a><a id="Input-Convex-Neural-Networks-with-Flux.jl-1"></a><a class="docs-heading-anchor-permalink" href="#Input-Convex-Neural-Networks-with-Flux.jl" title="Permalink"></a></h1><p>This tutorial shows how to embed an input convex neural network (ICNN) model from <a href="https://github.com/FluxML/Flux.jl">Flux.jl</a> into JuMP.</p><h2 id="Required-packages"><a class="docs-heading-anchor" href="#Required-packages">Required packages</a><a id="Required-packages-1"></a><a class="docs-heading-anchor-permalink" href="#Required-packages" title="Permalink"></a></h2><p>This tutorial requires the following packages:</p><pre><code class="language-julia hljs">using JuMP
+import Flux
+import HiGHS
+import MathOptAI
+import Plots</code></pre><h2 id="Building-the-ICNN"><a class="docs-heading-anchor" href="#Building-the-ICNN">Building the ICNN</a><a id="Building-the-ICNN-1"></a><a class="docs-heading-anchor-permalink" href="#Building-the-ICNN" title="Permalink"></a></h2><p>The following custom layer can be used to build ICNNs. This layer has two forward methods. One that takes a single input and the other takes  a <code>Tuple</code>. They both return the result of the forward pass as well as the original input.</p><pre><code class="language-julia hljs">struct InputConvex{T,F}
+    weight_x::Matrix{T}
+    weight_z::Matrix{T}
+    bias::Vector{T}
+    σ::F
+end
+
+Flux.@layer(InputConvex, trainable = (weight_x, weight_z, bias))
+
+function InputConvex(
+    ((in_z, in_x), out)::Pair{Tuple{Int,Int},Int},
+    σ = identity;
+    init = Flux.glorot_uniform,
+)
+    return InputConvex(init(out, in_x), init(out, in_z), init(out), σ)
+end
+
+function (c::InputConvex)(x::AbstractVector)
+    return c.σ.(c.weight_x * x .+ c.bias), x
+end
+
+function (c::InputConvex)((z, x)::Tuple)
+    return c.σ.(Flux.softplus.(c.weight_z) * z .+ c.weight_x * x .+ c.bias), x
+end
+
+function Base.show(io::IO, l::InputConvex)
+    m, n = size(l.weight_x)
+    print(io, &quot;InputConvex((&quot;, size(l.weight_z, 2), &quot;, $m) =&gt; $n&quot;)
+    if l.σ != identity
+        print(io, &quot;, &quot;, l.σ)
+    end
+    if l.bias == false
+        print(io, &quot;; bias=false&quot;)
+    end
+    print(io, &quot;)&quot;)
+    return
+end</code></pre><p>Here&#39;s an example:</p><pre><code class="language-julia hljs">layer = InputConvex((8, 8) =&gt; 2, Flux.relu)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">InputConvex((8, 2) =&gt; 8, relu)  <span class="sgr90"># 34 parameters</span></code></pre><pre><code class="language-julia hljs">layer(rand(8))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([0.0, 0.0], [0.3446052613257955, 0.04320413056988237, 0.306005503688099, 0.8979095213635149, 0.41623777436493214, 0.7757198133758644, 0.02716972516853322, 0.07538982033670616])</code></pre><p>Next, we define a custom <code>Chain</code> to build the ICNN.</p><pre><code class="language-julia hljs">struct InputConvexChain{T&lt;:Flux.Chain}
+    chain::T
+end
+
+InputConvexChain(layers...) = InputConvexChain(Flux.Chain(layers))
+
+(model::InputConvexChain)(x) = model.chain(x)
+
+function Base.show(io::IO, l::InputConvexChain)
+    println(io, &quot;InputConvexChain(&quot;)
+    println.(io, &quot;\t&quot;, l.chain)
+    println(io, &quot;)&quot;)
+    return
+end</code></pre><p>Here&#39;s an example:</p><pre><code class="language-julia hljs">chain = InputConvexChain(
+    InputConvex((8, 8) =&gt; 2, Flux.relu),
+    InputConvex((2, 8) =&gt; 1, Flux.relu),
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">InputConvexChain(
+	InputConvex((8, 2) =&gt; 8, relu)
+	InputConvex((2, 1) =&gt; 8, relu)
+)
+</code></pre><pre><code class="language-julia hljs">chain(rand(8))</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">([3.01134351749337], [0.06719319892279885, 0.7612474094497187, 0.08526553478077581, 0.19573913653912345, 0.7368500462567157, 0.47066161256248684, 0.7975658593276151, 0.8556687814985411])</code></pre><h2 id="Building-the-Predictor"><a class="docs-heading-anchor" href="#Building-the-Predictor">Building the Predictor</a><a id="Building-the-Predictor-1"></a><a class="docs-heading-anchor-permalink" href="#Building-the-Predictor" title="Permalink"></a></h2><p>We need to implement <a href="../../api/#build_predictor"><code>build_predictor</code></a> and <a href="../../api/#add_predictor"><code>add_predictor</code></a> for <code>InputConvexChain</code> in order to be able to embed this network into JuMP.</p><pre><code class="language-julia hljs">struct InputConvexChainPredictor &lt;: MathOptAI.AbstractPredictor
+    p::MathOptAI.Pipeline
+end
+
+function MathOptAI.build_predictor(
+    predictor::InputConvexChain;
+    config::Dict = Dict{Any,Any}(),
+    kwargs...,
+)
+    layer1 = first(predictor.chain)
+    p = MathOptAI.Pipeline(
+        MathOptAI.Affine(layer1.weight_x, layer1.bias),
+        MathOptAI.build_predictor(layer1.σ; config),
+    )
+    for layer in predictor.chain[2:end]
+        weights = hcat(Flux.softplus(layer.weight_z), layer.weight_x)
+        push!(p.layers, MathOptAI.Affine(weights, layer.bias))
+        push!(p.layers, MathOptAI.build_predictor(layer.σ; config))
+    end
+    return InputConvexChainPredictor(p)
+end
+
+function MathOptAI.add_predictor(
+    model::JuMP.AbstractModel,
+    predictor::InputConvexChainPredictor,
+    x::Vector;
+    kwargs...,
+)
+    layers = predictor.p.layers
+    z, inner = MathOptAI.add_predictor(model, first(layers), x)
+    formulation = MathOptAI.PipelineFormulation(predictor, Any[inner])
+    for layer in layers[2:end]
+        z, inner = if layer isa MathOptAI.Affine
+            MathOptAI.add_predictor(model, layer, [z; x])
+        else
+            MathOptAI.add_predictor(model, layer, z)
+        end
+        push!(formulation.layers, inner)
+    end
+    return z, formulation
+end</code></pre><p>With that, we are now ready to embed these networks into JuMP.</p><h2 id="Embed-ICNN-into-JuMP"><a class="docs-heading-anchor" href="#Embed-ICNN-into-JuMP">Embed ICNN into JuMP</a><a id="Embed-ICNN-into-JuMP-1"></a><a class="docs-heading-anchor-permalink" href="#Embed-ICNN-into-JuMP" title="Permalink"></a></h2><p>Let us build a small ICNN first.</p><pre><code class="language-julia hljs">predictor = InputConvexChain(
+    InputConvex((8, 8) =&gt; 2, Flux.relu),
+    InputConvex((2, 8) =&gt; 1, Flux.relu),
+)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">InputConvexChain(
+	InputConvex((8, 2) =&gt; 8, relu)
+	InputConvex((2, 1) =&gt; 8, relu)
+)
+</code></pre><p>We can embed <code>predictor</code> into a JuMP model now.</p><pre><code class="language-julia hljs">model = Model()
+@variable(model, x[1:8])
+z, formulation = MathOptAI.add_predictor(
+    model,
+    predictor,
+    x;
+    config = Dict(Flux.relu =&gt; MathOptAI.ReLUSOS1),
+);</code></pre><pre><code class="language-julia hljs">z</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">1-element Vector{JuMP.VariableRef}:
+ moai_ReLU[1]</code></pre><pre><code class="language-julia hljs">formulation</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">Affine(A, b) [input: 8, output: 2]
+├ variables [2]
+│ ├ moai_Affine[1]
+│ └ moai_Affine[2]
+└ constraints [2]
+  ├ -0.5096388459205627 x[1] + 0.7213218212127686 x[2] + 0.3465062379837036 x[3] + 0.21616172790527344 x[4] - 0.09705247730016708 x[5] - 0.6025386452674866 x[6] - 0.601024329662323 x[7] - 0.41341647505760193 x[8] - moai_Affine[1] = -1.4082778692245483
+  └ -0.09904312342405319 x[1] + 0.608214795589447 x[2] + 0.3115716874599457 x[3] + 0.2597499489784241 x[4] + 0.21186232566833496 x[5] - 0.5228407979011536 x[6] + 0.4720723032951355 x[7] - 0.2998329699039459 x[8] - moai_Affine[2] = 0.051912274211645126
+MathOptAI.ReLUSOS1()
+├ variables [4]
+│ ├ moai_ReLU[1]
+│ ├ moai_ReLU[2]
+│ ├ moai_z[1]
+│ └ moai_z[2]
+└ constraints [8]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_z[1] ≥ 0
+  ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
+  ├ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+  ├ moai_ReLU[2] ≥ 0
+  ├ moai_z[2] ≥ 0
+  ├ moai_Affine[2] - moai_ReLU[2] + moai_z[2] = 0
+  └ [moai_ReLU[2], moai_z[2]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+Affine(A, b) [input: 10, output: 1]
+├ variables [1]
+│ └ moai_Affine[1]
+└ constraints [1]
+  └ 0.5755668878555298 x[1] - 0.4747422933578491 x[2] - 0.6962139010429382 x[3] + 0.44143033027648926 x[4] + 0.07368853688240051 x[5] + 0.35844969749450684 x[6] - 0.0018295868067070842 x[7] - 0.6144623160362244 x[8] + 0.5640174150466919 moai_ReLU[1] + 0.5657538771629333 moai_ReLU[2] - moai_Affine[1] = 1.35654878616333
+MathOptAI.ReLUSOS1()
+├ variables [2]
+│ ├ moai_ReLU[1]
+│ └ moai_z[1]
+└ constraints [4]
+  ├ moai_ReLU[1] ≥ 0
+  ├ moai_z[1] ≥ 0
+  ├ moai_Affine[1] - moai_ReLU[1] + moai_z[1] = 0
+  └ [moai_ReLU[1], moai_z[1]] ∈ MathOptInterface.SOS1{Float64}([1.0, 2.0])
+</code></pre><h2 id="Epigraph-formulations"><a class="docs-heading-anchor" href="#Epigraph-formulations">Epigraph formulations</a><a id="Epigraph-formulations-1"></a><a class="docs-heading-anchor-permalink" href="#Epigraph-formulations" title="Permalink"></a></h2><p>The nice thing about ICNNs is that we can formulate their epigraph and avoid adding binary variables to the model. For that, we can use <a href="../../api/#ReLUEpigraph"><code>ReLUEpigraph</code></a>.</p><pre><code class="language-julia hljs">chain = InputConvexChain(
+    InputConvex((1, 1) =&gt; 3, Flux.relu),
+    InputConvex((3, 1) =&gt; 1, Flux.relu),
+)
+model = Model(HiGHS.Optimizer)
+set_silent(model)
+@variable(model, x[1:1])
+config = Dict(Flux.relu =&gt; MathOptAI.ReLUEpigraph)
+y, _ = MathOptAI.add_predictor(model, chain, x; config)
+@objective(model, Min, only(y))
+x_value, y_value = -20:20, Float64[]
+for xi in x_value
+    fix(x[1], xi)
+    optimize!(model)
+    assert_is_solved_and_feasible(model)
+    push!(y_value, objective_value(model))
+end
+Plots.plot(x_value, y_value)</code></pre><img src="c7f41341.svg" alt="Example block output"/><p>As expected, the value of <code>y</code> is convex with respect to <code>x</code>.</p><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../graph_neural_networks/">« Graph neural networks</a><a class="docs-footer-nextpage" href="../../developers/checklists/">Checklists »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Thursday 25 June 2026 05:03">Thursday 25 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

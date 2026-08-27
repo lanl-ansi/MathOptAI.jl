@@ -7,6 +7,35 @@ CurrentModule = MathOptAI
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Version 1.0.0 (August 27, 2026)
+
+### Breaking
+
+- Removed the `::AbstractVector` interface to ExaModels. The input `x` to
+  [`add_predictor`](@ref) for ExaModels must now be an `ExaModels.Variable` or
+  `ExaModels.Expression`. No other input types are allowed. (#324), (#325)
+
+  This is a breaking change only if you used the ExaModels extension, and only
+  if your model did not follow ExaModels best practice and used something like
+  ```julia
+  import ExaModels, MathOptAI
+  core = ExaModels.ExaCore(; concrete = Val(true))
+  core, x = ExaModels.add_var(core, 2)
+  x_vec = [x[i] for i in 1:2]
+  (core, y), _ = MathOptAI.add_predictor(core, MathOptAI.ReLU(), x_vec)
+  ```
+  instead of
+  ```julia
+  import ExaModels, MathOptAI
+  core = ExaModels.ExaCore(; concrete = Val(true))
+  core, x = ExaModels.add_var(core, 2)
+  (core, y), _ = MathOptAI.add_predictor(core, MathOptAI.ReLU(), x)
+  ```
+
+### Other
+
+- Fixed some typos in the documentation (#323)
+
 ## Version 0.2.9 (August 22, 2026)
 
 ### Other

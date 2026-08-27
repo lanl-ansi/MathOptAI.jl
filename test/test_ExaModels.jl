@@ -463,30 +463,11 @@ function test_Permutation_structure()
         MathOptAI.add_predictor(core, MathOptAI.ReducedSpace(perm), x)
     @test y isa ExaModels.Expression
     @test y.length == 3
-    @test y[1] == x[3]
-    @test y[2] == x[1]
-    @test y[3] == x[2]
     @test form.predictor isa MathOptAI.ReducedSpace{MathOptAI.Permutation}
     m = ExaModels.ExaModel(core)
     @test m.meta.nvar == 3
     @test m.meta.ncon == 0
-    # https://github.com/madsuite-org/ExaModels.jl/issues/293
-    # _test_solution(x -> x[perm.p], core, x, y)
-    core, z = ExaModels.add_var(core, y.length)
-    core, _ = ExaModels.add_con(
-        core,
-        y[i] - z[i] for i in 1:y.length;
-        lcon = 0,
-        ucon = 0,
-    )
-    model = ExaModels.ExaModel(core)
-    result = NLPModelsIpopt.ipopt(model; print_level = 0)
-    @test result.status ∈ (:first_order, :acceptable)
-    @test_broken isapprox(
-        ExaModels.solution(result, y),
-        fn(ExaModels.solution(result, x));
-        atol = 1e-6,
-    )
+    _test_solution(x -> x[perm.p], core, x, y)
     return
 end
 

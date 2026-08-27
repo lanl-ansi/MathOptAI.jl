@@ -12,12 +12,6 @@ import MathOptAI
 # This is a bug with ExaModels.
 using ExaModels: Constant
 
-function _length(x::Union{ExaModels.Variable,ExaModels.Expression})
-    return x.length
-end
-
-_length(x::AbstractVector) = length(x)
-
 """
     add_predictor(
         model::ExaModels.ExaCore,
@@ -92,7 +86,7 @@ Affine(A, b) [input: 2, output: 1]
 function MathOptAI.add_predictor(
     model::ExaModels.ExaCore,
     predictor::Any,
-    x::Any;
+    x::Union{ExaModels.Variable,ExaModels.Expression};
     reduced_space::Bool = false,
     kwargs...,
 )
@@ -103,7 +97,7 @@ end
 function MathOptAI.add_predictor(
     model::ExaModels.ExaCore,
     predictor::MathOptAI.AbstractPredictor,
-    x::Any;
+    x::Union{ExaModels.Variable,ExaModels.Expression};
     reduced_space::Bool = false,
 )
     if reduced_space
@@ -111,6 +105,21 @@ function MathOptAI.add_predictor(
         return MathOptAI.add_predictor(model, inner, x)
     end
     return MathOptAI.add_predictor(model, predictor, x)
+end
+
+function MathOptAI.add_predictor(
+    ::ExaModels.ExaCore,
+    predictor::MathOptAI.ReducedSpace,
+    ::Union{ExaModels.Variable,ExaModels.Expression},
+)
+    return error(
+        """
+        Unsupported predictor: `$predictor`.
+
+        ExaModels does not support the reduced-space formulation of this \
+        predictor.
+        """,
+    )
 end
 
 include("ExaModels/Affine.jl")

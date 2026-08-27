@@ -7,7 +7,7 @@
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.Pipeline,
-    x,
+    x::Union{ExaModels.Variable,ExaModels.Expression},
 )
     form = MathOptAI.PipelineFormulation(p, Any[])
     for layer in p.layers
@@ -20,7 +20,7 @@ end
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.ReducedSpace{<:MathOptAI.Pipeline},
-    x,
+    x::Union{ExaModels.Variable,ExaModels.Expression},
 )
     form = MathOptAI.PipelineFormulation(p, Any[])
     for layer in p.predictor.layers

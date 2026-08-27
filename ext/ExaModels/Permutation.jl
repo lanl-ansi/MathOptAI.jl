@@ -5,10 +5,20 @@
 # in the LICENSE.md file.
 
 function MathOptAI.add_predictor(
-    core::ExaModels.ExaCore,
+    core::ExaModels.ExaCore{T},
     p::MathOptAI.ReducedSpace{MathOptAI.Permutation},
-    x,
-)
-    y = [x[p.predictor.p[i]] for i in eachindex(p.predictor.p)]
+    x::Union{ExaModels.Variable,ExaModels.Expression},
+) where {T}
+    # The following usage of add_expr is broken:
+    # https://github.com/madsuite-org/ExaModels.jl/issues/293
+    # core, y = ExaModels.add_expr(core, x[i] for i in p.predictor.p)
+    #
+    # Instead, use a permutation matrix.
+    P = zeros(T, x.length, x.length)
+    for (i, p) in enumerate(p.predictor.p)
+        P[i, p] = 1.0
+    end
+    p2 = MathOptAI.ReducedSpace(MathOptAI.Affine(P))
+    (core, y), _ = MathOptAI.add_predictor(core, p2, x)
     return (core, y), MathOptAI.Formulation(p)
 end

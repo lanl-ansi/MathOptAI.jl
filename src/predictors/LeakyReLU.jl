@@ -84,6 +84,8 @@ struct LeakyReLU{P} <: AbstractPredictor
     end
 end
 
+(p::LeakyReLU)(x) = max(0, x) + p.negative_slope * min(0, x)
+
 output_size(::LeakyReLU, input_size) = input_size
 
 function add_predictor(

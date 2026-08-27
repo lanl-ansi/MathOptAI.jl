@@ -63,9 +63,9 @@ ExaModels.@register_univariate(_gelu, _d_gelu, _dd_gelu)
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.GELU,
-    x::ExaModels.AbstractVariable,
+    x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     core, y = ExaModels.add_var(core, n)
     core, c1 = ExaModels.add_con(
         core,
@@ -78,25 +78,9 @@ end
 
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
-    p::MathOptAI.GELU,
-    x::AbstractVector,
-)
-    n = length(x)
-    core, y = ExaModels.add_var(core, n)
-    cons = Any[]
-    for i in 1:n
-        core, c =
-            ExaModels.add_con(core, y[i] - _gelu(x[i]); lcon = 0.0, ucon = 0.0)
-        push!(cons, c)
-    end
-    return (core, y), MathOptAI.Formulation(p, Any[y], cons)
-end
-
-function MathOptAI.add_predictor(
-    core::ExaModels.ExaCore,
     p::MathOptAI.ReducedSpace{<:MathOptAI.GELU},
-    x,
+    x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    y = [_gelu(x[i]) for i in 1:_length(x)]
+    core, y = ExaModels.add_expr(core, _gelu(x[i]) for i in 1:x.length)
     return (core, y), MathOptAI.Formulation(p)
 end

@@ -255,7 +255,7 @@ Plots.plot!(x_value, x_value .^ 2; label = "Target", linestyle = :dash)
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     nn::InputConvexNN,
-    x::Any;
+    x::ExaModels.Variable;
     kwargs...,
 )
     formulation = MathOptAI.PipelineFormulation(nn, Any[])

@@ -7,9 +7,9 @@
 function MathOptAI.add_predictor(
     core::ExaModels.ExaCore,
     p::MathOptAI.ReLUEpigraph,
-    x::ExaModels.AbstractVariable,
+    x::Union{ExaModels.Variable,ExaModels.Expression},
 )
-    n = _length(x)
+    n = x.length
     core, y = ExaModels.add_var(core, n; lvar = 0.0)
     core, c1 = ExaModels.add_con(
         core,
@@ -18,19 +18,4 @@ function MathOptAI.add_predictor(
         ucon = Inf,
     )
     return (core, y), MathOptAI.Formulation(p, Any[y], Any[c1])
-end
-
-function MathOptAI.add_predictor(
-    core::ExaModels.ExaCore,
-    p::MathOptAI.ReLUEpigraph,
-    x::AbstractVector,
-)
-    n = length(x)
-    core, y = ExaModels.add_var(core, n; lvar = 0.0)
-    cons = Any[]
-    for i in 1:n
-        core, c = ExaModels.add_con(core, y[i] - x[i]; lcon = 0.0, ucon = Inf)
-        push!(cons, c)
-    end
-    return (core, y), MathOptAI.Formulation(p, Any[y], cons)
 end
